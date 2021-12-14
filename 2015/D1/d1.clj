@@ -29,4 +29,4 @@
            $)
       (reductions + $)
       (.indexOf $ -1)
-      inc))
+      (inc $)))
