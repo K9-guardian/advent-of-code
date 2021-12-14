@@ -28,4 +28,5 @@
               \) -1)
            $)
       (reductions + $)
+      (.indexOf $ -1)
       inc))
