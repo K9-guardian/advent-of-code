@@ -1,4 +1,5 @@
 (import java.security.MessageDigest)
+(require '[clojure.core.reducers :as r])
 
 (def input (slurp "d4.txt"))
 
@@ -15,6 +16,7 @@
   (->>
     (.getBytes input "UTF-8")
     (.digest algo)
+    #_(.digest (MessageDigest/getInstance "MD5")) ;; Use this for parallel solve
     (take 3)
     (every? zero?)))
 
@@ -29,3 +31,14 @@
     (if (budget-md5-6-zeros-prefix? (str input i))
       i
       (recur (inc i)))))
+
+;; Attempt to parallelize
+#_(defn d2 [input]
+    (as-> (iterate inc 1) $
+      (pmap
+       (comp
+        budget-md5-6-zeros-prefix?
+        (partial str input))
+       $)
+      (.indexOf $ true)
+      (inc $)))
