@@ -1,20 +1,18 @@
 (def input (slurp "d3.txt"))
 
-(defn d1 [input]
+(defn p1 [input]
   (->>
    input
    (reduce
     (fn [[[x y] st] v]
       (let [x* ((case v \> inc \< dec identity) x)
             y* ((case v \^ inc \v dec identity) y)]
-        (prn [x* y*])
-        [[x* y*] (conj! st [x* y*])]))
-    [[0 0] (transient #{[0 0]})])
+        [[x* y*] (conj st [x* y*])]))
+    [[0 0] #{[0 0]}])
    second
-   persistent!
    count))
 
-(defn d2 [input]
+(defn p2 [input]
   (->>
    input
    (partition 2)
@@ -24,12 +22,9 @@
             y1* ((case v1 \^ inc \v dec identity) y1)
             x2* ((case v2 \> inc \< dec identity) x2)
             y2* ((case v2 \^ inc \v dec identity) y2)]
-        (conj! st [x1* y1*])
-        (conj! st [x2* y2*])
         [[x1* y1*]
          [x2* y2*]
-         st]))
-    [[0 0] [0 0] (transient #{[0 0]})])
+         (conj st [x1* y1*] [x2* y2*])]))
+    [[0 0] [0 0] #{[0 0]}])
    peek
-   persistent!
    count))

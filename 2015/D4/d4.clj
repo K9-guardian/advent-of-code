@@ -20,13 +20,13 @@
          (zero? (aget $ 1))
          (zero? (aget $ 2)))))
 
-(defn d1 [input]
+(defn p1 [input]
   (loop [i 1]
     (if (every? #{\0} (take 5 (md5 (str input i))))
       i
       (recur (inc i)))))
 
-(defn d2 [input]
+(defn p2 [input]
   (loop [i 1]
     (if (budget-md5-6-zeros-prefix? (str input i))
       i

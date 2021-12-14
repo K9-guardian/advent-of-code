@@ -17,7 +17,7 @@
    (* l w h)
    (take 2 (sort < [(* 2 l) (* 2 w) (* 2 h)]))))
 
-(defn d1 [input]
+(defn p1 [input]
   (->>
    input
    str/split-lines
@@ -30,7 +30,7 @@
       (partial re-seq #"(\d+)x(\d+)x(\d+)")))
     +)))
 
-(defn d2 [input]
+(defn p2 [input]
   (->>
    input
    str/split-lines
