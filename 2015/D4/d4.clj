@@ -4,22 +4,21 @@
 (def input (slurp "d4.txt"))
 
 ;; Good general purpose algorithm, but slow for day 2
-(def algo (MessageDigest/getInstance "MD5"))
-(defn md5 ^String [^String input]
+(defn md5 [^String input]
   (->>
    (.getBytes input "UTF-8")
-   (.digest algo)
+   (.digest ^MessageDigest (MessageDigest/getInstance "MD5"))
    (BigInteger. 1)
    (format "%032x")))
 
-;; You could further optimize this by reusing buffers, but I'm lazy
+;; You could further optimize this by reusing buffers, but type hints are good enough
 (defn budget-md5-6-zeros-prefix? [^String input]
-    (as-> input $
-      (.getBytes $ "UTF-8")
-      (.digest ^MessageDigest algo $)
-      (and (zero? (aget $ 0))
-           (zero? (aget $ 1))
-           (zero? (aget $ 2)))))
+  (as-> input $
+    (.getBytes $ "UTF-8")
+    (.digest ^MessageDigest (MessageDigest/getInstance "MD5") $)
+    (and (zero? (aget $ 0))
+         (zero? (aget $ 1))
+         (zero? (aget $ 2)))))
 
 (defn d1 [input]
   (loop [i 1]
@@ -28,7 +27,7 @@
       (recur (inc i)))))
 
 (defn d2 [input]
-    (loop [i 1]
-      (if (budget-md5-6-zeros-prefix? (str input i))
-        i
-        (recur (inc i)))))
+  (loop [i 1]
+    (if (budget-md5-6-zeros-prefix? (str input i))
+      i
+      (recur (inc i)))))
