@@ -16,7 +16,7 @@
   (->>
     (.getBytes input "UTF-8")
     (.digest algo)
-    #_(.digest (MessageDigest/getInstance "MD5")) ;; Use this for parallel solve
+    #_(.digest (MessageDigest/getInstance "MD5")) ; Use this for parallel solve
     (take 3)
     (every? zero?)))
 
