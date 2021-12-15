@@ -1,5 +1,4 @@
 (import java.security.MessageDigest)
-(require '[clojure.core.reducers :as r])
 
 (def input (slurp "d4.txt"))
 
@@ -27,7 +26,11 @@
       (recur (inc i)))))
 
 (defn p2 [input]
-  (loop [i 1]
-    (if (budget-md5-6-zeros-prefix? (str input i))
-      i
-      (recur (inc i)))))
+  (as-> (iterate inc 1) $
+    (pmap
+     (comp
+      budget-md5-6-zeros-prefix?
+      (partial str input))
+     $)
+    (.indexOf $ true)
+    (inc $)))
