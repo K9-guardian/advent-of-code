@@ -11,14 +11,15 @@
    "turn off" #(max 0 (dec %)),
    "toggle" (partial + 2)})
 
-(defn parse-instruction [m s]
-  (as-> s $
-    (re-seq #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)" $)
-    (nfirst $)
-    (as-> $ [act c1 c2]
-      [(m act)
-       (mapv #(Integer/parseInt %) (str/split c1 #","))
-       (mapv #(Integer/parseInt %) (str/split c2 #","))])))
+(defn parse-instruction [m]
+  (fn [s]
+    (as-> s $
+      (re-seq #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)" $)
+      (nfirst $)
+      (as-> $ [act c1 c2]
+        [(m act)
+         (mapv #(Integer/parseInt %) (str/split c1 #","))
+         (mapv #(Integer/parseInt %) (str/split c2 #","))]))))
 
 (defn update-inclusive-range [v start end f]
   (loop [i start v v]
@@ -43,7 +44,7 @@
   (->>
    input
    str/split-lines
-   (map (partial parse-instruction action->function-p1))
+   (map (parse-instruction action->function-p1))
    (reduce next-state init)
    flatten
    (filter (complement zero?))
@@ -53,7 +54,7 @@
   (->>
    input
    str/split-lines
-   (map (partial parse-instruction action->function-p2))
+   (map (parse-instruction action->function-p2))
    (reduce next-state init)
    flatten
    (reduce +)))

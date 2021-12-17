@@ -11,14 +11,15 @@
    "turn off" #(max 0 (dec %)),
    "toggle" (partial + 2)})
 
-(defn parse-instruction [m s]
-  (as-> s $
-    (re-seq #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)" $)
-    (nfirst $)
-    (as-> $ [act c1 c2]
-      [(m act)
-       (mapv #(Integer/parseInt %) (str/split c1 #","))
-       (mapv #(Integer/parseInt %) (str/split c2 #","))])))
+(defn parse-instruction [m]
+  (fn [s]
+    (as-> s $
+      (re-seq #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)" $)
+      (nfirst $)
+      (as-> $ [act c1 c2]
+        [(m act)
+         (mapv #(Integer/parseInt %) (str/split c1 #","))
+         (mapv #(Integer/parseInt %) (str/split c2 #","))]))))
 
 (defn update!-inclusive-range-longs [^longs arr idx1 idx2 f]
   (doseq [i (range idx1 (inc idx2))]
@@ -28,7 +29,7 @@
   (let [init (long-array 1000000 0)]
     (as-> input $
       (str/split-lines $)
-      (map (partial parse-instruction action->function-p1) $)
+      (map (parse-instruction action->function-p1) $)
       (doseq [[act [x1 y1] [x2 y2]] $]
         (doseq [i (range y1 (inc y2))]
           (update!-inclusive-range-longs
@@ -42,7 +43,7 @@
   (let [init (long-array 1000000 0)]
     (as-> input $
       (str/split-lines $)
-      (map (partial parse-instruction action->function-p2) $)
+      (map (parse-instruction action->function-p2) $)
       (doseq [[act [x1 y1] [x2 y2]] $]
         (doseq [i (range y1 (inc y2))]
           (update!-inclusive-range-longs
