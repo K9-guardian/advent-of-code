@@ -1,0 +1,59 @@
+(def input (slurp "d7.txt"))
+(require '[clojure.string :as str])
+
+(defn parse-atom [a]
+  (try
+    (Integer/parseInt a)
+    (catch NumberFormatException e (keyword a))))
+
+(defn parse-instruction [s]
+  (->>
+   s
+   (re-seq #"(?:([a-z\d]+)|([a-z\d]+)? ?([A-Z]+) ([a-z\d]+)) -> ([a-z]+)")
+   nfirst
+   (remove nil?)
+   (map parse-atom)))
+
+(defn instruction->map-entry
+  ([x y] [y [x]])
+  ([f x y] [y [f x]])
+  ([x f y z] [z [f x y]]))
+
+(defn clamp [f] (comp (partial bit-and 0xFFFF) f))
+
+(defn evaluate [m k]
+  (def eval-rec
+    (memoize
+     (fn [k]
+       (if (number? k)
+         k
+         (let [[g x y] (m k)]
+           (case g
+             :NOT ((clamp bit-not) (eval-rec x))
+             :AND ((clamp bit-and) (eval-rec x) (eval-rec y))
+             :OR ((clamp bit-or) (eval-rec x) (eval-rec y))
+             :LSHIFT ((clamp bit-shift-left) (eval-rec x) (eval-rec y))
+             :RSHIFT ((clamp bit-shift-right) (eval-rec x) (eval-rec y))
+             (eval-rec g)))))))
+  (eval-rec k))
+
+(defn p1 [input]
+  (as-> input $
+    (str/split-lines $)
+    (map (comp
+          (partial apply instruction->map-entry)
+          parse-instruction)
+         $)
+    (reduce conj {} $)
+    (evaluate $ :a)))
+
+(defn p2 [input]
+  (as-> input $
+    (str/split-lines $)
+    (map (comp
+          (partial apply instruction->map-entry)
+          parse-instruction)
+         $)
+    (reduce conj {} $)
+    (assoc $ :b [(evaluate $ :a)])
+    (evaluate $ :a)))
