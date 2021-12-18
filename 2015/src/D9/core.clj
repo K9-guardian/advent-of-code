@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [clojure.math.combinatorics :as comb]))
 
-(def input (slurp "d9.txt"))
+(def input (slurp "input/d9.txt"))
 
 (defn parse-string [s]
   (->>

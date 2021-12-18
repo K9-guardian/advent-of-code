@@ -1,6 +1,6 @@
 (ns D3.core)
 
-(def input (slurp "d3.txt"))
+(def input (slurp "input/d3.txt"))
 
 (defn p1 [input]
   (->>

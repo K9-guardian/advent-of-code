@@ -2,7 +2,7 @@
 
 (import java.security.MessageDigest)
 
-(def input (slurp "d4.txt"))
+(def input (slurp "input/d4.txt"))
 
 ;; Good general purpose algorithm, but slow for day 2
 (defn md5 [^String input]

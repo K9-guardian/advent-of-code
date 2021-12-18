@@ -1,7 +1,7 @@
 (ns D8.core
   (:require [clojure.string :as str]))
 
-(def input (slurp "d8.txt"))
+(def input (slurp "input/d8.txt"))
 
 (defn string->chars-in-memory [s]
   (count (re-seq #"\\\\|\\\"|\\x[\da-f]{2}|[^\"]" s)))
