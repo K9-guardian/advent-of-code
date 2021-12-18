@@ -1,3 +1,5 @@
+(ns D1.core)
+
 (def input (slurp "d1.txt"))
 
 (defn p1 [input]

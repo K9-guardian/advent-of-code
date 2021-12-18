@@ -1,21 +1,14 @@
+(ns D9.core
+  (:require [clojure.string :as str]
+            [clojure.math.combinatorics :as comb]))
+
 (def input (slurp "d9.txt"))
-(require '[clojure.string :as str])
 
 (defn parse-string [s]
   (->>
    s
    (re-seq #"(\w+) to (\w+) = (\d+)")
    nfirst))
-
-;; From SICP
-(defn permutations [coll]
-  (if (empty? coll)
-    [[]]
-    (mapcat
-     #(map
-       (partial cons %)
-       (permutations (remove #{%} coll)))
-     coll)))
 
 (defn path->distance [m p]
   (reduce
@@ -36,7 +29,7 @@
         (update (keyword end) (fnil conj {}) [(keyword start) (Integer/parseInt d)])))
      {}
      $)
-    (let [paths (-> $ keys permutations)]
+    (let [paths (-> $ keys comb/permutations)]
       (->>
        paths
        (map (partial path->distance $))
@@ -54,7 +47,7 @@
         (update (keyword end) (fnil conj {}) [(keyword start) (Integer/parseInt d)])))
      {}
      $)
-    (let [paths (-> $ keys permutations)]
+    (let [paths (-> $ keys comb/permutations)]
       (->>
        paths
        (map (partial path->distance $))

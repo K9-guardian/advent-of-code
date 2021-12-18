@@ -1,3 +1,5 @@
+(ns D4.core)
+
 (import java.security.MessageDigest)
 
 (def input (slurp "d4.txt"))

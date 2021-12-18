@@ -1,5 +1,7 @@
+(ns D6.core
+  (:require [clojure.string :as str]))
+
 (def input (slurp "d6.txt"))
-(require '[clojure.string :as str])
 
 (def action->function-p1
   {"turn on" (partial bit-or 1),

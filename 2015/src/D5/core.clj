@@ -1,4 +1,6 @@
-(require '[clojure.string :as str])
+(ns D5.core
+  (:require [clojure.string :as str]))
+
 (def input (slurp "d5.txt"))
 
 (defn contains-3-vowels? [s]

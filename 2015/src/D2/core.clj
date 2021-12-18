@@ -1,4 +1,6 @@
-(require '[clojure.string :as str])
+(ns D2.clj
+  (:require [clojure.string :as str]))
+
 (def input (slurp "d2.txt"))
 
 (defn box->area [l w h]

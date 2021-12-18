@@ -1,5 +1,7 @@
+(ns D7.core
+  (:require [clojure.string :as str]))
+
 (def input (slurp "d7.txt"))
-(require '[clojure.string :as str])
 
 (defn parse-atom [a]
   (try
