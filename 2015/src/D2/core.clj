@@ -23,24 +23,22 @@
   (->>
    input
    str/split-lines
-   (transduce
-    (map
+   (map
      (comp
       (partial apply box->area)
       (partial map #(Integer/parseInt %))
       nfirst
       (partial re-seq #"(\d+)x(\d+)x(\d+)")))
-    +)))
+   (apply +)))
 
 (defn p2 [input]
   (->>
    input
    str/split-lines
-   (transduce
-    (map
+   (map
      (comp
       (partial apply box->ribbon)
       (partial map #(Integer/parseInt %))
       nfirst
       (partial re-seq #"(\d+)x(\d+)x(\d+)")))
-    +)))
+   (apply +)))
