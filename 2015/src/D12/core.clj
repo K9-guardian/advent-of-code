@@ -1,18 +1,22 @@
 (ns D12.core
-  (:require [cheshire.core :refer :all]
-            [clojure.walk :as w]))
+  (:require [cheshire.core :refer :all]))
 
 (def input (parse-string (slurp "input/d12.txt")))
 
 (defn p1 [input]
-  (let [x (atom 0)]
-    (w/postwalk #(when (number? %) (swap! x + %)) input)
-    @x))
+  (->>
+   input
+   (tree-seq (some-fn vector? map?) identity)
+   (filter number?)
+   (apply +)))
 
 (defn p2 [input]
-  (let [x (atom 0)]
-    (->>
-     input
-     (w/postwalk #(if (and (map? %) (->> % vals (some #{"red"}))) nil %))
-     (w/postwalk #(when (number? %) (swap! x + %))))
-    @x))
+  (->>
+   input
+   (tree-seq
+    #(or (vector? %)
+         (and (map? %)
+              (->> % vals (some #{"red"}) nil?)))
+    identity)
+   (filter number?)
+   (apply +)))
