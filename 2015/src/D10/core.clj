@@ -26,5 +26,3 @@
     (iterate next-turn $)
     (nth $ 50)
     (count $)))
-
-(p2 input)
