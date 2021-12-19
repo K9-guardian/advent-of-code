@@ -24,6 +24,17 @@
 (defn clamp [f] (comp (partial bit-and 0xFFFF) f))
 
 (defn evaluate [m k]
+  (letfn [(eval-rec [k]
+            (if (number? k)
+              k
+              (let [[g x y] (m k)]
+                (case g
+                  :NOT ((clamp bit-not) (eval-rec x))
+                  :AND ((clamp bit-and) (eval-rec x) (eval-rec y))
+                  :OR ((clamp bit-or) (eval-rec x) (eval-rec y))
+                  :LSHIFT ((clamp bit-shift-left) (eval-rec x) (eval-rec y))
+                  :RSHIFT ((clamp bit-shift-right) (eval-rec x) (eval-rec y))
+                  (eval-rec g)))))])
   (def eval-rec
     (memoize
      (fn [k]
