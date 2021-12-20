@@ -47,7 +47,7 @@
           (partial apply instruction->map-entry)
           parse-instruction)
          $)
-    (reduce conj {} $)
+    (into {} $)
     (evaluate $ :a)))
 
 (defn p2 [input]
@@ -57,6 +57,6 @@
           (partial apply instruction->map-entry)
           parse-instruction)
          $)
-    (reduce conj {} $)
+    (into {} $)
     (assoc $ :b [(evaluate $ :a)])
     (evaluate $ :a)))
