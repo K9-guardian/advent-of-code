@@ -23,40 +23,34 @@
          (mapv #(Integer/parseInt %) (str/split c1 #","))
          (mapv #(Integer/parseInt %) (str/split c2 #","))]))))
 
-(defn update-inclusive-range [v start end f]
-  (loop [i start v v]
-    (if (> i end)
-      v
-      (recur (inc i) (update v i f)))))
-
-(defn next-state [state [act [x1 y1] [x2 y2]]]
-  (update-inclusive-range
-   state
-   y1
-   y2
-   #(update-inclusive-range % x1 x2 act)))
-
-(def init
-  (vec
-   (repeat
-    1000
-    (vec (repeat 1000 0)))))
+(defn update!-inclusive-range-longs [^longs arr idx1 idx2 f]
+  (doseq [i (range idx1 (inc idx2))]
+    (aset arr i ^long (f (aget arr i)))))
 
 (defn p1 [input]
-  (->>
-   input
-   str/split-lines
-   (map (parse-instruction action->function-p1))
-   (reduce next-state init)
-   flatten
-   (filter (complement zero?))
-   count))
+  (let [init (long-array 1000000 0)]
+    (as-> input $
+      (str/split-lines $)
+      (map (parse-instruction action->function-p1) $)
+      (doseq [[act [x1 y1] [x2 y2]] $]
+        (doseq [i (range y1 (inc y2))]
+          (update!-inclusive-range-longs
+           init
+           (+ (* 1000 i) x1)
+           (+ (* 1000 i) x2)
+           act))))
+    (areduce init idx ret 0 (+ ret (aget init idx)))))
 
 (defn p2 [input]
-  (->>
-   input
-   str/split-lines
-   (map (parse-instruction action->function-p2))
-   (reduce next-state init)
-   flatten
-   (reduce +)))
+  (let [init (long-array 1000000 0)]
+    (as-> input $
+      (str/split-lines $)
+      (map (parse-instruction action->function-p2) $)
+      (doseq [[act [x1 y1] [x2 y2]] $]
+        (doseq [i (range y1 (inc y2))]
+          (update!-inclusive-range-longs
+           init
+           (+ (* 1000 i) x1)
+           (+ (* 1000 i) x2)
+           act))))
+    (areduce init idx ret 0 (+ ret (aget init idx)))))

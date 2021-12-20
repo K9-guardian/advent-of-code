@@ -40,12 +40,6 @@
              (eval-rec g)))))))
   (eval-rec k))
 
-(macroexpand
- '(fn fact [x]
-    (if (= x 0)
-      1
-      (* x (fact (dec x))))))
-
 (defn p1 [input]
   (as-> input $
     (str/split-lines $)
