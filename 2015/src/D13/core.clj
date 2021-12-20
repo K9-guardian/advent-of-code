@@ -15,7 +15,7 @@
         p2 (keyword p2)
         signum (case signum "gain" + "lose" -)
         amt (Integer/parseInt amt)]
-    [p1 {p2 (signum amt)}]))
+    [p1 [p2 (signum amt)]]))
 
 (defn arrangement->happiness [m a]
   (->>
@@ -33,10 +33,9 @@
     (str/split-lines $)
     (map (comp parsed->map-entry parse-line) $)
     (reduce
-       (fn [m [k v]]
-         (update m k (fnil conj {}) v))
-       {}
-       $)
+     (fn [m [k v]] (update m k (fnil conj {}) v))
+     {}
+     $)
     (let [arrangements (->>
                         $
                         keys
@@ -52,8 +51,7 @@
     (str/split-lines $)
     (map (comp parsed->map-entry parse-line) $)
     (reduce
-     (fn [m [k v]]
-       (update m k (fnil conj {:me 0}) v))
+     (fn [m [k v]] (update m k (fnil conj {:me 0}) v))
      {}
      $)
     (assoc $ :me (zipmap (keys $) (repeat 0)))

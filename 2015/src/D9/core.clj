@@ -14,8 +14,8 @@
   (let [start (keyword start)
         end (keyword end)
         d (Integer/parseInt d)]
-    [[start {end d}]
-     [end {start d}]]))
+    [[start [end d]]
+     [end [start d]]]))
 
 (defn path->distance [m p]
   (reduce
