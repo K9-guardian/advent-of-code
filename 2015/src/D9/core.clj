@@ -4,11 +4,18 @@
 
 (def input (slurp "input/d9.txt"))
 
-(defn parse-string [s]
+(defn parse-line [l]
   (->>
-   s
+   l
    (re-seq #"(\w+) to (\w+) = (\d+)")
    nfirst))
+
+(defn parsed->map-entries [[start end d]]
+  (let [start (keyword start)
+        end (keyword end)
+        d (Integer/parseInt d)]
+    [[start {end d}]
+     [end {start d}]]))
 
 (defn path->distance [m p]
   (reduce
@@ -20,13 +27,13 @@
 (defn p1 [input]
   (as-> input $
     (str/split-lines $)
-    (map parse-string $)
+    (map (comp parsed->map-entries parse-line) $)
     (reduce
-     (fn [m [start end d]]
+     (fn [m [[k1 v1] [k2 v2]]]
        (->
         m
-        (update (keyword start) (fnil conj {}) [(keyword end) (Integer/parseInt d)])
-        (update (keyword end) (fnil conj {}) [(keyword start) (Integer/parseInt d)])))
+        (update k1 (fnil conj {}) v1)
+        (update k2 (fnil conj {}) v2)))
      {}
      $)
     (let [paths (-> $ keys comb/permutations)]
@@ -38,13 +45,13 @@
 (defn p2 [input]
   (as-> input $
     (str/split-lines $)
-    (map parse-string $)
+    (map (comp parsed->map-entries parse-line) $)
     (reduce
-     (fn [m [start end d]]
+     (fn [m [[k1 v1] [k2 v2]]]
        (->
         m
-        (update (keyword start) (fnil conj {}) [(keyword end) (Integer/parseInt d)])
-        (update (keyword end) (fnil conj {}) [(keyword start) (Integer/parseInt d)])))
+        (update k1 (fnil conj {}) v1)
+        (update k2 (fnil conj {}) v2)))
      {}
      $)
     (let [paths (-> $ keys comb/permutations)]
