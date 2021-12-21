@@ -40,20 +40,19 @@
   (eval-rec k))
 
 (defn p1 [input]
-  (as-> input $
-    (str/split-lines $)
-    (map (comp (partial apply instruction->map-entry)
-               parse-instruction)
-         $)
-    (into {} $)
-    (evaluate $ :a)))
+  (let [m (->> input
+               str/split-lines
+               (map (comp (partial apply instruction->map-entry)
+                          parse-instruction))
+               (into {}))]
+    (evaluate m :a)))
 
 (defn p2 [input]
-  (as-> input $
-    (str/split-lines $)
-    (map (comp (partial apply instruction->map-entry)
-               parse-instruction)
-         $)
-    (into {} $)
-    (assoc $ :b [(evaluate $ :a)])
-    (evaluate $ :a)))
+  (let [m (->> input
+               str/split-lines
+               (map (comp (partial apply instruction->map-entry)
+                          parse-instruction))
+               (into {}))]
+    (-> m
+        (assoc :b [(evaluate m :a)])
+        (evaluate :a))))

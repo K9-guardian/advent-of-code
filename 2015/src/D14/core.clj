@@ -22,16 +22,15 @@
     (+ (* full-bursts speed run-time) (* part-burst speed))))
 
 (defn next-second [m time]
-  (as-> m $
-    (map-kv (fn [{:keys [stats] :as all}]
-              (assoc all :distance (stats->distance time stats)))
-            $)
-    (sort-by (comp :distance val) > $)
-    (partition-by (comp :distance val) $)
-    (as-> $ [deers & more]
-      (cons (map (fn [[k v]] [k (update v :points inc)]) deers) more))
-    (apply concat $)
-    (into {} $)))
+  (let [[lead-deer & more] (->> m
+                                (map-kv (fn [{:keys [stats] :as all}]
+                                          (assoc all :distance (stats->distance time stats))))
+                                (sort-by (comp :distance val) >)
+                                (partition-by (comp :distance val)))]
+    (->>
+     (cons (map (fn [[k v]] [k (update v :points inc)]) lead-deer) more)
+     (apply concat)
+     (into {}))))
 
 (defn p1 [input]
   (->> input
@@ -42,14 +41,13 @@
        (apply max-key val)))
 
 (defn p2 [input]
-  (as-> input $
-    (str/split-lines $)
-    (map (comp (fn [[k v]]
-                 [k {:stats v :distance 0 :points 0}])
-               parsed->map-entry
-               parse-line)
-         $)
-    (into {} $)
-    (reduce next-second $ (range 1 2504))
-    (map-kv :points $)
-    (apply max-key val $)))
+  (let [m (->> input
+               str/split-lines
+               (map (comp (fn [[k v]] [k {:stats v :distance 0 :points 0}])
+                          parsed->map-entry
+                          parse-line))
+               (into {}))
+        m* (reduce next-second m (range 1 2504))]
+    (->> m*
+         (map-kv :points)
+         (apply max-key val))))

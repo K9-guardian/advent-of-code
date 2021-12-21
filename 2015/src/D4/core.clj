@@ -12,12 +12,11 @@
 
 ;; You could further optimize this by reusing buffers, but type hints are good enough
 (defn budget-md5-6-zeros-prefix? [^String input]
-  (as-> input $
-    (.getBytes $ "UTF-8")
-    (.digest ^MessageDigest (MessageDigest/getInstance "MD5") $)
-    (and (zero? (aget $ 0))
-         (zero? (aget $ 1))
-         (zero? (aget $ 2)))))
+  (let [bs (->> (.getBytes input "UTF-8")
+                (.digest ^MessageDigest (MessageDigest/getInstance "MD5")))]
+    (and (zero? (aget bs 0))
+         (zero? (aget bs 1))
+         (zero? (aget bs 2)))))
 
 (defn p1 [input]
   (loop [i 1]
@@ -26,10 +25,8 @@
       (recur (inc i)))))
 
 (defn p2 [input]
-  (as-> (iterate inc 1) $
-    (pmap
-     (comp budget-md5-6-zeros-prefix?
-           (partial str input))
-     $)
-    (.indexOf $ true)
-    (inc $)))
+  (let [l (->> (iterate inc 1)
+               (pmap
+                (comp budget-md5-6-zeros-prefix?
+                      (partial str input))))]
+    (-> l (.indexOf true) inc)))

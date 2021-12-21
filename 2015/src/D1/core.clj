@@ -10,11 +10,9 @@
        (apply +)))
 
 (defn p2 [input]
-  (as-> input $
-    (map #(case %
-            \( 1
-            \) -1)
-         $)
-    (reductions + $)
-    (.indexOf $ -1)
-    (inc $)))
+  (let [seqq (->> input
+               (map #(case %
+                       \( 1
+                       \) -1))
+               (reductions +))]
+    (-> seqq (.indexOf -1) inc)))

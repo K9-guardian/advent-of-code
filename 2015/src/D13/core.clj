@@ -25,32 +25,28 @@
                   +)))
 
 (defn p1 [input]
-  (as-> input $
-    (str/split-lines $)
-    (map (comp parsed->map-entry parse-line) $)
-    (reduce (fn [m [k v]] (update m k (fnil conj {}) v))
-            {}
-            $)
-    (let [arrangements (->> $
-                            keys
-                            comb/permutations
-                            (map #(take (-> % count (+ 2)) (cycle %))))]
-      (->> arrangements
-           (map (partial arrangement->happiness $))
-           (apply max)))))
+  (let [m (->> input
+               str/split-lines
+               (map (comp parsed->map-entry parse-line))
+               (reduce (fn [m [k v]] (update m k (fnil conj {}) v)) {}))
+        arrangements (->> m
+                          keys
+                          comb/permutations
+                          (map #(take (-> % count (+ 2)) (cycle %))))]
+    (->> arrangements
+         (map (partial arrangement->happiness m))
+         (apply max))))
 
 (defn p2 [input]
-  (as-> input $
-    (str/split-lines $)
-    (map (comp parsed->map-entry parse-line) $)
-    (reduce (fn [m [k v]] (update m k (fnil conj {:me 0}) v))
-            {}
-            $)
-    (assoc $ :me (zipmap (keys $) (repeat 0)))
-    (let [arrangements (->> $
-                            keys
-                            comb/permutations
-                            (map #(take (-> % count (+ 2)) (cycle %))))]
-      (->> arrangements
-           (map (partial arrangement->happiness $))
-           (apply max)))))
+  (let [m (->> input
+               str/split-lines
+               (map (comp parsed->map-entry parse-line))
+               (reduce (fn [m [k v]] (update m k (fnil conj {:me 0}) v)) {}))
+        m* (assoc m :me (zipmap (keys m) (repeat 0)))
+        arrangements (->> m*
+                          keys
+                          comb/permutations
+                          (map #(take (-> % count (+ 2)) (cycle %))))]
+    (->> arrangements
+         (map (partial arrangement->happiness m*))
+         (apply max))))

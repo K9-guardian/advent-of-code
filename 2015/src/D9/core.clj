@@ -23,33 +23,31 @@
           (partition 2 1 p)))
 
 (defn p1 [input]
-  (as-> input $
-    (str/split-lines $)
-    (map (comp parsed->map-entries parse-line) $)
-    (reduce (fn [m [[k1 v1] [k2 v2]]]
-              (->
-               m
-               (update k1 (fnil conj {}) v1)
-               (update k2 (fnil conj {}) v2)))
-            {}
-            $)
-    (let [paths (-> $ keys comb/permutations)]
-      (->> paths
-           (map (partial path->distance $))
-           (apply min)))))
+  (let [m (->> input
+               str/split-lines
+               (map (comp parsed->map-entries parse-line))
+               (reduce (fn [m [[k1 v1] [k2 v2]]]
+                         (->
+                          m
+                          (update k1 (fnil conj {}) v1)
+                          (update k2 (fnil conj {}) v2)))
+                       {}))
+        paths (-> m keys comb/permutations)]
+    (->> paths
+         (map (partial path->distance m))
+         (apply min))))
 
 (defn p2 [input]
-  (as-> input $
-    (str/split-lines $)
-    (map (comp parsed->map-entries parse-line) $)
-    (reduce (fn [m [[k1 v1] [k2 v2]]]
-              (->
-               m
-               (update k1 (fnil conj {}) v1)
-               (update k2 (fnil conj {}) v2)))
-            {}
-            $)
-    (let [paths (-> $ keys comb/permutations)]
-      (->> paths
-           (map (partial path->distance $))
-           (apply max)))))
+  (let [m (->> input
+               str/split-lines
+               (map (comp parsed->map-entries parse-line))
+               (reduce (fn [m [[k1 v1] [k2 v2]]]
+                         (->
+                          m
+                          (update k1 (fnil conj {}) v1)
+                          (update k2 (fnil conj {}) v2)))
+                       {}))
+        paths (-> m keys comb/permutations)]
+    (->> paths
+         (map (partial path->distance m))
+         (apply max))))
