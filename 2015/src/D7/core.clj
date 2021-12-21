@@ -9,12 +9,11 @@
     (catch NumberFormatException e (keyword a))))
 
 (defn parse-instruction [s]
-  (->>
-   s
-   (re-seq #"(?:([a-z\d]+)|([a-z\d]+)? ?([A-Z]+) ([a-z\d]+)) -> ([a-z]+)")
-   nfirst
-   (remove nil?)
-   (map parse-atom)))
+  (->> s
+       (re-seq #"(?:([a-z\d]+)|([a-z\d]+)? ?([A-Z]+) ([a-z\d]+)) -> ([a-z]+)")
+       nfirst
+       (remove nil?)
+       (map parse-atom)))
 
 (defn instruction->map-entry
   ([x y] [y [x]])
@@ -43,9 +42,8 @@
 (defn p1 [input]
   (as-> input $
     (str/split-lines $)
-    (map (comp
-          (partial apply instruction->map-entry)
-          parse-instruction)
+    (map (comp (partial apply instruction->map-entry)
+               parse-instruction)
          $)
     (into {} $)
     (evaluate $ :a)))
@@ -53,9 +51,8 @@
 (defn p2 [input]
   (as-> input $
     (str/split-lines $)
-    (map (comp
-          (partial apply instruction->map-entry)
-          parse-instruction)
+    (map (comp (partial apply instruction->map-entry)
+               parse-instruction)
          $)
     (into {} $)
     (assoc $ :b [(evaluate $ :a)])

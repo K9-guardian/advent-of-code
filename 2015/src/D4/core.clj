@@ -5,11 +5,10 @@
 
 ;; Good general purpose algorithm, but slow for day 2
 (defn md5 [input]
-  (->>
-   (.getBytes input "UTF-8")
-   (.digest (MessageDigest/getInstance "MD5"))
-   (BigInteger. 1)
-   (format "%032x")))
+  (->> (.getBytes input "UTF-8")
+       (.digest (MessageDigest/getInstance "MD5"))
+       (BigInteger. 1)
+       (format "%032x")))
 
 ;; You could further optimize this by reusing buffers, but type hints are good enough
 (defn budget-md5-6-zeros-prefix? [^String input]
@@ -29,9 +28,8 @@
 (defn p2 [input]
   (as-> (iterate inc 1) $
     (pmap
-     (comp
-      budget-md5-6-zeros-prefix?
-      (partial str input))
+     (comp budget-md5-6-zeros-prefix?
+           (partial str input))
      $)
     (.indexOf $ true)
     (inc $)))

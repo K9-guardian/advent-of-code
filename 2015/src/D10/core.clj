@@ -3,15 +3,13 @@
 (def input (slurp "input/d10.txt"))
 
 (defn parse-input [s]
-  (->>
-   s
-   (map #(Character/getNumericValue %))))
+  (->> s
+       (map #(Character/getNumericValue %))))
 
 (defn next-turn [coll]
-  (->>
-   coll
-   (partition-by identity)
-   (mapcat #(list (count %) (first %)))))
+  (->> coll
+       (partition-by identity)
+       (mapcat #(list (count %) (first %)))))
 
 (defn p1 [input]
   (as-> input $

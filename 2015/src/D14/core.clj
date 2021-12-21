@@ -28,7 +28,8 @@
             $)
     (sort-by (comp :distance val) > $)
     (partition-by (comp :distance val) $)
-    (as-> $ [deers & more] (cons (map (fn [[k v]] [k (update v :points inc)]) deers) more))
+    (as-> $ [deers & more]
+      (cons (map (fn [[k v]] [k (update v :points inc)]) deers) more))
     (apply concat $)
     (into {} $)))
 
