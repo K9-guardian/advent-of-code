@@ -3,12 +3,12 @@
 
 (def input (slurp "input/d14.txt"))
 
+(defn map-kv [f m] (reduce-kv (fn [m k v] (assoc m k (f v))) (empty m) m))
+
 (defn parse-line [l]
   (->> l
        (re-find #"(.*) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds.")
        rest))
-
-(defn map-kv [f m] (reduce-kv (fn [m k v] (assoc m k (f v))) (empty m) m))
 
 (defn parsed->map-entry [[raindeer & values]]
   (let [raindeer (keyword raindeer)
@@ -47,7 +47,7 @@
                           parsed->map-entry
                           parse-line))
                (into {}))
-        m* (reduce next-second m (range 1 2504))]
-    (->> m*
+        m (reduce next-second m (range 1 2504))]
+    (->> m
          (map-kv :points)
          (apply max-key val))))
