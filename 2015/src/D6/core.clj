@@ -16,8 +16,8 @@
 (defn parse-instruction [m]
   (fn [s]
     (let [parsed (->> s
-                      (re-seq #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)")
-                      nfirst)
+                      (re-find #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)")
+                      rest)
           [act c1 c2] parsed]
       [(m act)
        (mapv #(Integer/parseInt %) (str/split c1 #","))

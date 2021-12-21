@@ -4,7 +4,9 @@
 (def input (slurp "input/d8.txt"))
 
 (defn string->chars-in-memory [s]
-  (count (re-seq #"\\\\|\\\"|\\x[\da-f]{2}|[^\"]" s)))
+  (->> s
+       (re-seq #"\\\\|\\\"|\\x[\da-f]{2}|[^\"]")
+       count))
 
 (defn string->chars-for-encoding [s]
   (reduce #(+ %1

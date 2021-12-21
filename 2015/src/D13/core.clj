@@ -6,8 +6,8 @@
 
 (defn parse-line [l]
   (->> l
-       (re-seq #"(.*) would (.*) (\d+) happiness units by sitting next to (.*).")
-       nfirst))
+       (re-find #"(.*) would (.*) (\d+) happiness units by sitting next to (.*).")
+       rest))
 
 (defn parsed->map-entry [[p1 signum amt p2]]
   (let [p1 (keyword p1)

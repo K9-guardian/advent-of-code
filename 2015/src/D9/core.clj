@@ -6,8 +6,8 @@
 
 (defn parse-line [l]
   (->> l
-       (re-seq #"(\w+) to (\w+) = (\d+)")
-       nfirst))
+       (re-find #"(\w+) to (\w+) = (\d+)")
+       rest))
 
 (defn parsed->map-entries [[start end d]]
   (let [start (keyword start)

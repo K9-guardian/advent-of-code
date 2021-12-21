@@ -10,8 +10,8 @@
 
 (defn parse-instruction [s]
   (->> s
-       (re-seq #"(?:([a-z\d]+)|([a-z\d]+)? ?([A-Z]+) ([a-z\d]+)) -> ([a-z]+)")
-       nfirst
+       (re-find #"(?:([a-z\d]+)|([a-z\d]+)? ?([A-Z]+) ([a-z\d]+)) -> ([a-z]+)")
+       rest
        (remove nil?)
        (map parse-atom)))
 

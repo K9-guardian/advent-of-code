@@ -5,8 +5,8 @@
 
 (defn parse-line [l]
   (->> l
-       (re-seq #"(.*) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds.")
-       nfirst))
+       (re-find #"(.*) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds.")
+       rest))
 
 (defn map-kv [f m] (reduce-kv (fn [m k v] (assoc m k (f v))) (empty m) m))
 
