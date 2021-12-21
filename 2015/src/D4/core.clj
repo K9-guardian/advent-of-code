@@ -1,14 +1,13 @@
-(ns D4.core)
-
-(import java.security.MessageDigest)
+(ns D4.core
+  (:import java.security.MessageDigest))
 
 (def input (slurp "input/d4.txt"))
 
 ;; Good general purpose algorithm, but slow for day 2
-(defn md5 [^String input]
+(defn md5 [input]
   (->>
    (.getBytes input "UTF-8")
-   (.digest ^MessageDigest (MessageDigest/getInstance "MD5"))
+   (.digest (MessageDigest/getInstance "MD5"))
    (BigInteger. 1)
    (format "%032x")))
 
