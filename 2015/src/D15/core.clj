@@ -12,8 +12,6 @@
                         (into {}))]
     [(keyword ingredient) properties]))
 
-;; dp[][][][]
-
 (defn sum-to-n [n x]
   (case x
     1 [[n]]
