@@ -12,15 +12,6 @@
                         (into {}))]
     [(keyword ingredient) properties]))
 
-(defn sum-to-n [n x]
-  (case x
-    1 [[n]]
-    (partition x
-               (flatten
-                (for [i (range (inc n))
-                      :let [nums (sum-to-n (- n i) (dec x))]]
-                  (map (partial cons i) nums))))))
-
 (defn ratio->score [xs properties-per-teaspoon]
   (->> properties-per-teaspoon
        (apply map (fn [p1 p2 p3 p4]
@@ -32,6 +23,13 @@
   (->> (map * cals xs)
        (apply +)))
 
+(def nums
+  (for [i (range 0 101) j (range 0 101)
+        k (range 0 101) l (range 0 101)
+        :when (= 100 (+ i j k l))
+        ]
+    [i j k l]))
+
 (defn p1 [input]
   (let [m (->> input
                str/split-lines
@@ -39,7 +37,7 @@
                (into {}))
         number-of-ingredients (count m)]
     (->
-     (for [xs (sum-to-n 100 number-of-ingredients)]
+     (for [xs nums]
        [xs
         (ratio->score xs
                       (->> m vals
@@ -55,7 +53,7 @@
                (into {}))
         number-of-ingredients (count m)]
     (->
-     (for [xs (sum-to-n 100 number-of-ingredients)
+     (for [xs nums
            :when (= 500 (ratio->calories xs (map :calories (vals m))))]
        [xs
         (ratio->score xs
