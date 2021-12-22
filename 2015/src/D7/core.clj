@@ -8,51 +8,55 @@
     (Integer/parseInt a)
     (catch NumberFormatException e (keyword a))))
 
-(defn parse-instruction [s]
-  (->> s
-       (re-find #"(?:([a-z\d]+)|([a-z\d]+)? ?([A-Z]+) ([a-z\d]+)) -> ([a-z]+)")
-       rest
-       (remove nil?)
-       (map parse-atom)))
+;; instruction ::= lhs "->" rhs
+;; rhs ::= symb
+;; lhs ::= fn atom | atom fn atom
 
-(defn instruction->map-entry
-  ([x y] [y [x]])
-  ([f x y] [y [f x]])
-  ([x f y z] [z [f x y]]))
+;; fn ::= "NOT" | "AND" | "OR" | "LSHIFT" | "RSHIFT"
+;; atom ::= symb | num
+;; symb ::= [a-z]+
+;; num ::= \d+
+
+(defn parse-instruction [s]
+  (let [[lhs rhs] (str/split s #" -> ")
+        rhs (parse-atom rhs)
+        lhs (mapv parse-atom (str/split lhs #" "))]
+    [rhs lhs]))
 
 (defn clamp [f] (comp (partial bit-and 0xFFFF) f))
 
-(defn evaluate [m k]
-  ;; I swear to learn combinators *eventually*
+(def act->fun
+  {:NOT (clamp bit-not)
+   :AND (clamp bit-and)
+   :OR (clamp bit-or)
+   :LSHIFT (clamp bit-shift-left)
+   :RSHIFT (clamp bit-shift-right)})
+
+(defn evaluate [k m]
+  ;; I swear to learn fixed point memoization *eventually*
   (def eval-rec
     (memoize
      (fn [k]
        (if (number? k)
          k
-         (let [[g x y] (m k)]
-           (case g
-             :NOT ((clamp bit-not) (eval-rec x))
-             :AND ((clamp bit-and) (eval-rec x) (eval-rec y))
-             :OR ((clamp bit-or) (eval-rec x) (eval-rec y))
-             :LSHIFT ((clamp bit-shift-left) (eval-rec x) (eval-rec y))
-             :RSHIFT ((clamp bit-shift-right) (eval-rec x) (eval-rec y))
-             (eval-rec g)))))))
+         (let [v (m k)]
+           (condp = (count v)
+             1 (as-> v [x] (eval-rec x))
+             2 (as-> v [f x] ((act->fun f) (eval-rec x)))
+             3 (as-> v [x f y] ((act->fun f) (eval-rec x) (eval-rec y)))))))))
   (eval-rec k))
 
 (defn p1 [input]
-  (let [m (->> input
-               str/split-lines
-               (map (comp (partial apply instruction->map-entry)
-                          parse-instruction))
-               (into {}))]
-    (evaluate m :a)))
+  (->> input
+       str/split-lines
+       (map parse-instruction)
+       (into {})
+       (evaluate :a)))
 
 (defn p2 [input]
   (let [m (->> input
                str/split-lines
-               (map (comp (partial apply instruction->map-entry)
-                          parse-instruction))
-               (into {}))]
-    (-> m
-        (assoc :b [(evaluate m :a)])
-        (evaluate :a))))
+               (map parse-instruction)
+               (into {}))
+        m (assoc m :b [(evaluate :a m)])]
+    (evaluate :a m)))
