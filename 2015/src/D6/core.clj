@@ -13,6 +13,10 @@
    "turn off" #(max 0 (dec %)),
    "toggle" (partial + 2)})
 
+;; instruction ::= action range "through" range
+;; action ::= "turn on" | "turn off" | "toggle"
+;; range ::= \d+,\d+
+
 (defn parse-instruction [m]
   (fn [s]
     (let [parsed (->> s

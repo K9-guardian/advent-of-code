@@ -23,8 +23,7 @@
         (comp
          (partial apply box->area)
          (partial map #(Integer/parseInt %))
-         rest
-         (partial re-find #"(\d+)x(\d+)x(\d+)")))
+         #(str/split % #"x")))
        (apply +)))
 
 (defn p2 [input]
@@ -34,6 +33,5 @@
         (comp
          (partial apply box->ribbon)
          (partial map #(Integer/parseInt %))
-         rest
-         (partial re-find #"(\d+)x(\d+)x(\d+)")))
+         #(str/split % #"x")))
        (apply +)))
