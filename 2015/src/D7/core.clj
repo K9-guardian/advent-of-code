@@ -25,7 +25,7 @@
 
 (defn clamp [f] (comp (partial bit-and 0xFFFF) f))
 
-(def act->fun
+(def act->fn
   {:NOT (clamp bit-not)
    :AND (clamp bit-and)
    :OR (clamp bit-or)
@@ -42,8 +42,8 @@
          (let [v (m k)]
            (condp = (count v)
              1 (as-> v [x] (eval-rec x))
-             2 (as-> v [f x] ((act->fun f) (eval-rec x)))
-             3 (as-> v [x f y] ((act->fun f) (eval-rec x) (eval-rec y)))))))))
+             2 (as-> v [f x] ((act->fn f) (eval-rec x)))
+             3 (as-> v [x f y] ((act->fn f) (eval-rec x) (eval-rec y)))))))))
   (eval-rec k))
 
 (defn p1 [input]
