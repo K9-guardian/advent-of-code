@@ -1,7 +1,7 @@
 (ns D12.core
-  (:require [cheshire.core :refer :all]))
+  (:require [cheshire.core :as json]))
 
-(def input (parse-string (slurp "input/d12.txt")))
+(def input (json/parse-string (slurp "input/d12.txt")))
 
 (defn p1 [input]
   (->> input

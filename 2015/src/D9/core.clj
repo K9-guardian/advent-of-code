@@ -1,6 +1,6 @@
 (ns D9.core
-  (:require [clojure.string :as str]
-            [clojure.math.combinatorics :as comb]))
+  (:require [clojure.math.combinatorics :as comb]
+            [clojure.string :as str]))
 
 (def input (slurp "input/d9.txt"))
 
