@@ -4,8 +4,8 @@
 (def input (slurp "input/d15.txt"))
 
 (defn parse-line [l]
-  (let [[ingredient & more] (str/split l #"[:,] ")
-        properties (->> more
+  (let [[ingredient & stats] (str/split l #"[:,] ")
+        properties (->> stats
                         (map (comp
                               (fn [[k v]] [(keyword k) (Integer/parseInt v)])
                               #(str/split % #" ")))

@@ -15,10 +15,10 @@
   (let [seqq (->> input
                   parse-input
                   (iterate next-turn))]
-    (-> seqq (nth 40) count)))
+    (count (nth seqq 40))))
 
 (defn p2 [input]
   (let [seqq (->> input
                   parse-input
                   (iterate next-turn))]
-    (-> seqq (nth 50) count)))
+    (count (nth seqq 50))))

@@ -10,7 +10,7 @@
        (<= 3)))
 
 (defn contains-consecutive-duplicate? [s]
-  (< (-> s dedupe count)
+  (< (count (dedupe s))
      (count s)))
 
 (defn contains-banned-pair? [s]

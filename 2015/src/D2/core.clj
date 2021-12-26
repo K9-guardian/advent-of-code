@@ -19,19 +19,15 @@
 (defn p1 [input]
   (->> input
        str/split-lines
-       (map
-        (comp
-         (partial apply box->area)
-         (partial map #(Integer/parseInt %))
-         #(str/split % #"x")))
+       (map (comp (partial apply box->area)
+                  (partial map #(Integer/parseInt %))
+                  #(str/split % #"x")))
        (apply +)))
 
 (defn p2 [input]
   (->> input
        str/split-lines
-       (map
-        (comp
-         (partial apply box->ribbon)
-         (partial map #(Integer/parseInt %))
-         #(str/split % #"x")))
+       (map (comp (partial apply box->ribbon)
+                  (partial map #(Integer/parseInt %))
+                  #(str/split % #"x")))
        (apply +)))

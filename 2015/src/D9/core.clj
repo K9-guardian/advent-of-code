@@ -32,7 +32,7 @@
                           (update k1 (fnil conj {}) v1)
                           (update k2 (fnil conj {}) v2)))
                        {}))
-        paths (-> m keys comb/permutations)]
+        paths (comb/permutations (keys m))]
     (->> paths
          (map (partial path->distance m))
          (apply min))))
@@ -47,7 +47,7 @@
                           (update k1 (fnil conj {}) v1)
                           (update k2 (fnil conj {}) v2)))
                        {}))
-        paths (-> m keys comb/permutations)]
+        paths (comb/permutations (keys m))]
     (->> paths
          (map (partial path->distance m))
          (apply max))))

@@ -22,15 +22,17 @@
     (+ (* full-bursts speed run-time) (* part-burst speed))))
 
 (defn next-second [m time]
-  (let [[lead-deer & more] (->> m
-                                (map-kv (fn [{:keys [stats] :as all}]
-                                          (assoc all :distance (stats->distance time stats))))
-                                (sort-by (comp :distance val) >)
-                                (partition-by (comp :distance val)))]
-    (->>
-     (cons (map (fn [[k v]] [k (update v :points inc)]) lead-deer) more)
-     (apply concat)
-     (into {}))))
+  (let [deer-distances (->> m
+                            (map-kv (fn [{:keys [stats] :as all}]
+                                      (assoc all :distance (stats->distance time stats))))
+                            (sort-by (comp :distance val) >)
+                            (partition-by (comp :distance val)))
+        leaders (map #(vector (key %) (update (val %) :points inc))
+                     (first deer-distances))]
+    (->> (rest deer-distances)
+         (cons leaders)
+         (apply concat)
+         (into {}))))
 
 (defn p1 [input]
   (->> input

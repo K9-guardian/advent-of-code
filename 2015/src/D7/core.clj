@@ -40,7 +40,7 @@
        (if (number? k)
          k
          (let [v (m k)]
-           (condp = (count v)
+           (case (count v)
              1 (as-> v [x] (eval-rec x))
              2 (as-> v [f x] ((act->fn f) (eval-rec x)))
              3 (as-> v [x f y] ((act->fn f) (eval-rec x) (eval-rec y)))))))))
