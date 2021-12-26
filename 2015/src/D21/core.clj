@@ -59,25 +59,23 @@
 (defn p1 [input]
   (let [boss (parse-input input)
         loadouts (comb/cartesian-product weapons
-                                         (-> armor
-                                             (conj {:type :none :cost 0 :dmg 0 :arm 0}))
+                                         (conj armor {:type :none :cost 0 :dmg 0 :arm 0})
                                          (->> rings
                                               comb/subsets
                                               (take-while #(<= (count %) 2))))]
     (->> loadouts
          (filter (partial win? boss))
-         (map (fn [l] [l (cost l)]))
-         (apply min-key second))))
+         (map cost)
+         (apply min))))
 
 (defn p2 [input]
   (let [boss (parse-input input)
         loadouts (comb/cartesian-product weapons
-                                         (-> armor
-                                             (conj {:type :none :cost 0 :dmg 0 :arm 0}))
+                                         (conj armor {:type :none :cost 0 :dmg 0 :arm 0})
                                          (->> rings
                                               comb/subsets
                                               (take-while #(<= (count %) 2))))]
     (->> loadouts
          (filter (partial (complement win?) boss))
-         (map (fn [l] [l (cost l)]))
-         (apply max-key second))))
+         (map cost)
+         (apply max))))
