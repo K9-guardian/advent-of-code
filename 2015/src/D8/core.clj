@@ -3,12 +3,12 @@
 
 (def input (slurp "input/d8.txt"))
 
-(defn string->chars-in-memory [s]
+(defn string->num-chars-in-memory [s]
   (->> s
        (re-seq #"\\\\|\\\"|\\x[\da-f]{2}|[^\"]")
        count))
 
-(defn string->chars-for-encoding [s]
+(defn string->num-chars-for-encoding [s]
   (reduce #(+ %1
               (case %2
                 (\\ \") 2
@@ -19,11 +19,11 @@
 (defn p1 [input]
   (->> input
        str/split-lines
-       (map #(- (count %) (-> % string->chars-in-memory)))
+       (map #(- (count %) (string->num-chars-in-memory %)))
        (reduce +)))
 
 (defn p2 [input]
   (->> input
        str/split-lines
-       (map #(- (-> % string->chars-for-encoding) (count %)))
+       (map #(- (str->num-chars-for-encoding %) (count %)))
        (reduce +)))
