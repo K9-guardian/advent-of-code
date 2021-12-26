@@ -28,15 +28,15 @@
 
 (defn inc-string [s]
   (letfn [(inc-char [c] (-> c int inc char))]
-    (loop [[c & more :as cs] (reverse s)
+    (loop [cs (reverse s)
            carry? true
            acc ()]
       (cond
         (and carry? (empty? cs)) (cons \a acc)
         (empty? cs) acc
-        (and carry? (= \z c)) (recur more true (cons \a acc))
-        carry? (recur more false (cons (inc-char c) acc))
-        :else (recur more false (cons c acc))))))
+        (and carry? (= \z (first cs))) (recur (rest cs) true (cons \a acc))
+        carry? (recur (rest cs) false (cons (inc-char (first cs)) acc))
+        :else (recur (rest cs) false (cons (first cs) acc))))))
 
 (defn p1 [input]
   (->> input
