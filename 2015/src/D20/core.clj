@@ -6,10 +6,9 @@
   (reduce (fn [m n]
             (if (<= input (* 10 (apply + (m n))))
               (reduced n)
-              (reduce
-               (fn [m d] (update m (+ n d) (fnil conj [(+ n d)]) d))
-               m
-               (m n))))
+              (reduce (fn [m d] (update m (+ n d) (fnil conj [(+ n d)]) d))
+                      m
+                      (m n))))
           {1 [1]}
           (iterate inc 1)))
 
@@ -20,9 +19,8 @@
                                (apply +)
                                (* 11)))
               (reduced n)
-              (reduce
-               (fn [m d] (update m (+ n d) (fnil conj [(+ n d)]) d))
-               m
-               (m n))))
+              (reduce (fn [m d] (update m (+ n d) (fnil conj [(+ n d)]) d))
+                      m
+                      (m n))))
           {1 [1]}
           (iterate inc 1)))
