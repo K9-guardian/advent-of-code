@@ -25,5 +25,5 @@
 (defn p2 [input]
   (->> input
        str/split-lines
-       (map #(- (str->num-chars-for-encoding %) (count %)))
+       (map #(- (string->num-chars-for-encoding %) (count %)))
        (reduce +)))
