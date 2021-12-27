@@ -28,7 +28,7 @@
        (map * ratio)
        (apply +)))
 
-(def nums
+(def ratios
   (for [i (range 0 101) j (range 0 101) k (range 0 101) l (range 0 101)
         :when (= 100 (+ i j k l))]
     [i j k l]))
@@ -37,15 +37,17 @@
   (let [ingredients (->> input
                          str/split-lines
                          (map parse-line))]
-    (->> nums
-         (map (partial ratio->score ingredients))
-         (apply max))))
+    (->> ratios
+         (map (juxt (partial zipmap (map :name ingredients))
+                    (partial ratio->score ingredients)))
+         (apply max-key second))))
 
 (defn p2 [input]
   (let [ingredients (->> input
                          str/split-lines
                          (map parse-line))]
-    (->> nums
+    (->> ratios
          (filter #(= 500 (ratio->calories ingredients %)))
-         (map (partial ratio->score ingredients))
-         (apply max))))
+         (map (juxt (partial zipmap (map :name ingredients))
+                    (partial ratio->score ingredients)))
+         (apply max-key second))))
