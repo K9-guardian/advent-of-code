@@ -42,11 +42,11 @@
                str/split-lines
                (map (comp parsed->map-entry parse-line))
                (reduce (fn [m [k v]] (update m k (fnil conj {:me 0}) v)) {}))
-        m* (assoc m :me (zipmap (keys m) (repeat 0)))
-        arrangements (->> m*
+        m (assoc m :me (zipmap (keys m) (repeat 0)))
+        arrangements (->> m
                           keys
                           comb/permutations
                           (map #(take (+ 2 (count %)) (cycle %))))]
     (->> arrangements
-         (map (partial arrangement->happiness m*))
+         (map (partial arrangement->happiness m))
          (apply max))))
