@@ -3,8 +3,7 @@
 (def input (slurp "input/d10.txt"))
 
 (defn parse-input [s]
-  (->> s
-       (map #(Character/getNumericValue %))))
+  (map #(Character/getNumericValue %) s))
 
 (defn next-turn [coll]
   (->> coll

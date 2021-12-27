@@ -32,7 +32,7 @@
         arrangements (->> m
                           keys
                           comb/permutations
-                          (map #(take (-> % count (+ 2)) (cycle %))))]
+                          (map #(take (+ 2 (count %)) (cycle %))))]
     (->> arrangements
          (map (partial arrangement->happiness m))
          (apply max))))
@@ -46,7 +46,7 @@
         arrangements (->> m*
                           keys
                           comb/permutations
-                          (map #(take (-> % count (+ 2)) (cycle %))))]
+                          (map #(take (+ 2 (count %)) (cycle %))))]
     (->> arrangements
          (map (partial arrangement->happiness m*))
          (apply max))))
