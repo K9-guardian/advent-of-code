@@ -3,6 +3,8 @@
 
 (def input (slurp "input/d22.txt"))
 
+(def inf ##Inf) ; My formatter sucks
+
 (def parse-key
   {"Hit Points" :hp
    "Damage" :dmg})
@@ -83,8 +85,6 @@
            :boss-start :boss
            :boss :my-start}))
 
-(def inf ##Inf)
-
 ;; TODO: Use Dijkstra's. Nodes are state, edges are mana cost.
 (defn solve [st total-cost]
   (cond
@@ -125,7 +125,7 @@
   (let [init {:me {:hp 50 :arm 0 :mana 500}
               :boss (parse-input input)
               :effects [{:name "Drip"
-                         :turns ##Inf
+                         :turns inf
                          :action #(case (:turn %) :my-start (update-in % [:me :hp] dec) %)}]
               :turn :my-start}]
     (solve init 0)))
