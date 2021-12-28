@@ -11,13 +11,13 @@
        (mapcat #(list (count %) (first %)))))
 
 (defn p1 [input]
-  (let [seqq (->> input
-                  parse-input
-                  (iterate next-turn))]
-    (count (nth seqq 40))))
+  (let [s (->> input
+               parse-input
+               (iterate next-turn))]
+    (count (nth s 40))))
 
 (defn p2 [input]
-  (let [seqq (->> input
-                  parse-input
-                  (iterate next-turn))]
-    (count (nth seqq 50))))
+  (let [s (->> input
+               parse-input
+               (iterate next-turn))]
+    (count (nth s 50))))
