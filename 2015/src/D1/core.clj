@@ -4,15 +4,11 @@
 
 (defn p1 [input]
   (->> input
-       (map #(case %
-               \( 1
-               \) -1))
+       (map {\( 1 \) -1})
        (apply +)))
 
 (defn p2 [input]
   (let [s (->> input
-               (map #(case %
-                       \( 1
-                       \) -1))
+               (map {\( 1 \) -1})
                (reductions +))]
     (-> s (.indexOf -1) inc)))

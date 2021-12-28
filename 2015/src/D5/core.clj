@@ -14,7 +14,8 @@
      (count s)))
 
 (defn contains-banned-pair? [s]
-  (some #{[\a \b] [\c \d] [\p \q] [\x \y]} (partition 2 1 s)))
+  (some #{[\a \b] [\c \d] [\p \q] [\x \y]}
+        (partition 2 1 s)))
 
 (defn nice-p1? [s]
   ((every-pred contains-3-vowels?
@@ -27,9 +28,8 @@
          l (partition 2 1 s)]
     (case (count l)
       (1 2) b
-      (let [[f _ & rr] l]
-        (recur (or b (some #{f} rr))
-               (rest l))))))
+      (recur (or b (some #{(first l)} (nnext l)))
+             (rest l)))))
 
 (defn contains-length-3-palindrome? [s]
   (some #(= (first %) (last %))

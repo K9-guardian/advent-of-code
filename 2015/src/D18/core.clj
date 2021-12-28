@@ -59,7 +59,7 @@
 (defn p1 [input]
   (let [lights (->> input
                     str/split-lines
-                    (mapv (partial mapv #(case % \. 0 \# 1))))
+                    (mapv (partial mapv {\. 0 \# 1})))
         frame (nth (iterate next-frame-p1 lights) 100)]
     (->> frame
          flatten
@@ -69,7 +69,7 @@
 (defn p2 [input]
   (let [lights (->> input
                     str/split-lines
-                    (mapv (partial mapv #(case % \. 0 \# 1))))
+                    (mapv (partial mapv {\. 0 \# 1})))
         lights (-> lights
                    (assoc-in [0 0] 1)
                    (assoc-in [0 (dec board-size)] 1)
