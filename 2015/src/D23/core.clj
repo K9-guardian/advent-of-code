@@ -13,7 +13,9 @@
     (case instr
       ("hlf" "tpl" "inc") (as-> more [reg] {:instr (keyword instr) :reg (keyword reg)})
       ("jie" "jio") (as-> more [reg offset]
-                      {:instr (keyword instr) :reg (keyword reg) :offset (Integer/parseInt offset)})
+                      {:instr (keyword instr)
+                       :reg (keyword reg)
+                       :offset (Integer/parseInt offset)})
       "jmp" (as-> more [offset] {:instr (keyword instr) :offset (Integer/parseInt offset)}))))
 
 (defn solve [rs tape]
