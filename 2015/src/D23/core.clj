@@ -3,16 +3,10 @@
 
 (def input (slurp "input/d23.txt"))
 
-;; instruction ::= fn reg | "jmp" num | ("jie" | "jio") reg "," num
+;; instruction ::= ("hlf" | "tpl" | "inc") reg | "jmp" num | ("jie" | "jio") reg "," num
 
-;; fn ::= "hlf" | "tpl" | "inc"
 ;; reg ::= "a" | "b"
 ;; num ::= \d+
-
-(defn parse-atom [a]
-  (try
-    (Integer/parseInt a)
-    (catch NumberFormatException e (keyword a))))
 
 (defn parse-line [l]
   (let [[instr & more] (str/split l #",? ")]
