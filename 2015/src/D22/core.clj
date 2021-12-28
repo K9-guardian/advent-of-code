@@ -84,13 +84,11 @@
 
 (defn swap-turn [st] (update st :turn {:me :boss :boss :me}))
 
-(def inf ##Inf) ; My formatter sucks
-
 (defn solve [st total-cost]
   (let [st (apply-effects st)]
     (cond
       (<= (get-in st [:boss :hp] st) 0) total-cost
-      (<= (get-in st [:me :hp] st) 0) inf
+      (<= (get-in st [:me :hp] st) 0) ##Inf
       :else (case (:turn st)
               :me (let [valid-spells (->> spells
                                           (filter #(and (<= (:cost %) (get-in st [:me :mana]))
@@ -98,7 +96,7 @@
                                                                        (:name %)
                                                                        (:effects st))))))]
                     (if (empty? valid-spells)
-                      inf
+                      ##Inf
                       (->> valid-spells
                            (map (fn [{:keys [action cost]}]
                                   (solve (-> st (update-in [:me :mana] - cost) action swap-turn)
@@ -118,7 +116,7 @@
   (let [init {:me {:hp 50 :arm 0 :mana 500}
               :boss (parse-input input)
               :effects [{:name "Drip"
-                         :turns inf
+                         :turns ##Inf
                          :action #(case (:turn %)
                                     :me (update-in % [:me :hp] dec)
                                     :boss %)}]
