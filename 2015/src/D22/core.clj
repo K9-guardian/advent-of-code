@@ -75,42 +75,50 @@
                  (map #(update % :turns dec))
                  (remove #(zero? (:turns %)))))))
 
-(defn apply-effects [st]
-  (let [f (->> st
-               :effects
-               (map :action)
-               (apply comp))]
-    ((comp f dec-effect-turns) st))) ; Decrement effect timers first
+(defn swap-turn [st]
+  (update st
+          :turn
+          {:my-start :me
+           :me :boss-start
+           :boss-start :boss
+           :boss :my-start}))
 
-(defn swap-turn [st] (update st :turn {:me :boss :boss :me}))
+(def inf ##Inf)
 
 ;; TODO: Use Dijkstra's. Nodes are state, edges are mana cost.
 (defn solve [st total-cost]
-  (let [st (apply-effects st)]
-    (cond
-      (<= (get-in st [:boss :hp] st) 0) total-cost
-      (<= (get-in st [:me :hp] st) 0) ##Inf
-      :else (case (:turn st)
-              :me (let [valid-spells (->> spells
-                                          (filter #(and (<= (:cost %) (get-in st [:me :mana]))
-                                                        (not (find-key :name
-                                                                       (:name %)
-                                                                       (:effects st))))))]
-                    (if (empty? valid-spells)
-                      ##Inf
-                      (->> valid-spells
-                           (map (fn [{:keys [action cost]}]
-                                  (solve (-> st (update-in [:me :mana] - cost) action swap-turn)
-                                         (+ total-cost cost))))
-                           (apply min))))
-              :boss (recur (-> st (damage :me (get-in st [:boss :dmg])) swap-turn)
-                           total-cost)))))
+  (cond
+    (<= (get-in st [:boss :hp] st) 0) total-cost
+    (<= (get-in st [:me :hp] st) 0) inf
+    :else (case (:turn st)
+            (:my-start :boss-start) (let [f (->> st
+                                                 :effects
+                                                 (map :action)
+                                                 (apply comp))]
+                                      (-> st
+                                          dec-effect-turns
+                                          f
+                                          swap-turn
+                                          (recur total-cost)))
+            :boss (recur (-> st (damage :me (get-in st [:boss :dmg])) swap-turn) total-cost)
+            :me (let [valid-spells (->> spells
+                                        (filter #(and (<= (:cost %) (get-in st [:me :mana]))
+                                                      (not (find-key :name
+                                                                     (:name %)
+                                                                     (:effects st))))))]
+                  (if (empty? valid-spells)
+                    inf
+                    (->> valid-spells
+                         (map (fn [{:keys [action cost]}]
+                                (solve (-> st (update-in [:me :mana] - cost) action swap-turn)
+                                       (+ total-cost cost))))
+                         (apply min)))))))
 
 (defn p1 [input]
   (let [init {:me {:hp 50 :arm 0 :mana 500}
               :boss (parse-input input)
               :effects []
-              :turn :me}]
+              :turn :my-start}]
     (solve init 0)))
 
 (defn p2 [input]
@@ -118,8 +126,6 @@
               :boss (parse-input input)
               :effects [{:name "Drip"
                          :turns ##Inf
-                         :action #(case (:turn %)
-                                    :me (update-in % [:me :hp] dec)
-                                    :boss %)}]
-              :turn :me}]
+                         :action #(case (:turn %) :my-start (update-in % [:me :hp] dec) %)}]
+              :turn :my-start}]
     (solve init 0)))
