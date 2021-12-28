@@ -84,6 +84,7 @@
 
 (defn swap-turn [st] (update st :turn {:me :boss :boss :me}))
 
+;; TODO: Use Dijkstra's. Nodes are state, edges are mana cost.
 (defn solve [st total-cost]
   (let [st (apply-effects st)]
     (cond
