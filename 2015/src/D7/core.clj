@@ -10,27 +10,23 @@
 
 ;; instruction ::= lhs "->" rhs
 ;; rhs ::= symb
-;; lhs ::= fn atom | atom fn atom
+;; lhs ::= "NOT" atom | atom ("AND" | "OR" | "LSHIFT" | "RSHIFT") atom
 
-;; fn ::= "NOT" | "AND" | "OR" | "LSHIFT" | "RSHIFT"
 ;; atom ::= symb | num
 ;; symb ::= [a-z]+
 ;; num ::= \d+
 
-(defn parse-instruction [s]
-  (let [[lhs rhs] (str/split s #" -> ")
+(defn parse-line [l]
+  (let [[lhs rhs] (str/split l #" -> ")
         rhs (parse-atom rhs)
-        lhs (mapv parse-atom (str/split lhs #" "))]
-    [rhs lhs]))
+        lhs (map parse-atom (str/split lhs #" "))]
+    [rhs
+     (cond
+       (= :NOT (first lhs)) (as-> lhs [f x] {:f f :x x})
+       (#{:AND :OR :LSHIFT :RSHIFT} (second lhs)) (as-> lhs [x f y] {:f f :x x :y y})
+       :else (as-> lhs [x] {:x x}))]))
 
 (defn clamp [f] (comp (partial bit-and 0xFFFF) f))
-
-(def act->fn
-  {:NOT (clamp bit-not)
-   :AND (clamp bit-and)
-   :OR (clamp bit-or)
-   :LSHIFT (clamp bit-shift-left)
-   :RSHIFT (clamp bit-shift-right)})
 
 (defn evaluate [k m]
   ;; I swear to learn fixed point memoization *eventually*
@@ -39,24 +35,27 @@
      (fn [k]
        (if (number? k)
          k
-         (let [v (m k)]
-           (case (count v)
-             1 (as-> v [x] (eval-rec x))
-             2 (as-> v [f x] ((act->fn f) (eval-rec x)))
-             3 (as-> v [x f y] ((act->fn f) (eval-rec x) (eval-rec y)))))))))
+         (let [{:keys [f x y]} (m k)]
+           (case f
+             :NOT ((clamp bit-not) (eval-rec x))
+             :AND ((clamp bit-and) (eval-rec x) (eval-rec y))
+             :OR ((clamp bit-or) (eval-rec x) (eval-rec y))
+             :LSHIFT ((clamp bit-shift-left) (eval-rec x) (eval-rec y))
+             :RSHIFT ((clamp bit-shift-right) (eval-rec x) (eval-rec y))
+             (eval-rec x)))))))
   (eval-rec k))
 
 (defn p1 [input]
   (->> input
        str/split-lines
-       (map parse-instruction)
+       (map parse-line)
        (into {})
        (evaluate :a)))
 
 (defn p2 [input]
   (let [m (->> input
                str/split-lines
-               (map parse-instruction)
+               (map parse-line)
                (into {}))
-        m (assoc m :b [(evaluate :a m)])]
+        m (assoc m :b {:x (evaluate :a m)})]
     (evaluate :a m)))
