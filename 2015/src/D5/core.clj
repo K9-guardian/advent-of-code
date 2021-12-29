@@ -17,11 +17,10 @@
   (some #{[\a \b] [\c \d] [\p \q] [\x \y]}
         (partition 2 1 s)))
 
-(defn nice-p1? [s]
-  ((every-pred contains-3-vowels?
-               contains-consecutive-duplicate?
-               (complement contains-banned-pair?))
-   s))
+(def nice-p1?
+  (every-pred contains-3-vowels?
+              contains-consecutive-duplicate?
+              (complement contains-banned-pair?)))
 
 (defn contains-2-pairs-without-overlap? [s]
   (loop [b false
@@ -35,10 +34,9 @@
   (some #(= (first %) (last %))
         (partition 3 1 s)))
 
-(defn nice-p2? [s]
-  ((every-pred contains-2-pairs-without-overlap?
-               contains-length-3-palindrome?)
-   s))
+(def nice-p2?
+  (every-pred contains-2-pairs-without-overlap?
+              contains-length-3-palindrome?))
 
 (defn p1 [input]
   (->> input
