@@ -5,10 +5,11 @@
 (defn increasing-3-straight? [s]
   (->> s
        (partition 3 1)
-       (some (fn [[x y z]]
-               (= (+ 2 (int x))
-                  (+ 1 (int y))
-                  (int z))))))
+       (some #(->> %
+                   (map int)
+                   (partition 2 1)
+                   (map (partial apply -))
+                   (every? #{-1})))))
 
 (defn contains-banned-letters? [s]
   (some #{\i \o \l} s))
@@ -26,6 +27,7 @@
               (complement contains-banned-letters?)
               contains-2-different-non-overlap-pairs?))
 
+;; TODO: Make this function more idiomatic
 (defn inc-string [s]
   (letfn [(inc-char [c] (-> c int inc char))]
     (loop [cs (reverse s)
