@@ -20,7 +20,7 @@
                                       (fnil conj [])
                                       value)))
   (count [_] num-elements)
-  (empty [_] (PersistentPriorityQueue. 0 (sorted-map)))
+  (empty [_] (PersistentPriorityQueue. 0 (empty buckets)))
   (equiv [this other] (= (.seq this) (seq other)))
 
   IPersistentStack
