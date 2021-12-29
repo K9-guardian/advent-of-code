@@ -5,16 +5,15 @@
 
 (defn parse-line [l]
   (let [[name & values] (rest
-                             (re-find
-                              #"(.*) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds."
-                              l))
+                         (re-find
+                          #"(.*) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds."
+                          l))
         values (->> values
                     (map #(Integer/parseInt %))
                     (zipmap [:speed :run-time :rest-time]))]
     (assoc values :name name)))
 
 (defn stats->distance [time {:keys [speed run-time rest-time]}]
-  (prn time speed run-time rest-time)
   (let [full-time (+ run-time rest-time)
         full-bursts (quot time full-time)
         part-burst (min run-time (rem time full-time))]
