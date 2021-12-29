@@ -27,10 +27,9 @@
                str/split-lines
                (map (comp parsed->map-entries parse-line))
                (reduce (fn [m [[k1 v1] [k2 v2]]]
-                         (->
-                          m
-                          (update k1 (fnil conj {}) v1)
-                          (update k2 (fnil conj {}) v2)))
+                         (-> m
+                             (update k1 (fnil conj {}) v1)
+                             (update k2 (fnil conj {}) v2)))
                        {}))
         paths (comb/permutations (keys m))]
     (->> paths
@@ -42,10 +41,9 @@
                str/split-lines
                (map (comp parsed->map-entries parse-line))
                (reduce (fn [m [[k1 v1] [k2 v2]]]
-                         (->
-                          m
-                          (update k1 (fnil conj {}) v1)
-                          (update k2 (fnil conj {}) v2)))
+                         (-> m
+                             (update k1 (fnil conj {}) v1)
+                             (update k2 (fnil conj {}) v2)))
                        {}))
         paths (comb/permutations (keys m))]
     (->> paths
