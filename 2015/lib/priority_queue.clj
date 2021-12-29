@@ -40,14 +40,10 @@
   (let [partitions (partition 2 keyvals)]
     (if (odd? (count partitions))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (->> partitions
-           (map (partial apply vector))
-           (into (PersistentPriorityQueue. 0 (sorted-map)))))))
+      (into (PersistentPriorityQueue. 0 (sorted-map)) partitions))))
 
 (defn priority-queue-by [comparator & keyvals]
   (let [partitions (partition 2 keyvals)]
     (if (odd? (count partitions))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (->> partitions
-           (map (partial apply vector))
-           (into (PersistentPriorityQueue. 0 (sorted-map-by comparator)))))))
+      (into (PersistentPriorityQueue. 0 (sorted-map-by comparator)) partitions))))
