@@ -41,15 +41,13 @@
     (if (odd? (count partitions))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
       (->> partitions
-           (reduce (fn [pq [priority element]]
-                     (conj pq (clojure.lang.MapEntry. priority element)))
-                   (PersistentPriorityQueue. 0 (sorted-map)))))))
+           (map (partial apply vector))
+           (into (PersistentPriorityQueue. 0 (sorted-map)))))))
 
 (defn priority-queue-by [comparator & keyvals]
   (let [partitions (partition 2 keyvals)]
     (if (odd? (count partitions))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
       (->> partitions
-           (reduce (fn [pq [priority element]]
-                     (conj pq (clojure.lang.MapEntry. priority element)))
-                   (PersistentPriorityQueue. 0 (sorted-map-by comparator)))))))
+           (map (partial apply vector))
+           (into (PersistentPriorityQueue. 0 (sorted-map-by comparator)))))))
