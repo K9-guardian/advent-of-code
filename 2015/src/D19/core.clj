@@ -15,11 +15,11 @@
 
 ;; Like clojure.string/replace, but uses a collection of replacements
 (defn string-replace* [s value rs]
-  (loop [acc "" s s [r & more] rs]
+  (loop [acc "" s s rs rs]
     (if-let [i (str/index-of s value)]
-      (recur (str acc (subs s 0 i) r)
+      (recur (str acc (subs s 0 i) (first rs))
              (subs s (+ i (count value)))
-             more)
+             (rest rs))
       (str acc s))))
 
 (defn replacements [m [k vs]]
