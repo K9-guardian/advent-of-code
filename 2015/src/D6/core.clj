@@ -19,16 +19,15 @@
 
 (defn parse-instruction [m]
   (fn [s]
-    (let [parsed (->> s
-                      (re-find #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)")
-                      rest)
-          [act c1 c2] parsed]
-      [(m act)
-       (mapv #(Integer/parseInt %) (str/split c1 #","))
-       (mapv #(Integer/parseInt %) (str/split c2 #","))])))
+    (let [[act c1 c2] (->> s
+                           (re-find #"(turn on|turn off|toggle) (\d+,\d+) through (\d+,\d+)")
+                           rest)]
+      {:action (m act)
+       :from-range (mapv #(Integer/parseInt %) (str/split c1 #","))
+       :to-range (mapv #(Integer/parseInt %) (str/split c2 #","))})))
 
-(defn update!-inclusive-range [^longs arr idx1 idx2 f]
-  (doseq [i (range idx1 (inc idx2))]
+(defn update!-inclusive-range [^longs arr i1 i2 f]
+  (doseq [i (range i1 (inc i2))]
     (aset arr i ^long (f (aget arr i)))))
 
 (defn update!-grid [^longs arr x1 x2 y1 y2 f]
@@ -43,15 +42,15 @@
         parsed (->> input
                     str/split-lines
                     (map (parse-instruction action->function-p1)))]
-    (doseq [[act [x1 y1] [x2 y2]] parsed]
+    (doseq [{act :action [x1 y1] :from-range [x2 y2] :to-range} parsed]
       (update!-grid init x1 x2 y1 y2 act))
-    (areduce init idx ret 0 (+ ret (aget init idx)))))
+    (areduce init i ret 0 (+ ret (aget init i)))))
 
 (defn p2 [input]
   (let [init (long-array 1000000 0)
         parsed (->> input
                     str/split-lines
                     (map (parse-instruction action->function-p2)))]
-    (doseq [[act [x1 y1] [x2 y2]] parsed]
+    (doseq [{act :action [x1 y1] :from-range [x2 y2] :to-range} parsed]
       (update!-grid init x1 x2 y1 y2 act))
-    (areduce init idx ret 0 (+ ret (aget init idx)))))
+    (areduce init i ret 0 (+ ret (aget init i)))))
