@@ -63,7 +63,7 @@
         frame (nth (iterate next-frame-p1 lights) 100)]
     (->> frame
          flatten
-         (filter (partial = 1))
+         (filter #{1})
          count)))
 
 (defn p2 [input]
@@ -78,5 +78,5 @@
         frame (nth (iterate next-frame-p2 lights) 100)]
     (->> frame
          flatten
-         (filter (partial = 1))
+         (filter #{1})
          count)))
