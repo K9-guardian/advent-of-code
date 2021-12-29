@@ -2,27 +2,29 @@
 
 (def input (slurp "input/d3.txt"))
 
+(defn update-loc [loc mov]
+  (-> loc
+      (update 0 (case mov \> inc \< dec identity))
+      (update 1 (case mov \^ inc \v dec identity))))
+
 (defn p1 [input]
   (->> input
-       (reduce (fn [[[x y] st] v]
-                 (let [x* ((case v \> inc \< dec identity) x)
-                       y* ((case v \^ inc \v dec identity) y)]
-                   [[x* y*] (conj st [x* y*])]))
-               [[0 0] #{[0 0]}])
-       second
+       (reduce (fn [{:keys [loc visited]} mov]
+                 (let [new-loc (update-loc loc mov)]
+                   {:loc new-loc :visited (conj visited new-loc)}))
+               {:loc [0 0] :visited #{[0 0]}})
+       :visited
        count))
 
 (defn p2 [input]
   (->> input
        (partition 2)
-       (reduce (fn [[[x1 y1] [x2 y2] st] [v1 v2]]
-                 (let [x1* ((case v1 \> inc \< dec identity) x1)
-                       y1* ((case v1 \^ inc \v dec identity) y1)
-                       x2* ((case v2 \> inc \< dec identity) x2)
-                       y2* ((case v2 \^ inc \v dec identity) y2)]
-                   [[x1* y1*]
-                    [x2* y2*]
-                    (conj st [x1* y1*] [x2* y2*])]))
-               [[0 0] [0 0] #{[0 0]}])
-       peek
+       (reduce (fn [{:keys [santa-loc robo-loc visited]} [mov1 mov2]]
+                 (let [new-santa-loc (update-loc santa-loc mov1)
+                       new-robo-loc (update-loc robo-loc mov2)]
+                   {:santa-loc new-santa-loc
+                    :robo-loc new-robo-loc
+                    :visited (conj visited new-santa-loc new-robo-loc)}))
+               {:santa-loc [0 0] :robo-loc [0 0] :visited #{[0 0]}})
+       :visited
        count))
