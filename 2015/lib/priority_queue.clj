@@ -24,9 +24,7 @@
   (equiv [this other] (= (.seq this) (seq other)))
 
   IPersistentStack
-  (peek [_]
-    (when (pos? num-elements)
-      (clojure.lang.MapEntry. (-> buckets first key) (-> buckets first val peek))))
+  (peek [this] (first (.seq this)))
   (pop [_]
     (if (empty? buckets)
       (throw (IllegalStateException. "Can't pop empty priority queue"))
