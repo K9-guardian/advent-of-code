@@ -2,4 +2,7 @@
 ;; Guaranteed O(1) lookup
 ;; Amortized O(log n) insertion and deletion
 
-(ns lib.priority-queue)
+(ns priority-queue)
+
+(defn hello-world []
+  (println "Hello, World!"))

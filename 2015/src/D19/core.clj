@@ -1,6 +1,7 @@
 (ns D19.core
   (:require [clojure.string :as str]
-            [clojure.math.combinatorics :as comb]))
+            [clojure.math.combinatorics :as comb])
+  (:use [priority-queue]))
 
 (def input (slurp "input/d19.txt"))
 
