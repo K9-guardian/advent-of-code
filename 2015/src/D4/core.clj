@@ -29,4 +29,4 @@
                (pmap
                 (comp budget-md5-6-zeros-prefix?
                       (partial str input))))]
-    (-> l (.indexOf true) inc)))
+    (inc (.indexOf l true))))

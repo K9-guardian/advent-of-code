@@ -11,4 +11,4 @@
   (let [s (->> input
                (map {\( 1 \) -1})
                (reductions +))]
-    (-> s (.indexOf -1) inc)))
+    (inc (.indexOf s -1))))
