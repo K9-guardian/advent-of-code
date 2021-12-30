@@ -9,16 +9,17 @@
 (deftype PersistentPriorityQueue [num-elements buckets]
   Seqable
   (seq [_] (->> buckets
-                (map (fn [[priority values]] (map #(clojure.lang.MapEntry. priority %) values)))
-                (apply concat)))
+                (mapcat (fn [[priority values]] (map #(clojure.lang.MapEntry. priority %) values)))
+                seq))
 
   IPersistentCollection
   (cons [_ [priority value]]
     (PersistentPriorityQueue. (inc num-elements)
                               (update buckets
                                       priority
-                                      (fnil conj [])
+                                      (fnil conj ())
                                       value)))
+
   (count [_] num-elements)
   (empty [_] (PersistentPriorityQueue. 0 (empty buckets)))
   (equiv [this other] (= (.seq this) (seq other)))
