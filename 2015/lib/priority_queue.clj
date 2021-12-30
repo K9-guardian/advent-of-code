@@ -1,5 +1,5 @@
 ;; Persistent priority queue implementation using a bucketed sorted map. Min heap by default.
-;; O(1) lookup. O(log n) insertion and deletion average case, O(n) worst case (I think).
+;; O(1) lookup. O(log n) insertion and deletion.
 
 (ns priority-queue
   (:import clojure.lang.IPersistentCollection
@@ -38,12 +38,12 @@
 
 (defn priority-queue [& keyvals]
   (let [partitions (partition 2 keyvals)]
-    (if (odd? (count partitions))
+    (if (odd? (count keyvals))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
       (into (PersistentPriorityQueue. 0 (sorted-map)) partitions))))
 
 (defn priority-queue-by [comparator & keyvals]
   (let [partitions (partition 2 keyvals)]
-    (if (odd? (count partitions))
+    (if (odd? (count keyvals))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
       (into (PersistentPriorityQueue. 0 (sorted-map-by comparator)) partitions))))
