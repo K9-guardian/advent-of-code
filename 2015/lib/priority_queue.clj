@@ -36,18 +36,22 @@
 ;;    (Swap with its smaller child in a min-heap and its larger child in a max-heap.)
 (defn- bubble-down [heap comparator]
   (loop [heap heap idx 0]
-    (let [left-idx (left idx) right-idx (right idx) largest (atom idx)]
-      (and (< left-idx (count heap))
-           (< (comparator (heap left-idx) (heap @largest)) 0)
-           (reset! largest left-idx))
-      (and (< right-idx (count heap))
-           (< (comparator (heap right-idx) (heap @largest)) 0)
-           (reset! largest right-idx))
-      (if (= @largest idx)
+    (let [left-idx (left idx)
+          right-idx (right idx)
+          largest idx
+          largest (if (and (< left-idx (count heap))
+                           (< (comparator (heap left-idx) (heap largest)) 0))
+                    left-idx
+                    largest)
+          largest (if (and (< right-idx (count heap))
+                           (< (comparator (heap right-idx) (heap largest)) 0))
+                    right-idx
+                    largest)]
+      (if (= largest idx)
         heap
         (-> heap
-            (swap-indices idx @largest)
-            (recur @largest))))))
+            (swap-indices idx largest)
+            (recur largest))))))
 
 (deftype PersistentPriorityQueue [heap comparator]
   Seqable
