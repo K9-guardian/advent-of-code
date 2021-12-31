@@ -16,8 +16,8 @@
         (assoc idx1 e2)
         (assoc idx2 e1))))
 
-;; Changes comparator to use a pair, but only look at the first element
-(defn- wrap-comparator [comparator]
+;; Compare pairs on the first value with comparator
+(defn- first-comparator [comparator]
   (fn [[p1 _] [p2 _]] (comparator p1 p2)))
 
 ;; 1. Compare the added element with its parent; if they are in the correct order, stop.
@@ -77,10 +77,10 @@
   (let [partitions (partition 2 keyvals)]
     (if (odd? (count keyvals))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (into (PersistentPriorityQueue. [] (wrap-comparator compare)) partitions))))
+      (into (PersistentPriorityQueue. [] (first-comparator compare)) partitions))))
 
 (defn priority-queue-by [comparator & keyvals]
   (let [partitions (partition 2 keyvals)]
     (if (odd? (count keyvals))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (into (PersistentPriorityQueue. [] (wrap-comparator comparator)) partitions))))
+      (into (PersistentPriorityQueue. [] (first-comparator comparator)) partitions))))
