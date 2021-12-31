@@ -25,7 +25,7 @@
   (equiv [this other] (= (.seq this) (seq other)))
 
   IPersistentStack
-  (peek [_] (first (.seq this)))
+  (peek [this] (first (.seq this)))
   (pop [_]
     (if (empty? buckets)
       (throw (IllegalStateException. "Can't pop empty priority queue"))
