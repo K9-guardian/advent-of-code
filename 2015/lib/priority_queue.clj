@@ -35,23 +35,20 @@
 ;; 2. If not, swap the element with one of its children and return to the previous step.
 ;;    (Swap with its smaller child in a min-heap and its larger child in a max-heap.)
 (defn- bubble-down [heap comparator]
-  (loop [heap heap idx 0]
-    (let [left-idx (left idx)
-          right-idx (right idx)
-          largest idx
-          largest (if (and (< left-idx (count heap))
-                           (< (comparator (heap left-idx) (heap largest)) 0))
-                    left-idx
-                    largest)
-          largest (if (and (< right-idx (count heap))
-                           (< (comparator (heap right-idx) (heap largest)) 0))
-                    right-idx
-                    largest)]
-      (if (= largest idx)
-        heap
-        (-> heap
-            (swap-indices idx largest)
-            (recur largest))))))
+  (letfn [(min* [idx1 idx2] ; Accounts for if second idx is out of bounds
+            (if (and (< idx2 (count heap))
+                     (< (comparator (heap idx2) (heap idx1)) 0))
+              idx2
+              idx1))]
+    (loop [heap heap idx 0]
+      (let [left-idx (left idx)
+            right-idx (right idx)
+            largest (-> idx (min* left-idx) (min* right-idx))]
+        (if (= largest idx)
+          heap
+          (-> heap
+              (swap-indices idx largest)
+              (recur largest)))))))
 
 (deftype PersistentPriorityQueue [heap comparator]
   Seqable
