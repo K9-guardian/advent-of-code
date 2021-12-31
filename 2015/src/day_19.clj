@@ -1,7 +1,6 @@
 (ns day-19
   (:require [clojure.string :as str]
-            [clojure.math.combinatorics :as comb])
-  (:use [priority-queue]))
+            [clojure.math.combinatorics :as comb]))
 
 (def input (slurp "input/d19.txt"))
 
