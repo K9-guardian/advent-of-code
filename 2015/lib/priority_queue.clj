@@ -16,16 +16,17 @@
         (assoc idx1 e2)
         (assoc idx2 e1))))
 
-;; Compare pairs on the first value with comparator
-(defn- first-comparator [comparator]
-  (fn [[p1 _] [p2 _]] (comparator p1 p2)))
+;; Makes a comparator that only looks at the second element of a pair.
+(defn second-comparator [comparator]
+  (fn [[_ p1] [_ p2]]
+    (comparator p1 p2)))
 
 ;; 1. Compare the added element with its parent; if they are in the correct order, stop.
 ;; 2. If not, swap the element with its parent and return to the previous step.
 (defn- bubble-up [heap comparator]
   (loop [heap heap idx (dec (count heap))]
     (let [par-idx (parent idx)]
-      (if (<= (comparator (heap par-idx) (heap idx)) 0)
+      (if (<= ((second-comparator comparator) (heap par-idx) (heap idx)) 0)
         heap
         (-> heap
             (swap-indices idx par-idx)
@@ -37,7 +38,7 @@
 (defn- bubble-down [heap comparator]
   (letfn [(min* [idx1 idx2] ; Accounts for if second idx is out of bounds
             (if (and (< idx2 (count heap))
-                     (< (comparator (heap idx2) (heap idx1)) 0))
+                     (< ((second-comparator comparator) (heap idx2) (heap idx1)) 0))
               idx2
               idx1))]
     (loop [heap heap idx 0]
@@ -55,9 +56,9 @@
   (seq [_] (seq heap))
 
   IPersistentCollection
-  (cons [_ [priority element]]
+  (cons [_ [element priority]]
     (-> heap
-        (conj [priority element])
+        (conj [element priority])
         (bubble-up comparator)
         (PersistentPriorityQueue. comparator)))
   (count [_] (count heap))
@@ -73,14 +74,11 @@
         (bubble-down comparator)
         (PersistentPriorityQueue. comparator))))
 
+;; Keys are elements, vals are priority.
 (defn priority-queue [& keyvals]
-  (let [partitions (partition 2 keyvals)]
-    (if (odd? (count keyvals))
-      (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (into (PersistentPriorityQueue. [] (first-comparator compare)) partitions))))
+  {:pre (even? (count keyvals))}
+  (into (PersistentPriorityQueue. [] compare) (partition 2 keyvals)))
 
 (defn priority-queue-by [comparator & keyvals]
-  (let [partitions (partition 2 keyvals)]
-    (if (odd? (count keyvals))
-      (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (into (PersistentPriorityQueue. [] (first-comparator comparator)) partitions))))
+  {:pre (even? (count keyvals))}
+  (into (PersistentPriorityQueue. [] comparator) (partition 2 keyvals)))
