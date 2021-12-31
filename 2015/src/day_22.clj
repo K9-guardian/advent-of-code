@@ -64,7 +64,7 @@
 (defn dijkstra [pq dist]
   (if (empty? pq)
     dist
-    (let [[[p st] pq] [(peek pq) (pop pq)]]
+    (let [[[st p] pq] [(peek pq) (pop pq)]]
       (if (or (not= p (dist st))
               (<= (-> st :boss :hp) 0)
               (<= (-> st :me :hp) 0))
@@ -93,7 +93,7 @@
                                           #(map (juxt :name :turns) (:effects %)))
                                     [st st*]))
                         (if (< alt (get dist st* inf))
-                          [(conj pq [alt st*]) (conj dist [st* alt])]
+                          [(conj pq [st* alt]) (conj dist [st* alt])]
                           [pq dist])))
                     [pq dist]))
               (as-> [pq dist] (recur pq dist))))))))
@@ -103,7 +103,7 @@
               :boss (parse-input input)
               :effects []
               :turn :me}]
-    (->> (dijkstra (priority-queue 0 init) {init 0})
+    (->> (dijkstra (priority-queue init 0) {init 0})
          (filter (comp #(<= (-> % :boss :hp) 0) key))
          (apply min-key val))))
 
@@ -114,6 +114,6 @@
                          :turns inf
                          :action #({:my-start (update-in % [:me :hp] dec)} (:turn %) %)}]
               :turn :me}]
-    (->> (dijkstra (priority-queue 0 init) {init 0})
+    (->> (dijkstra (priority-queue init 0) {init 0})
          (filter (comp #(<= (-> % :boss :hp) 0) key))
          (apply min-key val))))
