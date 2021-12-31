@@ -1,50 +1,85 @@
-;; Persistent priority queue implementation using a bucketed sorted map. Min heap by default.
-;; O(log n) lookup, insertion, and deletion.
+;; Persistent priority queue implementation using a binary heap. Min heap by default.
+;; O(1) lookup, O(log n) insertion and deletion.
 
 (ns priority-queue
   (:import clojure.lang.IPersistentCollection
            clojure.lang.IPersistentStack
            clojure.lang.Seqable))
 
-(deftype PersistentPriorityQueue [num-elements buckets]
+(defn- left [idx] (+ 1 (* 2 idx)))
+(defn- right [idx] (+ 2 (* 2 idx)))
+(defn- parent [idx] (quot (dec idx) 2))
+
+(defn- swap-indices [arr idx1 idx2]
+  (let [e1 (arr idx1) e2 (arr idx2)]
+    (-> arr
+        (assoc idx1 e2)
+        (assoc idx2 e1))))
+
+;; Changes comparator to use a pair, but only look at the first element
+(defn- wrap-comparator [comparator]
+  (fn [[p1 _] [p2 _]] (comparator p1 p2)))
+
+;; 1. Compare the added element with its parent; if they are in the correct order, stop.
+;; 2. If not, swap the element with its parent and return to the previous step.
+(defn- bubble-up [heap comparator]
+  (loop [heap heap idx (dec (count heap))]
+    (let [par-idx (parent idx)]
+      (if (<= (comparator (heap par-idx) (heap idx)) 0)
+        heap
+        (-> heap
+            (swap-indices idx par-idx)
+            (recur par-idx))))))
+
+;; 1. Compare the new root with its children; if they are in the correct order, stop.
+;; 2. If not, swap the element with one of its children and return to the previous step.
+;;    (Swap with its smaller child in a min-heap and its larger child in a max-heap.)
+(defn- bubble-down [heap comparator]
+  (loop [heap heap idx 0]
+    (let [left-idx (left idx) right-idx (right idx) largest (atom idx)]
+      (and (< left-idx (count heap))
+           (< (comparator (heap left-idx) (heap @largest)) 0)
+           (reset! largest left-idx))
+      (and (< right-idx (count heap))
+           (< (comparator (heap right-idx) (heap @largest)) 0)
+           (reset! largest right-idx))
+      (if (= @largest idx)
+        heap
+        (-> heap
+            (swap-indices idx @largest)
+            (recur @largest))))))
+
+(deftype PersistentPriorityQueue [heap comparator]
   Seqable
-  (seq [_] (->> buckets
-                (mapcat (fn [[priority values]] (map #(clojure.lang.MapEntry. priority %) values)))
-                seq))
+  (seq [_] (seq heap))
 
   IPersistentCollection
-  (cons [_ [priority value]]
-    (PersistentPriorityQueue. (inc num-elements)
-                              (update buckets
-                                      priority
-                                      (fnil conj ())
-                                      value)))
-
-  (count [_] num-elements)
-  (empty [_] (PersistentPriorityQueue. 0 (empty buckets)))
+  (cons [_ [priority element]]
+    (-> heap
+        (conj [priority element])
+        (bubble-up comparator)
+        (PersistentPriorityQueue. comparator)))
+  (count [_] (count heap))
+  (empty [_] (PersistentPriorityQueue. comparator (empty heap)))
   (equiv [this other] (= (.seq this) (seq other)))
 
   IPersistentStack
-  (peek [this] (first (.seq this)))
+  (peek [_] (first heap))
   (pop [_]
-    (if (empty? buckets)
-      (throw (IllegalStateException. "Can't pop empty priority queue"))
-      (let [top (-> buckets first key)
-            buckets (update buckets top pop)]
-        (PersistentPriorityQueue.
-         (dec num-elements)
-         (if (empty? (buckets top))
-           (dissoc buckets top)
-           buckets))))))
+    (-> heap
+        (assoc 0 (peek heap))
+        pop
+        (bubble-down comparator)
+        (PersistentPriorityQueue. comparator))))
 
 (defn priority-queue [& keyvals]
   (let [partitions (partition 2 keyvals)]
     (if (odd? (count keyvals))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (into (PersistentPriorityQueue. 0 (sorted-map)) partitions))))
+      (into (PersistentPriorityQueue. [] (wrap-comparator compare)) partitions))))
 
 (defn priority-queue-by [comparator & keyvals]
   (let [partitions (partition 2 keyvals)]
     (if (odd? (count keyvals))
       (throw (IllegalArgumentException. (str "No value supplied for priority: " (last keyvals))))
-      (into (PersistentPriorityQueue. 0 (sorted-map-by comparator)) partitions))))
+      (into (PersistentPriorityQueue. [] (wrap-comparator comparator)) partitions))))
