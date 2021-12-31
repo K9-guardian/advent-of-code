@@ -112,7 +112,7 @@
               :boss (parse-input input)
               :effects [{:name "Drip"
                          :turns inf
-                         :action #(case (:turn %) :my-start (update-in % [:me :hp] dec) %)}]
+                         :action #({:my-start (update-in % [:me :hp] dec)} (:turn %) %)}]
               :turn :me}]
     (->> (dijkstra (priority-queue 0 init) {init 0})
          (filter (comp #(<= (-> % :boss :hp) 0) key))

@@ -4,8 +4,8 @@
 
 (defn update-loc [loc mov]
   (-> loc
-      (update 0 (case mov \> inc \< dec identity))
-      (update 1 (case mov \^ inc \v dec identity))))
+      (update 0 ({\> inc \< dec} mov identity))
+      (update 1 ({\^ inc \v dec} mov identity))))
 
 (defn p1 [input]
   (->> input

@@ -9,10 +9,7 @@
        count))
 
 (defn string->num-chars-for-encoding [s]
-  (reduce #(+ %1
-              (case %2
-                (\\ \") 2
-                1))
+  (reduce #(+ %1 (case %2 (\\ \") 2 1))
           2
           s))
 

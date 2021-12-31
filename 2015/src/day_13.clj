@@ -11,7 +11,7 @@
                              l))
         p1 (keyword p1)
         p2 (keyword p2)
-        signum (case signum "gain" + "lose" -)
+        signum ({"gain" + "lose" -} signum)
         amt (Integer/parseInt amt)]
     [p1 [p2 (signum amt)]]))
 
