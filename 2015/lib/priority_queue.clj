@@ -1,5 +1,5 @@
 ;; Persistent priority queue implementation using a bucketed sorted map. Min heap by default.
-;; O(1) lookup. O(log n) insertion and deletion.
+;; O(log n) lookup, insertion, and deletion.
 
 (ns priority-queue
   (:import clojure.lang.IPersistentCollection
@@ -25,7 +25,7 @@
   (equiv [this other] (= (.seq this) (seq other)))
 
   IPersistentStack
-  (peek [this] (first (.seq this)))
+  (peek [_] (first (.seq this)))
   (pop [_]
     (if (empty? buckets)
       (throw (IllegalStateException. "Can't pop empty priority queue"))
