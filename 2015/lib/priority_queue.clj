@@ -68,17 +68,19 @@
   IPersistentStack
   (peek [_] (first heap))
   (pop [_]
-    (-> heap
-        (assoc 0 (peek heap))
-        pop
-        (bubble-down comparator)
-        (PersistentPriorityQueue. comparator))))
+    (if-not (pos? (count heap))
+      (throw (IllegalStateException. "Can't pop empty priority map"))
+      (-> heap
+          (assoc 0 (peek heap))
+          pop
+          (bubble-down comparator)
+          (PersistentPriorityQueue. comparator)))))
 
 ;; Keys are elements, vals are priority.
 (defn priority-queue [& keyvals]
-  {:pre (even? (count keyvals))}
+  {:pre [(even? (count keyvals))]}
   (into (PersistentPriorityQueue. [] compare) (partition 2 keyvals)))
 
 (defn priority-queue-by [comparator & keyvals]
-  {:pre (even? (count keyvals))}
+  {:pre [(even? (count keyvals))]}
   (into (PersistentPriorityQueue. [] comparator) (partition 2 keyvals)))
