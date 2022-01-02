@@ -9,9 +9,7 @@
   (if (empty? l)
     [[]]
     (let [r (subsets (rest l))]
-      (concat r
-              (map (partial cons (first l))
-                   r)))))
+      (concat r (map (partial cons (first l)) r)))))
 
 (defn p1 [input]
   (->> input

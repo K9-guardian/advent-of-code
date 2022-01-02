@@ -86,13 +86,7 @@
               (->> (reduce
                     (fn [[pq dist] [cost f]]
                       (let [st* (-> st f swap-turn) alt (+ cost p)]
-                        #_(prn alt
-                               (map (juxt :turn
-                                          :me
-                                          :boss
-                                          #(map (juxt :name :turns) (:effects %)))
-                                    [st st*]))
-                        (if (< alt (get dist st* inf))
+                        (if (< alt (dist st* inf))
                           [(conj pq [st* alt]) (conj dist [st* alt])]
                           [pq dist])))
                     [pq dist]))

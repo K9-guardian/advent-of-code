@@ -10,7 +10,7 @@
 
 ;; instruction ::= lhs "->" rhs
 ;; rhs ::= symb
-;; lhs ::= "NOT" atom | atom ("AND" | "OR" | "LSHIFT" | "RSHIFT") atom
+;; lhs ::= atom | "NOT" atom | atom ("AND" | "OR" | "LSHIFT" | "RSHIFT") atom
 
 ;; atom ::= symb | num
 ;; symb ::= [a-z]+

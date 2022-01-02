@@ -35,10 +35,8 @@
 (defn corner? [pair]
   (let [i (first pair)
         j (second pair)]
-    (and (or (= 0 i)
-             (= (dec board-size) i))
-         (or (= 0 j)
-             (= (dec board-size) j)))))
+    (and (or (zero? i) (= (dec board-size) i))
+         (or (zero? j) (= (dec board-size) j)))))
 
 (defn next-frame-p2 [lights]
   (->> (for [i (range board-size) j (range board-size)

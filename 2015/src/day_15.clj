@@ -5,12 +5,12 @@
 
 (defn parse-line [l]
   (let [[name & stats] (str/split l #"[:,] ")
-        properties (->> stats
-                        (map (comp
-                              (fn [[k v]] [(keyword k) (Integer/parseInt v)])
-                              #(str/split % #" ")))
-                        (into {}))]
-    (assoc properties :name name)))
+        stats (->> stats
+                   (map (comp
+                         (fn [[k v]] [(keyword k) (Integer/parseInt v)])
+                         #(str/split % #" ")))
+                   (into {}))]
+    (assoc stats :name name)))
 
 (defn ratio->score [ingredients ratio]
   (->> ingredients

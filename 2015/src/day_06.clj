@@ -15,7 +15,7 @@
 
 ;; instruction ::= action range "through" range
 ;; action ::= "turn on" | "turn off" | "toggle"
-;; range ::= \d+,\d+
+;; range ::= \d+","\d+
 
 (defn parse-instruction [m]
   (fn [s]
