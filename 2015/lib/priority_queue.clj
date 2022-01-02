@@ -16,31 +16,33 @@
         (assoc idx1 e2)
         (assoc idx2 e1))))
 
-;; Makes a comparator that only looks at the second element of a pair.
-(defn second-comparator [comparator]
+;; Makes a comparator that only looks at the priority of a pair.
+(defn priority-comparator [comparator]
   (fn [[_ p1] [_ p2]]
     (comparator p1 p2)))
 
 ;; 1. Compare the added element with its parent; if they are in the correct order, stop.
 ;; 2. If not, swap the element with its parent and return to the previous step.
 (defn- bubble-up [heap comparator]
-  (loop [heap heap idx (dec (count heap))]
-    (let [par-idx (parent idx)]
-      (if (<= ((second-comparator comparator) (heap par-idx) (heap idx)) 0)
-        heap
-        (-> heap
-            (swap-indices idx par-idx)
-            (recur par-idx))))))
+  (let [pcomp (priority-comparator comparator)]
+    (loop [heap heap idx (dec (count heap))]
+      (let [par-idx (parent idx)]
+        (if (<= (pcomp (heap par-idx) (heap idx)) 0)
+          heap
+          (-> heap
+              (swap-indices idx par-idx)
+              (recur par-idx)))))))
 
 ;; 1. Compare the new root with its children; if they are in the correct order, stop.
 ;; 2. If not, swap the element with one of its children and return to the previous step.
 ;;    (Swap with its smaller child in a min-heap and its larger child in a max-heap.)
 (defn- bubble-down [heap comparator]
-  (letfn [(min* [idx1 idx2] ; Accounts for if second idx is out of bounds
-            (if (and (< idx2 (count heap))
-                     (< ((second-comparator comparator) (heap idx2) (heap idx1)) 0))
-              idx2
-              idx1))]
+  (let [pcomp (priority-comparator comparator)
+        min* (fn [idx1 idx2] ; Accounts for if second idx is out of bounds
+               (if (and (< idx2 (count heap))
+                        (< (pcomp (heap idx2) (heap idx1)) 0))
+                 idx2
+                 idx1))]
     (loop [heap heap idx 0]
       (let [left-idx (left idx)
             right-idx (right idx)
@@ -69,7 +71,7 @@
   (peek [_] (first heap))
   (pop [_]
     (if-not (pos? (count heap))
-      (throw (IllegalStateException. "Can't pop empty priority map"))
+      (throw (IllegalStateException. "Can't pop empty priority queue"))
       (-> heap
           (assoc 0 (peek heap))
           pop
