@@ -16,33 +16,26 @@
         (assoc idx1 e2)
         (assoc idx2 e1))))
 
-;; Makes a comparator that only looks at the priority of a pair.
-(defn priority-comparator [comparator]
-  (fn [[_ p1] [_ p2]]
-    (comparator p1 p2)))
-
 ;; 1. Compare the added element with its parent; if they are in the correct order, stop.
 ;; 2. If not, swap the element with its parent and return to the previous step.
 (defn- bubble-up [heap comparator]
-  (let [pcomp (priority-comparator comparator)]
-    (loop [heap heap idx (dec (count heap))]
-      (let [par-idx (parent idx)]
-        (if (<= (pcomp (heap par-idx) (heap idx)) 0)
-          heap
-          (-> heap
-              (swap-indices idx par-idx)
-              (recur par-idx)))))))
+  (loop [heap heap idx (dec (count heap))]
+    (let [par-idx (parent idx)]
+      (if (<= (comparator (heap par-idx) (heap idx)) 0)
+        heap
+        (-> heap
+            (swap-indices idx par-idx)
+            (recur par-idx))))))
 
 ;; 1. Compare the new root with its children; if they are in the correct order, stop.
 ;; 2. If not, swap the element with one of its children and return to the previous step.
 ;;    (Swap with its smaller child in a min-heap and its larger child in a max-heap.)
 (defn- bubble-down [heap comparator]
-  (let [pcomp (priority-comparator comparator)
-        min* (fn [idx1 idx2] ; Accounts for if second idx is out of bounds
-               (if (and (< idx2 (count heap))
-                        (< (pcomp (heap idx2) (heap idx1)) 0))
-                 idx2
-                 idx1))]
+  (letfn [(min* [idx1 idx2] ; Accounts for if second idx is out of bounds
+            (if (and (< idx2 (count heap))
+                     (< (comparator (heap idx2) (heap idx1)) 0))
+              idx2
+              idx1))]
     (loop [heap heap idx 0]
       (let [left-idx (left idx)
             right-idx (right idx)
@@ -78,11 +71,16 @@
           (bubble-down comparator)
           (PersistentPriorityQueue. comparator)))))
 
+;; Makes a comparator that only looks at the priority of a pair.
+(defn- priority-comparator [comparator]
+  (fn [[_ p1] [_ p2]]
+    (comparator p1 p2)))
+
 ;; Keys are elements, vals are priority.
 (defn priority-queue [& keyvals]
   {:pre [(even? (count keyvals))]}
-  (into (PersistentPriorityQueue. [] compare) (partition 2 keyvals)))
+  (into (PersistentPriorityQueue. [] (priority-comparator compare)) (partition 2 keyvals)))
 
 (defn priority-queue-by [comparator & keyvals]
   {:pre [(even? (count keyvals))]}
-  (into (PersistentPriorityQueue. [] comparator) (partition 2 keyvals)))
+  (into (PersistentPriorityQueue. [] (priority-comparator comparator)) (partition 2 keyvals)))
