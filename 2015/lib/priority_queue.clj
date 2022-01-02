@@ -21,7 +21,7 @@
 (defn- bubble-up [heap comparator]
   (loop [heap heap idx (dec (count heap))]
     (let [par-idx (parent idx)]
-      (if (<= (comparator (heap par-idx) (heap idx)) 0)
+      (if (< (comparator (heap par-idx) (heap idx)) 0)
         heap
         (-> heap
             (swap-indices idx par-idx)
