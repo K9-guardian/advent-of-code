@@ -4,8 +4,6 @@
 
 (def input (slurp "input/d22.txt"))
 
-(def inf ##Inf)
-
 (def parse-key
   {"Hit Points" :hp
    "Damage" :dmg})
@@ -86,7 +84,7 @@
               (->> (reduce
                     (fn [[pq dist] [cost f]]
                       (let [st* (-> st f swap-turn) alt (+ cost p)]
-                        (if (< alt (dist st* inf))
+                        (if (< alt (dist st* ##Inf))
                           [(conj pq [st* alt]) (conj dist [st* alt])]
                           [pq dist])))
                     [pq dist]))
@@ -105,7 +103,7 @@
   (let [init {:me {:hp 50 :arm 0 :mana 500}
               :boss (parse-input input)
               :effects [{:name "Drip"
-                         :turns inf
+                         :turns ##Inf
                          :action #({:my-start (update-in % [:me :hp] dec)} (:turn %) %)}]
               :turn :me}]
     (->> (dijkstra (priority-queue init 0) {init 0})
