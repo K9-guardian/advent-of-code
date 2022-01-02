@@ -6,7 +6,7 @@
            clojure.lang.IPersistentStack
            clojure.lang.Seqable))
 
-(defn- left [idx] (inc (* 2 idx)))
+(defn- left [idx] (+ 1 (* 2 idx)))
 (defn- right [idx] (+ 2 (* 2 idx)))
 (defn- parent [idx] (quot (dec idx) 2))
 
