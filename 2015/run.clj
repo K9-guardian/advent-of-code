@@ -1,29 +1,29 @@
 (ns run
-  (:require [day-01]
-            [day-02]
-            [day-03]
-            [day-04]
-            [day-05]
-            [day-06]
-            [day-07]
-            [day-08]
-            [day-09]
-            [day-10]
-            [day-11]
-            [day-12]
-            [day-13]
-            [day-14]
-            [day-15]
-            [day-16]
-            [day-17]
-            [day-18]
-            [day-19]
-            [day-20]
-            [day-21]
-            [day-22]
-            [day-23]
-            [day-24]
-            [day-25]))
+  (:require day-01
+            day-02
+            day-03
+            day-04
+            day-05
+            day-06
+            day-07
+            day-08
+            day-09
+            day-10
+            day-11
+            day-12
+            day-13
+            day-14
+            day-15
+            day-16
+            day-17
+            day-18
+            day-19
+            day-20
+            day-21
+            day-22
+            day-23
+            day-24
+            day-25))
 
 (print "Day 01: ") (time [(day-01/p1 day-01/input) (day-01/p2 day-01/input)])
 (print "Day 02: ") (time [(day-02/p1 day-02/input) (day-02/p2 day-02/input)])
