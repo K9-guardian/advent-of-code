@@ -69,14 +69,10 @@
 (defn p1 [input]
   (let [[rs m] (parse-input input)]
     (-> rs
-        #_first
-        #_(->> (single-replacements m))
         (->> (mapcat (partial single-replacements m)))
         set
         (disj m)
         count)))
-
-(p1 input)
 
 (defn p2 [input]
   (let [[rs m] (parse-input input)
