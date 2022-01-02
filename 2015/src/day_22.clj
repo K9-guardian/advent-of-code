@@ -1,6 +1,6 @@
 (ns day-22
   (:require [clojure.string :as str])
-  (:use [priority-queue]))
+  (:use priority-queue))
 
 (def input (slurp "input/d22.txt"))
 
