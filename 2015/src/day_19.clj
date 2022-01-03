@@ -1,10 +1,9 @@
 (ns day-19
-  (:require [clojure.string :as str]
-            [clojure.math.combinatorics :as comb]))
+  (:require [clojure.math.combinatorics :as comb]
+            [clojure.set :as set]
+            [clojure.string :as str]))
 
 (def input (slurp "input/d19.txt"))
-
-(def inf ##Inf)
 
 (defn parse-input [input]
   (let [lines (str/split-lines input)
@@ -30,7 +29,8 @@
        (map (partial string-replace* m k))))
 
 ;; Failed brute force.
-#_(defn min-steps [m rs]
+(comment
+  (defn min-steps [m rs]
     (def min-steps-rec
       (memoize
        (fn [m n]
@@ -40,31 +40,70 @@
                                    (mapcat (partial replacements m))
                                    (remove #{m}))]
              (if (empty? replacements)
-               inf
+               ##Inf
                (->> replacements
                     (map #(min-steps-rec % (inc n)))
                     (apply min))))))))
-    (min-steps-rec m 0))
+    (min-steps-rec m 0)))
 
-#_(defn earley [m rs]
-    (let [s (vec (repeat (inc (count m)) (sorted-set)))]
-      (swap! s update 0 conj)))
+(defn earley [rs m s0 terminal?]
+  (letfn [(set-conj [v & xs] (reduce (fn [v x] (if (some #{x} v) v (conj v x))) v xs))
+          (finished? [st] (= (-> st :rule second count) (:pos st)))
+          (next-symbol [st] (and (not (finished? st)) ((-> st :rule second) (:pos st))))
+          (predicter [s st k]
+            (let [B (next-symbol st)
+                  predictions (filter (comp #{B} first) rs)]
+              (->> predictions
+                   (map #(hash-map :rule % :pos 0 :origin k))
+                   (update s k (partial apply set-conj)))))
+          (scanner [s st k]
+            (let [a (next-symbol st)]
+              (if (= a (get m k))
+                (update s (inc k) conj (update st :pos inc))
+                s)))
+          (completer [s {[lhs _] :rule origin :origin} k]
+            (let [completions (filter (comp #{lhs} next-symbol) (s origin))]
+              (->> completions
+                   (map #(update % :pos inc))
+                   (update s k (partial apply set-conj)))))]
+    (reduce
+     (fn [s k]
+       (loop [s s i 0]
+         (if (= i (count (s k)))
+           s
+           (let [st ((s k) i)]
+             (cond
+               (finished? st) (recur (completer s st k) (inc i))
+               (terminal? (next-symbol st)) (recur (scanner s st k) (inc i))
+               :else (recur (predicter s st k) (inc i)))))))
+     (let [top-levels (->> rs
+                           (filter (comp #{s0} first))
+                           (mapv #(hash-map :rule % :pos 0 :origin 0)))]
+       (->> (repeat (count m) [])
+            (cons top-levels)
+            vec))
+     (range (inc (count m))))))
 
-;; function EARLEY_PARSE(words, grammar)
-;;     INIT(words)
-;;     ADD_TO_SET((γ → •S, 0), S[0])
-;;     for k ← from 0 to LENGTH(words) do
-;;         for each state in S[k] do  // S[k] can expand during this loop
-;;             if not FINISHED(state) then
-;;                 if NEXT_ELEMENT_OF(state) is a nonterminal then
-;;                     PREDICTOR(state, k, grammar)         // non_terminal
-;;                 else do
-;;                     SCANNER(state, k, words)             // terminal
-;;             else do
-;;                 COMPLETER(state, k)
-;;         end
-;;     end
-;;     return chart
+(comment
+  (let [m ["number" "+" "number" "*" "number"]
+        rs [["P" ["S"]]
+            ["S" ["S" "+" "M"]]
+            ["S" ["M"]]
+            ["M" ["M" "*" "T"]]
+            ["M" ["T"]]
+            ["T" ["number"]]]]
+    (earley rs m "P" #{"number" "+" "*"})))
+
+(comment
+  (let [m ["h" "o" "h"]
+        rs [["e" ["H"]]
+            ["e" ["O"]]
+            ["H" ["H" "O"]]
+            ["H" ["O" "H"]]
+            ["O" ["H" "H"]]
+            ["H" ["h"]]
+            ["O" ["o"]]]]
+    (earley rs m "e" #{"h" "o"})))
 
 (defn p1 [input]
   (let [[rs m] (parse-input input)]
@@ -74,18 +113,19 @@
         (disj m)
         count)))
 
+;; Technically our molecule is not a proper sentence as it has nonterminals.
+;; However, we can make it a sentence by adding a rule A => a for every symbol,
+;; then applying each of those rules to the molecule, thus creating a valid sentence.
 (defn p2 [input]
   (let [[rs m] (parse-input input)
-        m (re-seq #"[A-Z][a-z]?|e" m)
-        rs (reduce (fn [m [k vs]] (merge m (zipmap vs (repeat k)))) {} rs)]
-    (min-steps m rs)))
-
-(let [m ["H" "O" "H" "O" "H" "O"]
-      rs {"H" "e"
-          "O" "e"
-          "HO" "H"
-          "OH" "H"
-          "HH" "O"}]
-  (min-steps m rs))
+        rs (map (fn [[k v]] [k (re-seq #"[A-Z][a-z]?" v)]) rs) ; Splitting by symbols
+        m (re-seq #"[A-Z][a-z]?" m)
+        rs (->> m ; Using all lowercase to represent terminals
+                (map (juxt identity (comp vector str/lower-case)))
+                (concat rs))
+        m (map str/lower-case m)
+        terms (set/difference (->> rs (mapcat second) set)
+                              (->> rs (map first) set))]
+    (earley rs m "e" )))
 
 (p2 input)
