@@ -5,15 +5,14 @@
 (def input (slurp "input/d13.txt"))
 
 (defn parse-line [l]
-  (let [[p1 signum amt p2] (rest
-                            (re-find
-                             #"(.*) would (.*) (\d+) happiness units by sitting next to (.*)."
-                             l))
+  (let [[p1 signum amt p2] (->> l
+                                (re-find #"(.*) would (.*) (\d+) happiness units by sitting next to (.*).")
+                                rest)
         p1 (keyword p1)
         p2 (keyword p2)
         signum ({"gain" + "lose" -} signum)
         amt (Integer/parseInt amt)]
-    [p1 [p2 (signum amt)]]))
+    {p1 {p2 (signum amt)}}))
 
 (defn arrangement->happiness [m a]
   (->> a
@@ -27,7 +26,7 @@
   (let [m (->> input
                str/split-lines
                (map parse-line)
-               (reduce (fn [m [k v]] (update m k (fnil conj {}) v)) {}))
+               (reduce (partial merge-with merge) {}))
         arrangements (->> m
                           keys
                           comb/permutations
@@ -40,7 +39,7 @@
   (let [m (->> input
                str/split-lines
                (map parse-line)
-               (reduce (fn [m [k v]] (update m k (fnil conj {:me 0}) v)) {}))
+               (reduce (partial merge-with (partial merge {:me 0})) {}))
         m (assoc m :me (zipmap (keys m) (repeat 0)))
         arrangements (->> m
                           keys

@@ -9,14 +9,14 @@
 ;; num ::= \d+
 
 (defn parse-line [l]
-  (let [[instr & more] (str/split l #",? ")]
+  (let [[instr & args] (str/split l #",? ")]
     (case instr
-      ("hlf" "tpl" "inc") (as-> more [reg] {:instr (keyword instr) :reg (keyword reg)})
-      ("jie" "jio") (as-> more [reg offset]
+      ("hlf" "tpl" "inc") (as-> args [reg] {:instr (keyword instr) :reg (keyword reg)})
+      ("jie" "jio") (as-> args [reg offset]
                       {:instr (keyword instr)
                        :reg (keyword reg)
                        :offset (Integer/parseInt offset)})
-      "jmp" (as-> more [offset] {:instr (keyword instr) :offset (Integer/parseInt offset)}))))
+      "jmp" (as-> args [offset] {:instr (keyword instr) :offset (Integer/parseInt offset)}))))
 
 (defn solve [rs tape]
   (letfn [(solve-iter [rs i]

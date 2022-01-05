@@ -4,10 +4,10 @@
 (def input (slurp "input/d14.txt"))
 
 (defn parse-line [l]
-  (let [[name & values] (rest
-                         (re-find
-                          #"(.*) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds."
-                          l))
+  (let [[name & values] (->> l
+                             (re-find
+                              #"(.*) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds.")
+                             rest)
         values (->> values
                     (map #(Integer/parseInt %))
                     (zipmap [:speed :run-time :rest-time]))]
@@ -20,13 +20,13 @@
     (+ (* full-bursts speed run-time) (* part-burst speed))))
 
 (defn next-second [deer time]
-  (let [deer-buckets (->> deer
-                          (map #(assoc % :distance (stats->distance time (:stats %))))
-                          (sort-by :distance >)
-                          (partition-by :distance))]
-    (->> (first deer-buckets)
+  (let [[leaders & followers] (->> deer
+                                   (map #(assoc % :distance (stats->distance time (:stats %))))
+                                   (sort-by :distance >)
+                                   (partition-by :distance))]
+    (->> leaders
          (map #(update % :points inc))
-         (conj (rest deer-buckets))
+         (conj followers)
          (apply concat))))
 
 (defn p1 [input]

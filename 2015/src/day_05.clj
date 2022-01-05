@@ -24,11 +24,11 @@
 
 (defn contains-2-pairs-without-overlap? [s]
   (loop [b false
-         l (partition 2 1 s)]
+         [p & ps] (partition 2 1 s)]
     (case (count l)
       (1 2) b
-      (recur (or b (some #{(first l)} (nnext l)))
-             (rest l)))))
+      (recur (or b (some #{p} (nnext l)))
+             ps))))
 
 (defn contains-length-3-palindrome? [s]
   (some #(= (first %) (last %))

@@ -27,18 +27,17 @@
               (complement contains-banned-letters?)
               contains-2-different-non-overlap-pairs?))
 
-;; TODO: Make this function more idiomatic
 (defn inc-string [s]
   (letfn [(inc-char [c] (-> c int inc char))]
-    (loop [cs (reverse s)
+    (loop [[c & cs :as all] (reverse s)
            carry? true
            acc ()]
       (cond
-        (and carry? (empty? cs)) (cons \a acc)
-        (empty? cs) acc
-        (and carry? (= \z (first cs))) (recur (rest cs) true (cons \a acc))
-        carry? (recur (rest cs) false (cons (inc-char (first cs)) acc))
-        :else (recur (rest cs) false (cons (first cs) acc))))))
+        (and carry? (empty? all)) (cons \a acc)
+        (empty? all) acc
+        (and carry? (= \z c)) (recur cs true (cons \a acc))
+        carry? (recur cs false (cons (inc-char c) acc))
+        :else (recur cs false (cons c acc))))))
 
 (defn p1 [input]
   (->> input
