@@ -27,11 +27,7 @@
             :turns 6
             :action (fn [st] ; This is messy because it needs to read the state
                       (let [active? (->> st :effects (find-key :name "Shield"))]
-                        (assoc-in st
-                                  [:me :arm]
-                                  (if active?
-                                    7
-                                    0))))}
+                        (assoc-in st [:me :arm] (if active? 7 0))))}
    :poison {:name "Poison" :turns 6 :action #(update-in % [:boss :hp] - 3)}
    :recharge {:name "Recharge" :turns 5 :action #(update-in % [:me :mana] + 101)}})
 
@@ -104,7 +100,7 @@
               :boss (parse-input input)
               :effects [{:name "Drip"
                          :turns ##Inf
-                         :action #({:my-start (update-in % [:me :hp] dec)} (:turn %) %)}]
+                         :action #(cond-> % (:my-start %) (update-in [:me :hp] dec))}]
               :turn :me}]
     (->> (dijkstra (priority-queue init 0) {init 0})
          (filter (comp #(<= (-> % :boss :hp) 0) key))
