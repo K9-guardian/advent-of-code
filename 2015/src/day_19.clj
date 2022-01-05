@@ -28,61 +28,47 @@
        comb/permutations
        (map (partial string-replace* m k))))
 
-;; Failed brute force.
-(comment
-  (defn min-steps [m rs]
-    (def min-steps-rec
-      (memoize
-       (fn [m n]
-         (if (= "e" m)
-           n
-           (let [replacements (->> rs
-                                   (mapcat (partial replacements m))
-                                   (remove #{m}))]
-             (if (empty? replacements)
-               ##Inf
-               (->> replacements
-                    (map #(min-steps-rec % (inc n)))
-                    (apply min))))))))
-    (min-steps-rec m 0)))
-
-(defn earley [rs m s0 terminal?]
-  (letfn [(set-conj [v & xs] (reduce (fn [v x] (if (some #{x} v) v (conj v x))) v xs))
+(defn earley [rs m S terminal?]
+  (letfn [(set-conj [{:keys [seen?] :as all} & xs]
+            (let [xs (remove seen? xs)]
+              (-> all
+                  (update :seen? (partial apply conj) xs)
+                  (update :items (partial apply conj) xs))))
           (finished? [st] (= (-> st :rule second count) (:pos st)))
           (next-symbol [st] (and (not (finished? st)) ((-> st :rule second) (:pos st))))
           (predicter [s st k]
-            (let [B (next-symbol st)
-                  predictions (filter (comp #{B} first) rs)]
+            (let [predictions (filter (comp #{(next-symbol st)} first) rs)]
               (->> predictions
                    (map #(hash-map :rule % :pos 0 :origin k))
                    (update s k (partial apply set-conj)))))
           (scanner [s st k]
             (let [a (next-symbol st)]
               (if (= a (get m k))
-                (update s (inc k) conj (update st :pos inc))
+                (update s (inc k) set-conj (update st :pos inc))
                 s)))
           (completer [s {[lhs _] :rule origin :origin} k]
-            (let [completions (filter (comp #{lhs} next-symbol) (s origin))]
+            (let [completions (filter (comp #{lhs} next-symbol) (-> s (get origin) :items))]
               (->> completions
                    (map #(update % :pos inc))
                    (update s k (partial apply set-conj)))))]
-    (reduce
-     (fn [s k]
-       (loop [s s i 0]
-         (if (= i (count (s k)))
-           s
-           (let [st ((s k) i)]
-             (cond
-               (finished? st) (recur (completer s st k) (inc i))
-               (terminal? (next-symbol st)) (recur (scanner s st k) (inc i))
-               :else (recur (predicter s st k) (inc i)))))))
-     (let [top-levels (->> rs
-                           (filter (comp #{s0} first))
-                           (mapv #(hash-map :rule % :pos 0 :origin 0)))]
-       (->> (repeat (count m) [])
-            (cons top-levels)
-            vec))
-     (range (inc (count m))))))
+    (->> (range (inc (count m)))
+         (reduce
+          (fn [s k]
+            (loop [s s i 0]
+              (if (= i (-> s (get k) :items count))
+                s
+                (let [st (-> s (get k) :items (get i))]
+                  (cond
+                    (finished? st) (recur (completer s st k) (inc i))
+                    (terminal? (next-symbol st)) (recur (scanner s st k) (inc i))
+                    :else (recur (predicter s st k) (inc i)))))))
+          (let [top-levels (->> rs
+                                (filter (comp #{S} first))
+                                (mapv #(hash-map :rule % :pos 0 :origin 0)))]
+            (->> (repeat (count m) {:seen? #{} :items []})
+                 (cons {:seen? (set top-levels) :items top-levels})
+                 vec)))
+         (mapv :items))))
 
 (comment
   (let [m ["number" "+" "number" "*" "number"]
@@ -92,9 +78,7 @@
             ["M" ["M" "*" "T"]]
             ["M" ["T"]]
             ["T" ["number"]]]]
-    (earley rs m "P" #{"number" "+" "*"})))
-
-(comment
+    (earley rs m "P" #{"number" "+" "*"}))
   (let [m ["h" "o" "h"]
         rs [["e" ["H"]]
             ["e" ["O"]]
@@ -118,14 +102,15 @@
 ;; then applying each of those rules to the molecule, thus creating a valid sentence.
 (defn p2 [input]
   (let [[rs m] (parse-input input)
-        rs (map (fn [[k v]] [k (re-seq #"[A-Z][a-z]?" v)]) rs) ; Splitting by symbols
+        rs (map (fn [[k v]] [k (vec (re-seq #"[A-Z][a-z]?" v))]) rs) ; Splitting by symbols
         m (re-seq #"[A-Z][a-z]?" m)
-        rs (->> m ; Using all lowercase to represent terminals
+        rs (->> m
+                set ; Using all lowercase to represent terminals
                 (map (juxt identity (comp vector str/lower-case)))
                 (concat rs))
-        m (map str/lower-case m)
-        terms (set/difference (->> rs (mapcat second) set)
-                              (->> rs (map first) set))]
-    (earley rs m "e" )))
+        m (mapv str/lower-case m)
+        terminals (set/difference (->> rs (mapcat second) set)
+                                  (->> rs (map first) set))]
+    (earley rs m "e" terminals)))
 
 (p2 input)
