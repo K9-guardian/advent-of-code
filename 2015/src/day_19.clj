@@ -28,66 +28,82 @@
        comb/permutations
        (map (partial string-replace* m k))))
 
-(defn earley [rs m S terminal?]
+(defn earley [m rs S & {:keys [parse-tree?] :or {parse-tree? false}}]
   (letfn [(set-conj [{:keys [seen?] :as all} & xs]
             (let [xs (remove seen? xs)]
-              (-> all
-                  (update :seen? (partial apply conj) xs)
-                  (update :items (partial apply conj) xs))))
+              (into {} (map (fn [[k v]] [k (apply conj v xs)])) all)))
           (finished? [st] (= (-> st :rule second count) (:pos st)))
           (next-symbol [st] (and (not (finished? st)) ((-> st :rule second) (:pos st))))
-          (predicter [s st k]
+          (predict [s st k]
             (let [predictions (filter (comp #{(next-symbol st)} first) rs)]
               (->> predictions
                    (map #(hash-map :rule % :pos 0 :origin k))
                    (update s k (partial apply set-conj)))))
-          (scanner [s st k]
-            (let [a (next-symbol st)]
-              (if (= a (get m k))
-                (update s (inc k) set-conj (update st :pos inc))
-                s)))
-          (completer [s {[lhs _] :rule origin :origin} k]
+          (scan [s st k]
+            (cond-> s
+              (= (next-symbol st) (get m k))
+              (update (inc k) (fnil set-conj {:seen? #{} :items []}) (update st :pos inc))))
+          (complete [s {[lhs _] :rule origin :origin} k]
             (let [completions (filter (comp #{lhs} next-symbol) (-> s (get origin) :items))]
               (->> completions
                    (map #(update % :pos inc))
-                   (update s k (partial apply set-conj)))))]
-    (->> (range (inc (count m)))
-         (reduce
-          (fn [s k]
-            (loop [s s i 0]
-              (if (= i (-> s (get k) :items count))
-                s
-                (let [st (-> s (get k) :items (get i))]
-                  (cond
-                    (finished? st) (recur (completer s st k) (inc i))
-                    (terminal? (next-symbol st)) (recur (scanner s st k) (inc i))
-                    :else (recur (predicter s st k) (inc i)))))))
-          (let [top-levels (->> rs
-                                (filter (comp #{S} first))
-                                (mapv #(hash-map :rule % :pos 0 :origin 0)))]
-            (->> (repeat (count m) {:seen? #{} :items []})
-                 (cons {:seen? (set top-levels) :items top-levels})
-                 vec)))
-         (mapv :items))))
+                   (update s k (partial apply set-conj)))))
+          (parse-tree [chart]
+            (->> chart
+                 (mapcat
+                  (fn [i s]
+                    (->> s
+                         (filter finished?)
+                         (map #(-> %
+                                   (dissoc :pos)
+                                   (assoc :end i)))))
+                  (range))
+                 (group-by :origin)
+                 (into {} (map (fn [[k v]] [k (map #(dissoc % :origin) v)])))))]
+    (let [terminal? (set/difference (->> rs (mapcat second) set) (->> rs (map first) set))
+          top-levels (->> rs
+                          (filter (comp #{S} first))
+                          (map #(hash-map :rule % :pos 0 :origin 0)))
+          chart (->> (range (inc (count m)))
+                     (reduce
+                      (fn [s k]
+                        (loop [s s i 0]
+                          (let [items (:items (s k))]
+                            (if (= i (count items))
+                              s
+                              (let [st (items i)]
+                                (cond
+                                  (finished? st) (recur (complete s st k) (inc i))
+                                  (terminal? (next-symbol st)) (recur (scan s st k) (inc i))
+                                  :else (recur (predict s st k) (inc i))))))))
+                      [(zipmap [:seen? :items] ((juxt set vec) top-levels))])
+                     (map :items))]
+      (cond-> chart
+        parse-tree? parse-tree))))
 
 (comment
-  (let [m ["number" "+" "number" "*" "number"]
-        rs [["P" ["S"]]
-            ["S" ["S" "+" "M"]]
-            ["S" ["M"]]
-            ["M" ["M" "*" "T"]]
-            ["M" ["T"]]
-            ["T" ["number"]]]]
-    (earley rs m "P" #{"number" "+" "*"}))
-  (let [m ["h" "o" "h"]
-        rs [["e" ["H"]]
-            ["e" ["O"]]
-            ["H" ["H" "O"]]
-            ["H" ["O" "H"]]
-            ["O" ["H" "H"]]
-            ["H" ["h"]]
-            ["O" ["o"]]]]
-    (earley rs m "e" #{"h" "o"})))
+  (earley ["num" "+" "num" "*" "num"]
+          [[:P [:S]]
+           [:S [:S "+" :M]]
+           [:S [:M]]
+           [:M [:M "*" :T]]
+           [:M [:T]]
+           [:T ["num"]]]
+          :P)
+  (earley ["h" "o" "h"]
+          [[:e [:H]]
+           [:e [:O]]
+           [:H [:H :O]]
+           [:H [:O :H]]
+           [:O [:H :H]]
+           [:H ["h"]]
+           [:O ["o"]]]
+          :e)
+  (earley ["s" "s" "s"]
+          [[:S [:S :S]]
+           [:S ["s"]]]
+          :S
+          :parse-tree? true))
 
 (defn p1 [input]
   (let [[rs m] (parse-input input)]
@@ -108,9 +124,10 @@
                 set ; Using all lowercase to represent terminals
                 (map (juxt identity (comp vector str/lower-case)))
                 (concat rs))
-        m (mapv str/lower-case m)
-        terminals (set/difference (->> rs (mapcat second) set)
-                                  (->> rs (map first) set))]
-    (earley rs m "e" terminals)))
+        m (mapv str/lower-case m)]
+    (->> (earley m rs "e")
+         parse-tree
+         (tree-seq vector? identity)
+         count)))
 
 (p2 input)
