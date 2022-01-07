@@ -50,16 +50,14 @@
                    (update s k (partial apply set-conj)))))
           (parse-tree [chart]
             (->> chart
-                 (mapcat
-                  (fn [i s]
-                    (->> s
-                         (filter finished?)
-                         (map #(-> %
-                                   (dissoc :pos)
-                                   (assoc :end i)))))
-                  (range))
+                 (mapcat (fn [i s]
+                           (->> s
+                                (filter finished?)
+                                (map #(-> % (dissoc :pos) (assoc :end i)))))
+                         (range))
                  (group-by :origin)
-                 (into {} (map (fn [[k v]] [k (map #(dissoc % :origin) v)])))))]
+                 (into {} #_(map (fn [[k v]] [k (map #(dissoc % :origin) v)])))
+                 ))]
     (let [terminal? (set/difference (->> rs (mapcat second) set) (->> rs (map first) set))
           top-levels (->> rs
                           (filter (comp #{S} first))
@@ -89,7 +87,8 @@
            [:M [:M "*" :T]]
            [:M [:T]]
            [:T ["num"]]]
-          :P)
+          :P
+          :parse-tree? true)
   (earley ["h" "o" "h"]
           [[:e [:H]]
            [:e [:O]]
