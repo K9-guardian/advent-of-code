@@ -1,28 +1,26 @@
 (ns earley
   (:require [clojure.set :as set]))
 
-;; Accepts strings or indexed collections.
-(defn- indexed?* [s] ((some-fn string? indexed?) s))
-
 ;; TODO: Deal with nullable nonterminals.
-;; TODO: Have the LR(0) item be a separate map.
 (defn earley [s grm S]
-  {:pre [(indexed?* s) (->> grm (map second) (every? indexed?*))]}
+  {:pre [((some-fn string? indexed?) s)
+         (->> grm (map second) (every? (some-fn string? indexed?)))]}
   (letfn [(set-conj [{:keys [seen?] :as all} & xs]
             (let [xs (remove seen? xs)]
               (into {} (map (fn [[k v]] [k (apply conj v xs)])) all)))
-          (finished? [{[_ rhs] :rule pos :pos}] (= (count rhs) pos))
-          (next-symbol [{[_ rhs] :rule pos :pos}] (or (get rhs pos) false))
+          (next-symbol [{[_ rhs] :rule pos :pos}] (get rhs pos ::complete))
           (add-sppf [{{[lhs _] :rule :as lr0} :lr0 origin :origin :as st} k]
-            (assoc st :sppf {:label (if (finished? lr0) lhs lr0) :start origin :finish k}))
-          (predict [chart {lr0 :lr0} k]
+            (assoc st :sppf {:label (if (= ::complete (next-symbol lr0)) lhs lr0)
+                             :start origin
+                             :finish k}))
+          (predict [chart {:keys [lr0]} k]
             (->> grm
                  (filter (comp #{(next-symbol lr0)} first))
                  (map #(hash-map :lr0 {:rule % :pos 0} :origin k))
                  (update chart k (partial apply set-conj))))
-          (scan [chart {lr0 :lr0 :as st} k]
+          (scan [chart {:keys [lr0] :as st} k]
             (cond-> chart
-              (= (next-symbol lr0) (get s k))
+              (= (next-symbol lr0) (get s k ::end-of-string))
               (update (inc k)
                       (fnil set-conj {:seen? #{} :items []})
                       (-> st (update-in [:lr0 :pos] inc) (add-sppf (inc k))))))
@@ -42,9 +40,9 @@
                 (let [items (:items (chart k))]
                   (if (= i (count items))
                     chart
-                    (let [{lr0 :lr0 :as st} (items i)]
+                    (let [{:keys [lr0] :as st} (items i)]
                       (cond
-                        (finished? lr0) (recur (complete chart st k) (inc i))
+                        (= ::complete (next-symbol lr0)) (recur (complete chart st k) (inc i))
                         (terminal? (next-symbol lr0)) (recur (scan chart st k) (inc i))
                         :else (recur (predict chart st k) (inc i))))))))
             [(zipmap [:seen? :items] ((juxt set vec) top-levels))])
