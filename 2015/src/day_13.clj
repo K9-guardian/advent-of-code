@@ -6,10 +6,8 @@
 
 (defn parse-line [l]
   (let [[p1 signum amt p2] (->> l
-                                (re-find #"(.*) would (.*) (\d+) happiness units by sitting next to (.*).")
+                                (re-find #"(\w+) .* (gain|lose) (\d+) .* (\w+).")
                                 rest)
-        p1 (keyword p1)
-        p2 (keyword p2)
         signum ({"gain" + "lose" -} signum)
         amt (Integer/parseInt amt)]
     {p1 {p2 (signum amt)}}))
@@ -39,8 +37,8 @@
   (let [m (->> input
                str/split-lines
                (map parse-line)
-               (reduce (partial merge-with (partial merge {:me 0})) {}))
-        m (assoc m :me (zipmap (keys m) (repeat 0)))
+               (reduce (partial merge-with (partial merge {"me" 0})) {}))
+        m (assoc m "me" (zipmap (keys m) (repeat 0)))
         arrangements (->> m
                           keys
                           comb/permutations

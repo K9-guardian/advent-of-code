@@ -15,6 +15,7 @@
                   #(str/split % #": ")))
        (into {:arm 0})))
 
+;; TODO: Update effects to use a map instead of a list.
 ;; Like find but with a key fn
 (defn find-key [k s l]
   (when-first [x l]

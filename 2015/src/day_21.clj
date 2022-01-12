@@ -39,13 +39,11 @@
        (into {})))
 
 (defn win? [boss [weapon armor rings]]
-  (let [dmg (-> (+ (:dmg weapon)
-                   (apply + (map :dmg rings)))
+  (let [dmg (-> (+ (:dmg weapon) (apply + (map :dmg rings)))
                 (- (:arm boss))
                 (max 1))
         boss-dmg (-> (:dmg boss)
-                     (- (+ (:arm armor)
-                           (apply + (map :arm rings))))
+                     (- (+ (:arm armor) (apply + (map :arm rings))))
                      (max 1))
         turns-to-win (Math/ceil (/ (:hp boss) dmg))
         turns-to-lose (Math/ceil (/ 100 boss-dmg))]
@@ -60,9 +58,7 @@
   (let [boss (parse-input input)
         loadouts (comb/cartesian-product weapons
                                          (conj armor {:type :none :cost 0 :dmg 0 :arm 0})
-                                         (->> rings
-                                              comb/subsets
-                                              (take-while #(<= (count %) 2))))]
+                                         (->> rings comb/subsets (take-while #(<= (count %) 2))))]
     (->> loadouts
          (filter (partial win? boss))
          (map (juxt identity cost))
@@ -72,9 +68,7 @@
   (let [boss (parse-input input)
         loadouts (comb/cartesian-product weapons
                                          (conj armor {:type :none :cost 0 :dmg 0 :arm 0})
-                                         (->> rings
-                                              comb/subsets
-                                              (take-while #(<= (count %) 2))))]
+                                         (->> rings comb/subsets (take-while #(<= (count %) 2))))]
     (->> loadouts
          (filter (partial (complement win?) boss))
          (map (juxt identity cost))

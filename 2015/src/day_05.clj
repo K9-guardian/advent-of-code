@@ -27,8 +27,7 @@
          [p & ps] (partition 2 1 s)]
     (case (count l)
       (1 2) b
-      (recur (or b (some #{p} (nnext l)))
-             ps))))
+      (recur (or b (some #{p} (nnext l))) ps))))
 
 (defn contains-length-3-palindrome? [s]
   (some #(= (first %) (last %))

@@ -6,9 +6,8 @@
 (defn parse-line [l]
   (let [[name & stats] (str/split l #"[:,] ")
         stats (->> stats
-                   (map (comp
-                         (fn [[k v]] [(keyword k) (Integer/parseInt v)])
-                         #(str/split % #" ")))
+                   (map (comp (fn [[k v]] [(keyword k) (Integer/parseInt v)])
+                              #(str/split % #" ")))
                    (into {}))]
     (assoc stats :name name)))
 

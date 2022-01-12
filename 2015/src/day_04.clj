@@ -26,7 +26,6 @@
 
 (defn p2 [input]
   (let [l (->> (iterate inc 1)
-               (pmap
-                (comp budget-md5-6-zeros-prefix?
-                      (partial str input))))]
+               (pmap (comp budget-md5-6-zeros-prefix?
+                           (partial str input))))]
     (inc (.indexOf l true))))

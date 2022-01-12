@@ -12,8 +12,7 @@
     [i j]))
 
 (defn in-bounds? [pair]
-  (let [i (first pair)
-        j (second pair)]
+  (let [i (first pair) j (second pair)]
     (and (< -1 i board-size)
          (< -1 j board-size))))
 

@@ -8,8 +8,6 @@
   (let [[start end d] (->> l
                            (re-find #"(\w+) to (\w+) = (\d+)")
                            rest)
-        start (keyword start)
-        end (keyword end)
         d (Integer/parseInt d)]
     [{start {end d}} {end {start d}}]))
 

@@ -11,8 +11,7 @@
     (nth (reductions + x (iterate inc col)) (dec row))))
 
 (defn next-code [code]
-  (rem (* 252533 code)
-       33554393))
+  (rem (* 252533 code) 33554393))
 
 (defn p1 [input]
   (let [init 20151125
