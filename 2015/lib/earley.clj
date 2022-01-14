@@ -25,14 +25,10 @@
             (if (= (next-symbol lr0) (get s k ::end-of-string))
               (let [prev (state->sppf st k)
                     symb {:terminal (next-symbol lr0) :start k :finish (inc k)}
-                    k (inc k)
                     st (update-in st [:lr0 :pos] inc)
-                    sppf (state->sppf st k)]
+                    sppf (state->sppf st (inc k))]
                 (-> chart
-                    (update-in [:chart k]
-                               (fnil set-conj {:seen? #{} :items []})
-                               st
-                               #_(assoc st :sppf (state->sppf st k)))
+                    (update-in [:chart (inc k)] (fnil set-conj {:seen? #{} :items []}) st)
                     (update-in [:forest sppf] (fnil conj []) [prev symb])))
               chart))
           (complete [chart {{[lhs _] :rule} :lr0 origin :origin :as st} k]
@@ -45,7 +41,7 @@
                         st (update-in st [:lr0 :pos] inc)
                         sppf (state->sppf st k)]
                     (-> chart
-                        (update-in [:chart k] set-conj st #_(assoc st :sppf (state->sppf st k)))
+                        (update-in [:chart k] set-conj st)
                         (update-in [:forest sppf] (fnil conj []) [prev symb]))))
                 chart
                 completions)))]
