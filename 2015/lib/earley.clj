@@ -66,12 +66,12 @@
 
 (comment
   ;; Example on Wikipedia.
-  (:forest (earley "2+3*4"
-                   [[:P [:S]]
-                    [:S [:S \+ :M]] [:S [:M]]
-                    [:M [:M \* :T]] [:M [:T]]
-                    [:T "1"] [:T "2"] [:T "3"] [:T "4"]]
-                   :P))
+  (earley "2+3*4"
+          [[:P [:S]]
+           [:S [:S \+ :M]] [:S [:M]]
+           [:M [:M \* :T]] [:M [:T]]
+           [:T "1"] [:T "2"] [:T "3"] [:T "4"]]
+          :P)
   ;; Works with ambiguous grammars.
   (:forest (earley "sss"
                    [[:S [:S :S]] [:S "s"]]
