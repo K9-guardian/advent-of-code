@@ -74,4 +74,9 @@
   ;; Works with ambiguous grammars.
   (:forest (earley "sss"
                    [[:S [:S :S]] [:S "s"]]
-                   :S)))
+                   :S))
+  ;; Nullable grammar test.
+  (earley "ac"
+          [[:A [\a :B \c]]
+           [:B ""]]
+          :A))
