@@ -77,6 +77,6 @@
                    :S))
   ;; Nullable grammar test.
   (earley "ac"
-          [[:A [\a :B \c]]
+          [[:A [\a :B :B :B \c]]
            [:B ""]]
           :A))
