@@ -13,7 +13,6 @@
 (def ^:private indexed?* (some-fn string? indexed?))
 
 ;; TODO: Deal with nullable nonterminals.
-;; TODO: Add derivation for complete.
 (defn earley [s grm S]
   {:pre [(indexed?* s) (->> grm (map second) (every? indexed?*))]}
   (letfn [(predict [chart {:keys [lr0]} k]
@@ -32,8 +31,8 @@
                     (update-in [:forest sppf] (fnil conj []) [prev symb])))
               chart))
           (complete [chart {{[lhs _] :rule} :lr0 origin :origin :as st} k]
-            (let [completions (->> (-> chart :chart (get origin) :items)
-                                   (filter (comp #{lhs} next-symbol :lr0)))]
+            (let [completions (filter (comp #{lhs} next-symbol :lr0)
+                                      (-> chart :chart (get origin) :items))]
               (reduce
                 (fn [chart {:keys [lr0] :as st}]
                   (let [prev (state->sppf st origin)
