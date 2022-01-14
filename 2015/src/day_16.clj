@@ -37,18 +37,14 @@
             m)))
 
 (defn p1 [input]
-  (let [parsed (->> input
-                    str/split-lines
-                    (map parse-line))]
+  (let [parsed (->> input str/split-lines (map parse-line))]
     (-> parsed
         (->> (map (maybe-aunt-p1? scan)))
         (.indexOf true)
         inc)))
 
 (defn p2 [input]
-  (let [parsed (->> input
-                    str/split-lines
-                    (map parse-line))]
+  (let [parsed (->> input str/split-lines (map parse-line))]
     (-> parsed
         (->> (map (maybe-aunt-p2? scan)))
         (.indexOf true)

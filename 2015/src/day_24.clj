@@ -10,9 +10,7 @@
       (->> (filter #(= target (apply + %))))))
 
 (defn p1 [input]
-  (let [nums (->> input
-                  str/split-lines
-                  (map #(Integer/parseInt %)))
+  (let [nums (->> input str/split-lines (map #(Integer/parseInt %)))
         goal (/ (apply + nums) 3)
         min-length-subsets (loop [i 1]
                              (if-let [xs (seq (subset-sums-of-n goal i nums))]
@@ -23,9 +21,7 @@
          (apply min))))
 
 (defn p2 [input]
-  (let [nums (->> input
-                  str/split-lines
-                  (map #(Integer/parseInt %)))
+  (let [nums (->> input str/split-lines (map #(Integer/parseInt %)))
         goal (/ (apply + nums) 4)
         min-length-subsets (loop [i 1]
                              (if-let [xs (seq (subset-sums-of-n goal i nums))]

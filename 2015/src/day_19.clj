@@ -1,7 +1,7 @@
 (ns day-19
   (:require [clojure.math.combinatorics :as comb]
             [clojure.string :as str])
-  (:use [earley]))
+  (:use earley))
 
 (def input (slurp "input/d19.txt"))
 

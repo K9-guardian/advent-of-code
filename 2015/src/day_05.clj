@@ -10,8 +10,7 @@
        (<= 3)))
 
 (defn contains-consecutive-duplicate? [s]
-  (< (count (dedupe s))
-     (count s)))
+  (< (count (dedupe s)) (count s)))
 
 (defn contains-banned-pair? [s]
   (some #{[\a \b] [\c \d] [\p \q] [\x \y]}
@@ -23,11 +22,11 @@
               (complement contains-banned-pair?)))
 
 (defn contains-2-pairs-without-overlap? [s]
-  (loop [b false
-         [p & ps] (partition 2 1 s)]
+  (loop [[p & ps] (partition 2 1 s)
+         b false]
     (case (count l)
       (1 2) b
-      (recur (or b (some #{p} (nnext l))) ps))))
+      (recur ps (or b (some #{p} (nnext l)))))))
 
 (defn contains-length-3-palindrome? [s]
   (some #(= (first %) (last %))

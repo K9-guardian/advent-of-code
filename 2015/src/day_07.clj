@@ -6,7 +6,7 @@
 (defn parse-atom [a]
   (try
     (Integer/parseInt a)
-    (catch NumberFormatException e (keyword a))))
+    (catch NumberFormatException e a)))
 
 ;; instruction ::= lhs "->" rhs
 ;; rhs ::= symb
@@ -18,13 +18,12 @@
 
 (defn parse-line [l]
   (let [[lhs rhs] (str/split l #" -> ")
-        rhs (parse-atom rhs)
-        lhs (map parse-atom (str/split lhs #" "))]
+        lhs (str/split lhs #" ")]
     [rhs
-     (cond
-       (= :NOT (first lhs)) (as-> lhs [f x] {:f f :x x})
-       (#{:AND :OR :LSHIFT :RSHIFT} (second lhs)) (as-> lhs [x f y] {:f f :x x :y y})
-       :else (as-> lhs [x] {:x x}))]))
+     (condp = (count lhs)
+       1 (as-> lhs [x] {:x (parse-atom x)})
+       2 (as-> lhs [f x] {:f f :x (parse-atom x)})
+       3 (as-> lhs [x f y] {:f f :x (parse-atom x) :y (parse-atom y)}))]))
 
 (defn clamp [f] (comp (partial bit-and 0xFFFF) f))
 
@@ -37,11 +36,11 @@
          k
          (let [{:keys [f x y]} (m k)]
            (case f
-             :NOT ((clamp bit-not) (eval-rec x))
-             :AND ((clamp bit-and) (eval-rec x) (eval-rec y))
-             :OR ((clamp bit-or) (eval-rec x) (eval-rec y))
-             :LSHIFT ((clamp bit-shift-left) (eval-rec x) (eval-rec y))
-             :RSHIFT ((clamp bit-shift-right) (eval-rec x) (eval-rec y))
+             "NOT" ((clamp bit-not) (eval-rec x))
+             "AND" ((clamp bit-and) (eval-rec x) (eval-rec y))
+             "OR" ((clamp bit-or) (eval-rec x) (eval-rec y))
+             "LSHIFT" ((clamp bit-shift-left) (eval-rec x) (eval-rec y))
+             "RSHIFT" ((clamp bit-shift-right) (eval-rec x) (eval-rec y))
              (eval-rec x)))))))
   (eval-rec k))
 
@@ -50,12 +49,12 @@
        str/split-lines
        (map parse-line)
        (into {})
-       (evaluate :a)))
+       (evaluate "a")))
 
 (defn p2 [input]
   (let [m (->> input
                str/split-lines
                (map parse-line)
                (into {}))
-        m (assoc m :b {:x (evaluate :a m)})]
-    (evaluate :a m)))
+        m (assoc m "b" {:x (evaluate "a" m)})]
+    (evaluate "a" m)))

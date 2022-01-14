@@ -39,18 +39,14 @@
 
 (defn p1 [input]
   (let [init (long-array 1000000 0)
-        parsed (->> input
-                    str/split-lines
-                    (map (parse-instruction action->function-p1)))]
+        parsed (->> input str/split-lines (map (parse-instruction action->function-p1)))]
     (doseq [{act :action [x1 y1] :from-range [x2 y2] :to-range} parsed]
       (update!-grid init x1 x2 y1 y2 act))
     (areduce init i ret 0 (+ ret (aget init i)))))
 
 (defn p2 [input]
   (let [init (long-array 1000000 0)
-        parsed (->> input
-                    str/split-lines
-                    (map (parse-instruction action->function-p2)))]
+        parsed (->> input str/split-lines (map (parse-instruction action->function-p2)))]
     (doseq [{act :action [x1 y1] :from-range [x2 y2] :to-range} parsed]
       (update!-grid init x1 x2 y1 y2 act))
     (areduce init i ret 0 (+ ret (aget init i)))))

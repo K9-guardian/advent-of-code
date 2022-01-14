@@ -15,7 +15,5 @@
 
 (defn p1 [input]
   (let [init 20151125
-        n (->> input
-               parse-input
-               coord->diagonal)]
+        n (-> input parse-input coord->diagonal)]
     (nth (iterate next-code init) (dec n))))

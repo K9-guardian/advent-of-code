@@ -33,18 +33,14 @@
     [i j k l]))
 
 (defn p1 [input]
-  (let [ingredients (->> input
-                         str/split-lines
-                         (map parse-line))]
+  (let [ingredients (->> input str/split-lines (map parse-line))]
     (->> ratios
          (map (juxt (partial zipmap (map :name ingredients))
                     (partial ratio->score ingredients)))
          (apply max-key second))))
 
 (defn p2 [input]
-  (let [ingredients (->> input
-                         str/split-lines
-                         (map parse-line))]
+  (let [ingredients (->> input str/split-lines (map parse-line))]
     (->> ratios
          (filter #(= 500 (ratio->calories ingredients %)))
          (map (juxt (partial zipmap (map :name ingredients))

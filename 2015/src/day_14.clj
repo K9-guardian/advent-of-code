@@ -5,8 +5,7 @@
 
 (defn parse-line [l]
   (let [[name & values] (->> l
-                             (re-find
-                              #"(.*) can fly (\d+) km/s for (\d+) seconds, .* (\d+) seconds.")
+                             (re-find #"(.*) can fly (\d+) km/s for (\d+) .* (\d+) .*")
                              rest)
         values (->> values
                     (map #(Integer/parseInt %))
