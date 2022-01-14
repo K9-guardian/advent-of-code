@@ -21,7 +21,7 @@
 (defn- bubble-up [heap comparator]
   (loop [heap heap idx (dec (count heap))]
     (let [par-idx (parent idx)]
-      (if (< (comparator (heap par-idx) (heap idx)) 0)
+      (if (<= (comparator (heap par-idx) (heap idx)) 0)
         heap
         (-> heap
             (swap-indices idx par-idx)
@@ -33,7 +33,7 @@
 (defn- bubble-down [heap comparator]
   (letfn [(min* [idx1 idx2] ; Accounts for if second idx is out of bounds
             (if (and (< idx2 (count heap))
-                     (< (comparator (heap idx2) (heap idx1)) 0))
+                     (<= (comparator (heap idx2) (heap idx1)) 0))
               idx2
               idx1))]
     (loop [heap heap idx 0]
