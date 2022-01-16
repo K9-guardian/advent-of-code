@@ -76,7 +76,7 @@
                    [[:S [:S :S]] [:S "s"]]
                    :S))
   ;; Nullable grammar test.
-  (earley "ac"
-          [[:A [\a :B :B :B \c]]
+  (earley "aa"
+          [[:A [\a :B :B :B \a]]
            [:B ""]]
           :A))
