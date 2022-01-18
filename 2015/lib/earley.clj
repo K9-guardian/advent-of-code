@@ -15,6 +15,8 @@
 (def ^:private indexed?* (some-fn string? indexed?))
 
 ;; Returns a single possible parse tree or a lazy sequence of all possible parse trees.
+;; Note: I made it return all potential parses mainly for fun, this uses core.logic so
+;;       it's incredibly slow, only use this on small sentences.
 (defn- parse [forest sppf & {:keys [all-parses] :or {all-parses false}}]
   (letfn [(walk [sppf]
             (loop [sppf sppf lst ()]
@@ -46,7 +48,7 @@
               (walko sppf () [rule symbs])
               (mapo (fn [x y]
                       (conde
-                        [(project [x] (featurec x {:terminal y}))]
+                        [(featurec x {:terminal y})]
                         [(parseo x y)]))
                     symbs
                     out)
@@ -120,7 +122,7 @@
                    [:T "1"] [:T "2"] [:T "3"] [:T "4"]]
                   :P))
   ;; Works with ambiguous grammars.
-  (:parse (earley "sss"
+  (:parse (earley "sssss"
                   [[:S [:S :S]] [:S "s"]]
                   :S
                   :all-parses true))
