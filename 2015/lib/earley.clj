@@ -14,10 +14,8 @@
 
 (def ^:private indexed?* (some-fn string? indexed?))
 
-;; Returns a single possible parse tree or a lazy sequence of all possible parse trees.
-;; Note: I made it return all potential parses mainly for fun, this uses core.logic so
-;;       it's incredibly slow. Only check all parses on small inputs!
-(defn- parse [forest sppf & {:keys [all-parses] :or {all-parses false}}]
+;; Returns a single parse tree.
+(defn- single-parse [forest sppf]
   (letfn [(walk [sppf]
             (loop [sppf sppf lst ()]
               (if-let [[{{[lhs _] :rule pos :pos} :label :as left} right] (first (forest sppf))]
@@ -27,8 +25,15 @@
           (parse [sppf]
             (let [[rule symbs] (walk sppf)
                   symbs (map (some-fn :terminal parse) symbs)]
-              (cons rule symbs)))
-          (mapo [rel lst out]
+              (cons rule symbs)))]
+    (parse sppf)))
+
+;; Returns a lazy sequence of all possible parse trees.
+;; I made it return all potential parses mainly for fun.
+;; This uses core.logic so it's incredibly slow.
+;; Only check all parses on small inputs!
+(defn- all-parses* [forest sppf]
+  (letfn [(mapo [rel lst out]
             (matche [lst out]
               ([[] []])
               ([[x . xs] [y . ys]]
@@ -46,9 +51,7 @@
               (walko sppf () [rule symbs])
               (mapo (fn [x y] (conde [(featurec x {:terminal y})] [(parseo x y)])) symbs out)
               (conso rule out tree)))]
-    (if all-parses
-      (run* [q] (parseo sppf q))
-      (parse sppf))))
+    (run* [q] (parseo sppf q))))
 
 ;; TODO: Deal with nullable nonterminals.
 (defn earley [s grm S & {:keys [all-parses] :or {all-parses false}}]
@@ -98,13 +101,11 @@
                                   #{::complete} (recur (complete chart st k) (inc i))
                                   terminal? (recur (scan chart st k) (inc i))
                                   (recur (predict chart st k) (inc i))))))))
-                      {:chart [{:seen? (set top-levels) :items (vec top-levels)}] :forest {}}))]
+                      {:chart [{:seen? (set top-levels) :items (vec top-levels)}] :forest {}}))
+          parse (if all-parses all-parses* single-parse)]
       (-> chart
           (update :chart (partial map :items))
-          (assoc :parse
-                 (parse (:forest chart)
-                        {:label S :start 0 :finish (count s)}
-                        :all-parses all-parses))))))
+          (assoc :parse (parse (:forest chart) {:label S :start 0 :finish (count s)}))))))
 
 (comment
   ;; Example on Wikipedia.
