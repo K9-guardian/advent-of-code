@@ -16,7 +16,7 @@
 
 ;; Returns a single possible parse tree or a lazy sequence of all possible parse trees.
 ;; Note: I made it return all potential parses mainly for fun, this uses core.logic so
-;;       it's incredibly slow. Only use this on small sentences unless you want an infinite loop!
+;;       it's incredibly slow. Only check all parses on small inputs!
 (defn- parse [forest sppf & {:keys [all-parses] :or {all-parses false}}]
   (letfn [(walk [sppf]
             (loop [sppf sppf lst ()]
