@@ -36,20 +36,18 @@
   (letfn [(mapo [rel lst out]
             (matche [lst out]
               ([[] []])
-              ([[x . xs] [y . ys]]
-               (rel x y)
-               (mapo rel xs ys))))
+              ([[x . xs] [y . ys]] (rel x y) (mapo rel xs ys))))
           (walko [sppf lst derivation]
             (fresh [pos lhs rhs left right]
               (project [sppf] (membero [left right] (forest sppf)))
               (featurec left {:label {:rule [lhs rhs] :pos pos}})
-              (matche [pos]
+              (matchu [pos]
                 ([0] (conjo [lhs] (cons right lst) derivation))
                 ([_] (walko left (cons right lst) derivation)))))
           (parseo [sppf tree]
             (fresh [rule symbs out]
               (walko sppf () [rule symbs])
-              (mapo (fn [x y] (conde [(featurec x {:terminal y})] [(parseo x y)])) symbs out)
+              (mapo (fn [x y] (conda [(featurec x {:terminal y})] [(parseo x y)])) symbs out)
               (conso rule out tree)))]
     (run* [q] (parseo sppf q))))
 
