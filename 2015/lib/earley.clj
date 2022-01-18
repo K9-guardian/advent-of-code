@@ -16,7 +16,7 @@
 
 ;; Returns a single possible parse tree or a lazy sequence of all possible parse trees.
 ;; Note: I made it return all potential parses mainly for fun, this uses core.logic so
-;;       it's incredibly slow, only use this on small sentences.
+;;       it's incredibly slow. Only use this on small sentences unless you want an infinite loop!
 (defn- parse [forest sppf & {:keys [all-parses] :or {all-parses false}}]
   (letfn [(walk [sppf]
             (loop [sppf sppf lst ()]
@@ -29,29 +29,22 @@
                   symbs (map (some-fn :terminal parse) symbs)]
               (cons rule symbs)))
           (mapo [rel lst out]
-            (conde
-              [(emptyo lst) (== out ())]
-              [(fresh [x xs y ys]
-                 (conso x xs lst)
-                 (conso y ys out)
-                 (rel x y)
-                 (mapo rel xs ys))]))
+            (matche [lst out]
+              ([[] []])
+              ([[x . xs] [y . ys]]
+               (rel x y)
+               (mapo rel xs ys))))
           (walko [sppf lst derivation]
             (fresh [pos lhs rhs left right]
               (project [sppf] (membero [left right] (forest sppf)))
               (featurec left {:label {:rule [lhs rhs] :pos pos}})
-              (conde
-                [(== 0 pos) (conjo [lhs] (cons right lst) derivation)]
-                [(walko left (cons right lst) derivation)])))
+              (matche [pos]
+                ([0] (conjo [lhs] (cons right lst) derivation))
+                ([_] (walko left (cons right lst) derivation)))))
           (parseo [sppf tree]
             (fresh [rule symbs out]
               (walko sppf () [rule symbs])
-              (mapo (fn [x y]
-                      (conde
-                        [(featurec x {:terminal y})]
-                        [(parseo x y)]))
-                    symbs
-                    out)
+              (mapo (fn [x y] (conde [(featurec x {:terminal y})] [(parseo x y)])) symbs out)
               (conso rule out tree)))]
     (if all-parses
       (run* [q] (parseo sppf q))
