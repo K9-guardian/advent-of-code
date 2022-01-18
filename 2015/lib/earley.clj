@@ -16,21 +16,34 @@
 
 ;; Returns a single possible parse tree or a lazy sequence of all possible parse trees.
 (defn- parse [forest sppf & {:keys [all-parses] :or {all-parses false}}]
-  (letfn [(walk [sppf]
-            (loop [sppf sppf lst ()]
-              (if-let [[left right] (first (forest sppf))] ; Using first for a single parse tree.
-                (if (-> left :label :pos zero?)
-                  [(-> left :label :rule first) (cons right lst)]
-                  (recur left (cons right lst))))))
-          (parse [sppf]
-            (let [[rule symbs] (walk sppf)
-                  symbs (map (some-fn :terminal parse) symbs)]
-              (cons rule symbs)))
-          (walk* [sppf] ()) ; TODO
-          (parse* [sppf] ())]
+  (letfn [(walko [sppf lst derivation]
+            (fresh [pos lhs rhs left right]
+              (project [sppf] (membero [left right] (forest sppf)))
+              (featurec left {:label {:rule [lhs rhs] :pos pos}})
+              (conde
+                [(== 0 pos) (conjo [lhs] (cons right lst) derivation)]
+                [(walko left (cons right lst) derivation)])))
+          (mapo [rel lst out]
+            (conde
+              [(emptyo lst) (== out ())]
+              [(fresh [x xs y ys]
+                 (conso x xs lst)
+                 (conso y ys out)
+                 (rel x y)
+                 (mapo rel xs ys))]))
+          (parseo [sppf tree]
+            (fresh [rule symbs out]
+              (walko sppf () [rule symbs])
+              (mapo (fn [x y]
+                      (conde
+                        [(project [x] (featurec x {:terminal y}))]
+                        [(parseo x y)]))
+                    symbs
+                    out)
+              (conso rule out tree)))]
     (if all-parses
-      (run* [q] (parse* sppf q))
-      (parse sppf))))
+      (run* [q] (parseo sppf q))
+      (first (run 1 [q] (parseo sppf q))))))
 
 ;; TODO: Deal with nullable nonterminals.
 (defn earley [s grm S & {:keys [all-parses] :or {all-parses false}}]
@@ -99,7 +112,8 @@
   ;; Works with ambiguous grammars.
   (:parse (earley "sss"
                   [[:S [:S :S]] [:S "s"]]
-                  :S))
+                  :S
+                  :all-parses true))
   ;; Nullable grammar test.
   (earley "aa"
           [[:A [\a :B :B :B \a]]
