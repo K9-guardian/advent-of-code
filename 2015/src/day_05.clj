@@ -22,7 +22,7 @@
               (complement contains-banned-pair?)))
 
 (defn contains-2-pairs-without-overlap? [s]
-  (loop [[p & ps] (partition 2 1 s)
+  (loop [[p & ps :as l] (partition 2 1 s)
          b false]
     (case (count l)
       (1 2) b
