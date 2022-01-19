@@ -4,6 +4,8 @@
             [clojure.set :as set])
   (:use clojure.core.logic))
 
+(declare single-parse all-parses)
+
 (defn- set-conj [{:keys [seen?] :as all} & xs]
   (let [xs (remove seen? xs)]
     (into {} (map (fn [[k v]] [k (apply conj v xs)])) all)))
@@ -14,57 +16,6 @@
   {:label (if (= ::complete (next-symbol lr0)) lhs lr0) :start origin :finish k})
 
 (def ^:private indexed?* (some-fn string? indexed?))
-
-;; Returns a single parse tree.
-(defn- single-parse [forest label]
-  (letfn [(walk [label]
-            (loop [label label lst ()]
-              (if-let [[{{[lhs _] :rule pos :pos} :label :as left} right] (first (forest label))]
-                (if (zero? pos)
-                  [lhs (cons right lst)]
-                  (recur left (cons right lst))))))
-          (parse [label]
-            (let [[rule symbs] (walk label)
-                  symbs (map (some-fn :terminal parse) symbs)]
-              (cons rule symbs)))]
-    (parse label)))
-
-(pldb/db-rel ^:private node ^:index label left right)
-
-;; Returns a lazy sequence of all possible parse trees.
-;; I made it return all potential parses mainly for fun.
-;; This uses core.logic so it's incredibly slow.
-;; Only check all parses on small inputs!
-(defn- all-parses [forest label]
-  (let [forest (->> forest
-                    (mapcat (fn [[k sppf]] (map (partial apply list node k) sppf)))
-                    (apply pldb/db))]
-    (letfn [(mapo [rel lst out]
-              (matche [lst out]
-                ([[] []])
-                ([[x . xs] [y . ys]]
-                 (rel x y)
-                 (mapo rel xs ys))))
-            (walko
-              ([label out] (walko label () out))
-              ([label acc out]
-               (fresh [pos lhs rhs left right acc*]
-                 (node label left right)
-                 (featurec left {:label {:rule [lhs rhs] :pos pos}})
-                 (conso right acc acc*)
-                 (matchu [pos]
-                   ([0] (conjo [lhs] acc* out))
-                   ([_] (walko left acc* out))))))
-            (parseo [label tree]
-              (fresh [rule symbs out]
-                (walko label [rule symbs])
-                (conso rule out tree)
-                (mapo #(conda
-                         [(featurec %1 {:terminal %2})]
-                         [(parseo %1 %2)])
-                      symbs
-                      out)))]
-      (pldb/with-db forest (run* [q] (parseo label q))))))
 
 ;; TODO: Deal with nullable nonterminals.
 (defn earley [s grm S & {all-parses* :all-parses :or {all-parses false}}]
@@ -119,6 +70,57 @@
       (-> chart
           (update :chart (partial map :items))
           (assoc :parse (parse (:forest chart) {:label S :start 0 :finish (count s)}))))))
+
+;; Returns a single parse tree.
+(defn- single-parse [forest label]
+  (letfn [(walk [label]
+            (loop [label label lst ()]
+              (if-let [[{{[lhs _] :rule pos :pos} :label :as left} right] (first (forest label))]
+                (if (zero? pos)
+                  [lhs (cons right lst)]
+                  (recur left (cons right lst))))))
+          (parse [label]
+            (let [[rule symbs] (walk label)
+                  symbs (map (some-fn :terminal parse) symbs)]
+              (cons rule symbs)))]
+    (parse label)))
+
+(pldb/db-rel ^:private node ^:index label left right)
+
+;; Returns a lazy sequence of all possible parse trees.
+;; I made it return all potential parses mainly for fun.
+;; This uses core.logic so it's incredibly slow.
+;; Only check all parses on small inputs!
+(defn- all-parses [forest label]
+  (let [forest (->> forest
+                    (mapcat (fn [[k sppf]] (map (partial apply list node k) sppf)))
+                    (apply pldb/db))]
+    (letfn [(mapo [rel lst out]
+              (matche [lst out]
+                ([[] []])
+                ([[x . xs] [y . ys]]
+                 (rel x y)
+                 (mapo rel xs ys))))
+            (walko
+              ([label out] (walko label () out))
+              ([label acc out]
+               (fresh [pos lhs rhs left right acc*]
+                 (node label left right)
+                 (featurec left {:label {:rule [lhs rhs] :pos pos}})
+                 (conso right acc acc*)
+                 (matchu [pos]
+                   ([0] (conjo [lhs] acc* out))
+                   ([_] (walko left acc* out))))))
+            (parseo [label tree]
+              (fresh [rule symbs out]
+                (walko label [rule symbs])
+                (conso rule out tree)
+                (mapo #(conda
+                         [(featurec %1 {:terminal %2})]
+                         [(parseo %1 %2)])
+                      symbs
+                      out)))]
+      (pldb/with-db forest (run* [q] (parseo label q))))))
 
 (comment
   ;; Example on Wikipedia.
