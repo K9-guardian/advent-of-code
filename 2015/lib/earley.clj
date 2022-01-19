@@ -42,7 +42,9 @@
     (letfn [(mapo [rel lst out]
               (matche [lst out]
                 ([[] []])
-                ([[x . xs] [y . ys]] (rel x y) (mapo rel xs ys))))
+                ([[x . xs] [y . ys]]
+                 (rel x y)
+                 (mapo rel xs ys))))
             (walko
               ([label out] (walko label () out))
               ([label acc out]
