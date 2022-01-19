@@ -48,8 +48,9 @@
                 (map (juxt identity (comp vector str/lower-case)))
                 (concat rs))
         m (mapv str/lower-case m)]
-    (->> (earley m rs "e" :parse-tree? true)
-         (tree-seq vector? identity)
-         count)))
-
-(p2 input)
+    (->> (earley m rs "e")
+         :parse
+         (tree-seq seq? identity)
+         (remove seq?)
+         count
+         (+ (- (* 2 (count m))))))) ; Removes the extra rules we added for terminals
