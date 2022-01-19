@@ -49,4 +49,4 @@
 (print "Day 22: ") (time [(day-22/p1 day-22/input) (day-22/p2 day-22/input)])
 (print "Day 23: ") (time [(day-23/p1 day-23/input) (day-23/p2 day-23/input)])
 (print "Day 24: ") (time [(day-24/p1 day-24/input) (day-24/p2 day-24/input)])
-(print "Day 25: ") (time [(day-25/p1 day-25/input) (day-25/p2 day-25/input)])
+(print "Day 25: ") (time (day-25/p1 day-25/input))
