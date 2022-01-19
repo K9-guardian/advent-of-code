@@ -1,6 +1,7 @@
 (ns earley
   (:refer-clojure :exclude [==])
-  (:require [clojure.set :as set])
+  (:require [clojure.core.logic.pldb :as pldb]
+            [clojure.set :as set])
   (:use clojure.core.logic))
 
 (defn- set-conj [{:keys [seen?] :as all} & xs]
@@ -32,24 +33,31 @@
 ;; I made it return all potential parses mainly for fun.
 ;; This uses core.logic so it's incredibly slow.
 ;; Only check all parses on small inputs!
+
+(pldb/db-rel ^:private node ^:index sppf left right)
+
 (defn- all-parses* [forest sppf]
-  (letfn [(mapo [rel lst out]
-            (matche [lst out]
-              ([[] []])
-              ([[x . xs] [y . ys]] (rel x y) (mapo rel xs ys))))
-          (walko [sppf lst derivation]
-            (fresh [pos lhs rhs left right]
-              (project [sppf] (membero [left right] (forest sppf)))
-              (featurec left {:label {:rule [lhs rhs] :pos pos}})
-              (matchu [pos]
-                ([0] (conjo [lhs] (cons right lst) derivation))
-                ([_] (walko left (cons right lst) derivation)))))
-          (parseo [sppf tree]
-            (fresh [rule symbs out]
-              (walko sppf () [rule symbs])
-              (mapo (fn [x y] (conda [(featurec x {:terminal y})] [(parseo x y)])) symbs out)
-              (conso rule out tree)))]
-    (run* [q] (parseo sppf q))))
+  (let [forest (->> forest
+                    (mapcat (fn [[k lst]] (map (partial apply vector node k) lst)))
+                    (apply pldb/db))]
+    (letfn [(mapo [rel lst out]
+              (matche [lst out]
+                ([[] []])
+                ([[x . xs] [y . ys]] (rel x y) (mapo rel xs ys))))
+            ;; TODO: Make this method less scuffed.
+            (walko [sppf lst derivation]
+              (fresh [pos lhs rhs left right]
+                (node sppf left right)
+                (featurec left {:label {:rule [lhs rhs] :pos pos}})
+                (matchu [pos]
+                  ([0] (conjo [lhs] (cons right lst) derivation))
+                  ([_] (walko left (cons right lst) derivation)))))
+            (parseo [sppf tree]
+              (fresh [rule symbs out]
+                (walko sppf () [rule symbs])
+                (mapo #(conda [(featurec %1 {:terminal %2})] [(parseo %1 %2)]) symbs out)
+                (conso rule out tree)))]
+      (pldb/with-db forest (run* [q] (parseo sppf q))))))
 
 ;; TODO: Deal with nullable nonterminals.
 (defn earley [s grm S & {:keys [all-parses] :or {all-parses false}}]
@@ -114,7 +122,7 @@
                    [:T "1"] [:T "2"] [:T "3"] [:T "4"]]
                   :P))
   ;; Works with ambiguous grammars.
-  (:parse (earley "sssss"
+  (:parse (earley "sssssssssssssssss"
                   [[:S [:S :S]] [:S "s"]]
                   :S
                   :all-parses true))
