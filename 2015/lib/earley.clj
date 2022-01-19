@@ -10,53 +10,59 @@
 
 (defn- next-symbol [{[_ rhs] :rule pos :pos}] (get rhs pos ::complete))
 
-(defn- state->sppf [{{[lhs _] :rule :as lr0} :lr0 origin :origin :as st} k]
+(defn- state->label [{{[lhs _] :rule :as lr0} :lr0 origin :origin :as st} k]
   {:label (if (= ::complete (next-symbol lr0)) lhs lr0) :start origin :finish k})
 
 (def ^:private indexed?* (some-fn string? indexed?))
 
 ;; Returns a single parse tree.
-(defn- single-parse [forest sppf]
-  (letfn [(walk [sppf]
-            (loop [sppf sppf lst ()]
-              (if-let [[{{[lhs _] :rule pos :pos} :label :as left} right] (first (forest sppf))]
+(defn- single-parse [forest label]
+  (letfn [(walk [label]
+            (loop [label label lst ()]
+              (if-let [[{{[lhs _] :rule pos :pos} :label :as left} right] (first (forest label))]
                 (if (zero? pos)
                   [lhs (cons right lst)]
                   (recur left (cons right lst))))))
-          (parse [sppf]
-            (let [[rule symbs] (walk sppf)
+          (parse [label]
+            (let [[rule symbs] (walk label)
                   symbs (map (some-fn :terminal parse) symbs)]
               (cons rule symbs)))]
-    (parse sppf)))
+    (parse label)))
 
-(pldb/db-rel ^:private node ^:index sppf left right)
+(pldb/db-rel ^:private node ^:index label left right)
 
 ;; Returns a lazy sequence of all possible parse trees.
 ;; I made it return all potential parses mainly for fun.
 ;; This uses core.logic so it's incredibly slow.
 ;; Only check all parses on small inputs!
-(defn- all-parses* [forest sppf]
+(defn- all-parses* [forest label]
   (let [forest (->> forest
-                    (mapcat (fn [[k lst]] (map (partial apply list node k) lst)))
+                    (mapcat (fn [[k sppf]] (map (partial apply list node k) sppf)))
                     (apply pldb/db))]
     (letfn [(mapo [rel lst out]
               (matche [lst out]
                 ([[] []])
                 ([[x . xs] [y . ys]] (rel x y) (mapo rel xs ys))))
-            ;; TODO: Make this method less scuffed.
-            (walko [sppf lst derivation]
-              (fresh [pos lhs rhs left right]
-                (node sppf left right)
-                (featurec left {:label {:rule [lhs rhs] :pos pos}})
-                (matchu [pos]
-                  ([0] (conjo [lhs] (cons right lst) derivation))
-                  ([_] (walko left (cons right lst) derivation)))))
-            (parseo [sppf tree]
+            (walko
+              ([label out] (walko label () out))
+              ([label acc out]
+               (fresh [pos lhs rhs left right acc*]
+                 (node label left right)
+                 (featurec left {:label {:rule [lhs rhs] :pos pos}})
+                 (conso right acc acc*)
+                 (matchu [pos]
+                   ([0] (conjo [lhs] acc* out))
+                   ([_] (walko left acc* out))))))
+            (parseo [label tree]
               (fresh [rule symbs out]
-                (walko sppf () [rule symbs])
-                (mapo #(conda [(featurec %1 {:terminal %2})] [(parseo %1 %2)]) symbs out)
-                (conso rule out tree)))]
-      (pldb/with-db forest (run* [q] (parseo sppf q))))))
+                (walko label [rule symbs])
+                (conso rule out tree)
+                (mapo #(conda
+                         [(featurec %1 {:terminal %2})]
+                         [(parseo %1 %2)])
+                      symbs
+                      out)))]
+      (pldb/with-db forest (run* [q] (parseo label q))))))
 
 ;; TODO: Deal with nullable nonterminals.
 (defn earley [s grm S & {:keys [all-parses] :or {all-parses false}}]
@@ -68,26 +74,26 @@
                  (update-in chart [:chart k] (partial apply set-conj))))
           (scan [chart {:keys [lr0] :as st} k]
             (if (= (next-symbol lr0) (get s k ::end-of-string))
-              (let [prev (state->sppf st k)
+              (let [prev (state->label st k)
                     symb {:terminal (next-symbol lr0) :start k :finish (inc k)}
                     st (update-in st [:lr0 :pos] inc)
-                    sppf (state->sppf st (inc k))]
+                    label (state->label st (inc k))]
                 (-> chart
                     (update-in [:chart (inc k)] (fnil set-conj {:seen? #{} :items []}) st)
-                    (update-in [:forest sppf] (fnil conj []) [prev symb])))
+                    (update-in [:forest label] (fnil conj []) [prev symb])))
               chart))
           (complete [chart {{[lhs _] :rule} :lr0 origin :origin :as st} k]
             (let [completions (filter (comp #{lhs} next-symbol :lr0)
                                       (-> chart :chart (get origin) :items))]
               (reduce
                (fn [chart {:keys [lr0] :as st}]
-                 (let [prev (state->sppf st origin)
+                 (let [prev (state->label st origin)
                        symb {:label (next-symbol lr0) :start origin :finish k}
                        st (update-in st [:lr0 :pos] inc)
-                       sppf (state->sppf st k)]
+                       label (state->label st k)]
                    (-> chart
                        (update-in [:chart k] set-conj st)
-                       (update-in [:forest sppf] (fnil conj []) [prev symb]))))
+                       (update-in [:forest label] (fnil conj []) [prev symb]))))
                chart
                completions)))]
     (let [terminal? (set/difference (->> grm (mapcat second) set) (->> grm (map first) set))
@@ -121,7 +127,7 @@
                    [:T "1"] [:T "2"] [:T "3"] [:T "4"]]
                   :P))
   ;; Works with ambiguous grammars.
-  (:parse (earley "sssssssssssssssss"
+  (:parse (earley "sssss"
                   [[:S [:S :S]] [:S "s"]]
                   :S
                   :all-parses true))
