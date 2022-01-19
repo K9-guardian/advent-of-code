@@ -29,13 +29,12 @@
               (cons rule symbs)))]
     (parse sppf)))
 
+(pldb/db-rel ^:private node ^:index sppf left right)
+
 ;; Returns a lazy sequence of all possible parse trees.
 ;; I made it return all potential parses mainly for fun.
 ;; This uses core.logic so it's incredibly slow.
 ;; Only check all parses on small inputs!
-
-(pldb/db-rel ^:private node ^:index sppf left right)
-
 (defn- all-parses* [forest sppf]
   (let [forest (->> forest
                     (mapcat (fn [[k lst]] (map (partial apply vector node k) lst)))
