@@ -35,7 +35,7 @@
 ;; I made it return all potential parses mainly for fun.
 ;; This uses core.logic so it's incredibly slow.
 ;; Only check all parses on small inputs!
-(defn- all-parses* [forest label]
+(defn- all-parses [forest label]
   (let [forest (->> forest
                     (mapcat (fn [[k sppf]] (map (partial apply list node k) sppf)))
                     (apply pldb/db))]
@@ -67,7 +67,7 @@
       (pldb/with-db forest (run* [q] (parseo label q))))))
 
 ;; TODO: Deal with nullable nonterminals.
-(defn earley [s grm S & {:keys [all-parses] :or {all-parses false}}]
+(defn earley [s grm S & {all-parses* :all-parses :or {all-parses false}}]
   {:pre [(indexed?* s) (->> grm (map second) (every? indexed?*))]}
   (letfn [(predict [chart {:keys [lr0]} k]
             (->> grm
@@ -115,7 +115,7 @@
                                   terminal? (recur (scan chart st k) (inc i))
                                   (recur (predict chart st k) (inc i))))))))
                       {:chart [{:seen? (set top-levels) :items (vec top-levels)}] :forest {}}))
-          parse (if all-parses all-parses* single-parse)]
+          parse (if all-parses* all-parses single-parse)]
       (-> chart
           (update :chart (partial map :items))
           (assoc :parse (parse (:forest chart) {:label S :start 0 :finish (count s)}))))))
