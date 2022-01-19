@@ -37,7 +37,7 @@
 ;; Only check all parses on small inputs!
 (defn- all-parses* [forest sppf]
   (let [forest (->> forest
-                    (mapcat (fn [[k lst]] (map (partial apply vector node k) lst)))
+                    (mapcat (fn [[k lst]] (map (partial apply list node k) lst)))
                     (apply pldb/db))]
     (letfn [(mapo [rel lst out]
               (matche [lst out]
