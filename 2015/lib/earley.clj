@@ -80,9 +80,10 @@
                   [lhs (cons right lst)]
                   (recur left (cons right lst))))))
           (parse [label]
-            (let [[rule symbs] (walk label)
-                  symbs (map (some-fn :terminal parse) symbs)]
-              (cons rule symbs)))]
+            (let [[rule symbs] (walk label)]
+              (->> symbs
+                   (map #(if (contains? % :terminal) (:terminal %) (parse %)))
+                   (cons rule))))]
     (parse label)))
 
 (pldb/db-rel ^:private node ^:index label left right)
