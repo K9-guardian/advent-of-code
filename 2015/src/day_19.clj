@@ -40,12 +40,12 @@
 ;; However, we can make it a sentence by adding a rule A => a for every symbol,
 ;; then applying each of those rules to the molecule, thus creating a valid sentence.
 (defn p2 [input]
-  (let [[rs m] (parse-input input)
-        rs (map #(update % 1 (comp vec (partial re-seq #"[A-Z][a-z]?"))) rs) ; Splitting by symbols
+  (let [[rs m] (parse-input input) ; Splitting by symbols
+        rs (mapcat #(update % 1 (comp vec (partial re-seq #"[A-Z][a-z]?"))) rs)
         m (re-seq #"[A-Z][a-z]?" m)
         rs (->> m
                 set ; Using all lowercase to represent terminals
-                (map (juxt identity (comp vector str/lower-case)))
+                (mapcat (juxt identity (comp vector str/lower-case)))
                 (concat rs))
         m (mapv str/lower-case m)]
     (->> (earley m rs "e")

@@ -19,57 +19,58 @@
 
 ;; TODO: Deal with nullable nonterminals.
 (defn earley [s grm S & {all-parses* :all-parses :or {all-parses false}}]
-  {:pre [(indexed?* s) (->> grm (map second) (every? indexed?*))]}
-  (letfn [(predict [chart {:keys [lr0]} k]
-            (->> grm
-                 (filter (comp #{(next-symbol lr0)} first))
-                 (map #(hash-map :lr0 {:rule % :pos 0} :origin k))
-                 (update-in chart [:chart k] (partial apply set-conj))))
-          (scan [chart {:keys [lr0] :as st} k]
-            (if (= (next-symbol lr0) (get s k ::end-of-string))
-              (let [prev (state->label st k)
-                    symb {:terminal (next-symbol lr0) :start k :finish (inc k)}
-                    st (update-in st [:lr0 :pos] inc)
-                    label (state->label st (inc k))]
-                (-> chart
-                    (update-in [:chart (inc k)] (fnil set-conj {:seen? #{} :items []}) st)
-                    (update-in [:forest label] (fnil conj []) [prev symb])))
-              chart))
-          (complete [chart {{[lhs _] :rule} :lr0 origin :origin :as st} k]
-            (let [completions (filter (comp #{lhs} next-symbol :lr0)
-                                      (-> chart :chart (get origin) :items))]
-              (reduce
-               (fn [chart {:keys [lr0] :as st}]
-                 (let [prev (state->label st origin)
-                       symb {:label (next-symbol lr0) :start origin :finish k}
+  {:pre [(even? (count grm)) (indexed?* s) (->> grm (partition 2) (map second) (every? indexed?*))]}
+  (let [grm (partition 2 grm)
+        terminal? (set/difference (->> grm (mapcat second) set) (->> grm (map first) set))
+        top-levels (->> grm
+                        (filter (comp #{S} first))
+                        (map #(hash-map :lr0 {:rule % :pos 0} :origin 0)))
+        parse (if all-parses* all-parses single-parse)
+        predict (fn [chart {:keys [lr0]} k]
+                  (->> grm
+                       (filter (comp #{(next-symbol lr0)} first))
+                       (map #(hash-map :lr0 {:rule % :pos 0} :origin k))
+                       (update-in chart [:chart k] (partial apply set-conj))))
+        scan (fn [chart {:keys [lr0] :as st} k]
+               (if (= (next-symbol lr0) (get s k ::end-of-string))
+                 (let [prev (state->label st k)
+                       symb {:terminal (next-symbol lr0) :start k :finish (inc k)}
                        st (update-in st [:lr0 :pos] inc)
-                       label (state->label st k)]
+                       label (state->label st (inc k))]
                    (-> chart
-                       (update-in [:chart k] set-conj st)
-                       (update-in [:forest label] (fnil conj []) [prev symb]))))
-               chart
-               completions)))]
-    (let [terminal? (set/difference (->> grm (mapcat second) set) (->> grm (map first) set))
-          top-levels (->> grm
-                          (filter (comp #{S} first))
-                          (map #(hash-map :lr0 {:rule % :pos 0} :origin 0)))
-          chart (->> (range (inc (count s)))
+                       (update-in [:chart (inc k)] (fnil set-conj {:seen? #{} :items []}) st)
+                       (update-in [:forest label] (fnil conj []) [prev symb])))
+                 chart))
+        complete (fn [chart {{[lhs _] :rule} :lr0 origin :origin :as st} k]
+                   (let [completions (filter (comp #{lhs} next-symbol :lr0)
+                                             (-> chart :chart (get origin) :items))]
                      (reduce
-                      (fn [chart k]
-                        (loop [chart chart i 0]
-                          (let [items (-> chart :chart (get k) :items)]
-                            (if (= i (count items))
-                              chart
-                              (let [{:keys [lr0] :as st} (items i)]
-                                (condp apply [(next-symbol lr0)] ; Unary predicates with condp.
-                                  #{::complete} (recur (complete chart st k) (inc i))
-                                  terminal? (recur (scan chart st k) (inc i))
-                                  (recur (predict chart st k) (inc i))))))))
-                      {:chart [{:seen? (set top-levels) :items (vec top-levels)}] :forest {}}))
-          parse (if all-parses* all-parses single-parse)]
-      (-> chart
-          (update :chart (partial map :items))
-          (assoc :parse (parse (:forest chart) {:label S :start 0 :finish (count s)}))))))
+                      (fn [chart {:keys [lr0] :as st}]
+                        (let [prev (state->label st origin)
+                              symb {:label (next-symbol lr0) :start origin :finish k}
+                              st (update-in st [:lr0 :pos] inc)
+                              label (state->label st k)]
+                          (-> chart
+                              (update-in [:chart k] set-conj st)
+                              (update-in [:forest label] (fnil conj []) [prev symb]))))
+                      chart
+                      completions)))
+        chart (->> (range (inc (count s)))
+                   (reduce
+                    (fn [chart k]
+                      (loop [chart chart i 0]
+                        (let [items (-> chart :chart (get k) :items)]
+                          (if (= i (count items))
+                            chart
+                            (let [{:keys [lr0] :as st} (items i)]
+                              (condp apply [(next-symbol lr0)] ; Unary predicates with condp.
+                                #{::complete} (recur (complete chart st k) (inc i))
+                                terminal? (recur (scan chart st k) (inc i))
+                                (recur (predict chart st k) (inc i))))))))
+                    {:chart [{:seen? (set top-levels) :items (vec top-levels)}] :forest {}}))]
+    (-> chart
+        (update :chart (partial map :items))
+        (assoc :parse (parse (:forest chart) {:label S :start 0 :finish (count s)})))))
 
 ;; Returns a single parse tree.
 (defn- single-parse [forest label]
@@ -126,18 +127,18 @@
 (comment
   ;; Example on Wikipedia.
   (:parse (earley "2+3*4"
-                  [[:P [:S]]
-                   [:S [:S \+ :M]] [:S [:M]]
-                   [:M [:M \* :T]] [:M [:T]]
-                   [:T "1"] [:T "2"] [:T "3"] [:T "4"]]
+                  [:P [:S]
+                   :S [:S \+ :M] :S [:M]
+                   :M [:M \* :T] :M [:T]
+                   :T "1" :T "2" :T "3" :T "4"]
                   :P))
   ;; Works with ambiguous grammars.
   (:parse (earley "sssss"
-                  [[:S [:S :S]] [:S "s"]]
+                  [:S [:S :S] :S "s"]
                   :S
                   :all-parses true))
   ;; Nullable grammar test.
   (earley "aa"
-          [[:A [\a :B :B :B \a]]
-           [:B ""]]
+          [:A [\a :B :B :B \a]
+           :B ""]
           :A))
