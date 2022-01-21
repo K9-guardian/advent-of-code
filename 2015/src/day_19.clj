@@ -41,7 +41,7 @@
 ;; then applying each of those rules to the molecule, thus creating a valid sentence.
 (defn p2 [input]
   (let [[rs m] (parse-input input)
-        rs (map (fn [[k v]] [k (vec (re-seq #"[A-Z][a-z]?" v))]) rs) ; Splitting by symbols
+        rs (map #(update % 1 (comp vec (partial re-seq #"[A-Z][a-z]?"))) rs) ; Splitting by symbols
         m (re-seq #"[A-Z][a-z]?" m)
         rs (->> m
                 set ; Using all lowercase to represent terminals
