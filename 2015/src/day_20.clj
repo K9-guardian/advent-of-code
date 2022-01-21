@@ -1,4 +1,5 @@
-(ns day-20)
+(ns day-20
+  (:require [clojure.data.int-map :as int-map]))
 
 (def input (Integer/parseInt (slurp "input/d20.txt")))
 
@@ -6,10 +7,10 @@
   (reduce (fn [m n]
             (if (<= input (* 10 (apply + (m n))))
               (reduced n)
-              (reduce (fn [m d] (update m (+ n d) (fnil conj [(+ n d)]) d))
+              (reduce (fn [m d] (int-map/update m (+ n d) (fnil conj [(+ n d)]) d))
                       m
                       (m n))))
-          {1 [1]}
+          (int-map/int-map 1 [1])
           (iterate inc 1)))
 
 (defn p2 [input]
@@ -19,8 +20,8 @@
                                (apply +)
                                (* 11)))
               (reduced n)
-              (reduce (fn [m d] (update m (+ n d) (fnil conj [(+ n d)]) d))
+              (reduce (fn [m d] (int-map/update m (+ n d) (fnil conj [(+ n d)]) d))
                       m
                       (m n))))
-          {1 [1]}
+          (int-map/int-map 1 [1])
           (iterate inc 1)))
