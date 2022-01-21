@@ -16,19 +16,17 @@
        (into {:arm 0})))
 
 (def effects
-  {:shield {"Shield" {:turns 6
-                      :action (fn [st] ; This is messy because it needs to read the state
-                                (let [active? (-> st :effects (get "Shield"))]
-                                  (assoc-in st [:me :arm] (if active? 7 0))))}}
-   :poison {"Poison" {:turns 6 :action #(update-in % [:boss :hp] - 3)}}
-   :recharge {"Recharge" {:turns 5 :action #(update-in % [:me :mana] + 101)}}})
+  {"Shield" #(assoc-in % [:me :arm] (if (-> % :effects (get "Shield")) 7 0))
+   "Poison" #(update-in % [:boss :hp] - 3)
+   "Recharge" #(update-in % [:me :mana] + 101)
+   "Drip" #(if (= :my-start (:turn %)) (update-in % [:me :hp] dec) %)})
 
 (def spells
   [{:name "Magic Missile" :cost 53 :action #(update-in % [:boss :hp] - 4)}
    {:name "Drain" :cost 73 :action #(-> % (update-in [:boss :hp] - 2) (update-in [:me :hp] + 2))}
-   {:name "Shield" :cost 113 :action #(update % :effects merge (:shield effects))}
-   {:name "Poison" :cost 173 :action #(update % :effects merge (:poison effects))}
-   {:name "Recharge" :cost 229 :action #(update % :effects merge (:recharge effects))}])
+   {:name "Shield" :cost 113 :action #(update % :effects assoc "Shield" 6)}
+   {:name "Poison" :cost 173 :action #(update % :effects assoc "Poison" 6)}
+   {:name "Recharge" :cost 229 :action #(update % :effects assoc "Recharge" 5)}])
 
 ;; Also removes effects when they reach 0 turns
 (defn dec-effect-turns [st]
@@ -36,8 +34,8 @@
           :effects
           (partial into
                    {}
-                   (comp (map #(update-in % [1 :turns] dec))
-                         (remove #(zero? (-> % second :turns)))))))
+                   (comp (map #(update % 1 dec))
+                         (remove #(-> % second zero?))))))
 
 (defn swap-turn [st]
   (update st
@@ -59,8 +57,8 @@
                       (:my-start :boss-start) [[0 (->> dec-effect-turns
                                                        (comp (->> st
                                                                   :effects
-                                                                  vals
-                                                                  (map :action)
+                                                                  keys
+                                                                  (map effects)
                                                                   (apply comp))))]]
                       :boss [[0 #(let [amt (max 1 (- (-> % :boss :dmg) (-> % :me :arm)))]
                                    (update-in % [:me :hp] - amt))]]
@@ -92,8 +90,7 @@
 (defn p2 [input]
   (let [init {:me {:hp 50 :arm 0 :mana 500}
               :boss (parse-input input)
-              :effects {:drip {:turns ##Inf
-                               :action #(if (= :my-start (:turn %)) (update-in % [:me :hp] dec) %)}}
+              :effects {"Drip" ##Inf}
               :turn :me}]
     (->> (dijkstra (priority-queue init 0) {init 0})
          (filter (comp #(<= (-> % :boss :hp) 0) key))
