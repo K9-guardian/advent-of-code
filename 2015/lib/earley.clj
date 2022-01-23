@@ -4,11 +4,11 @@
             [clojure.set :as set])
   (:use clojure.core.logic))
 
-(declare single-parse all-parses)
+(declare nullables single-parse all-parses)
 
 (defn- set-conj [{:keys [seen?] :as all} & xs]
   (let [xs (remove seen? xs)]
-    (into {} (map (fn [[k v]] [k (apply conj v xs)])) all)))
+    (into {} (map (fn [[k v]] [k (into v xs)])) all)))
 
 (defn- next-symbol [{[_ rhs] :rule pos :pos}] (get rhs pos ::complete))
 
@@ -17,20 +17,38 @@
 
 (def ^:private indexed?* (some-fn string? indexed?))
 
-;; TODO: Deal with nullable nonterminals.
 (defn earley [s grm S & {all-parses* :all-parses :or {all-parses false}}]
   {:pre [(even? (count grm)) (indexed?* s) (->> grm (partition 2) (map second) (every? indexed?*))]}
-  (let [grm (partition 2 grm)
+  (let [grm (->> grm (partition 2) (map vec))
+        nullable? (nullables grm)
         terminal? (set/difference (->> grm (mapcat second) set) (->> grm (map first) set))
         top-levels (->> grm
                         (filter (comp #{S} first))
                         (map #(hash-map :lr0 {:rule % :pos 0} :origin 0)))
         parse (if all-parses* all-parses single-parse)
-        predict (fn [chart {:keys [lr0]} k]
-                  (->> grm
-                       (filter (comp #{(next-symbol lr0)} first))
-                       (map #(hash-map :lr0 {:rule % :pos 0} :origin k))
-                       (update-in chart [:chart k] (partial apply set-conj))))
+        predict (fn [chart {:keys [lr0] :as st} k]
+                  (let [predictions (->> grm
+                                         (filter (comp #{(next-symbol lr0)} first))
+                                         (map #(hash-map :lr0 {:rule % :pos 0} :origin k)))]
+                    (reduce (fn [chart {{[lhs _] :rule} :lr0 :as pred}]
+                              (if (nullable? lhs)
+                                (let [prev (state->label st k)
+                                      symb {:label (next-symbol lr0) :start k :finish k}
+                                      st (update-in st [:lr0 :pos] inc)
+                                      label (state->label st k)]
+                                  (-> chart
+                                      (update-in [:chart k] set-conj st pred)
+                                      (update-in [:forest label] (fnil conj #{}) [prev symb])
+                                      (update-in [:forest symb]
+                                                 (fnil conj #{})
+                                                 [{:label {:rule [(next-symbol lr0) []]
+                                                           :pos 0}
+                                                   :start k
+                                                   :finish k}
+                                                  {:terminal [] :start k :finish k}])))
+                                (update-in chart [:chart k] set-conj pred)))
+                            chart
+                            predictions)))
         scan (fn [chart {:keys [lr0] :as st} k]
                (if (= (next-symbol lr0) (get s k ::end-of-string))
                  (let [prev (state->label st k)
@@ -39,7 +57,7 @@
                        label (state->label st (inc k))]
                    (-> chart
                        (update-in [:chart (inc k)] (fnil set-conj {:seen? #{} :items []}) st)
-                       (update-in [:forest label] (fnil conj []) [prev symb])))
+                       (update-in [:forest label] (fnil conj #{}) [prev symb])))
                  chart))
         complete (fn [chart {{[lhs _] :rule} :lr0 origin :origin :as st} k]
                    (let [completions (filter (comp #{lhs} next-symbol :lr0)
@@ -52,7 +70,7 @@
                               label (state->label st k)]
                           (-> chart
                               (update-in [:chart k] set-conj st)
-                              (update-in [:forest label] (fnil conj []) [prev symb]))))
+                              (update-in [:forest label] (fnil conj #{}) [prev symb]))))
                       chart
                       completions)))
         chart (->> (range (inc (count s)))
@@ -71,6 +89,21 @@
     (-> chart
         (update :chart (partial map :items))
         (assoc :parse (parse (:forest chart) {:label S :start 0 :finish (count s)})))))
+
+;; Returns all the nullable nonterminals in a grammar.
+(defn- nullables [grm]
+  (loop [prev #{}
+         curr (->> grm
+                   (filter (comp empty? second))
+                   (map first)
+                   set)]
+    (if (= prev curr)
+      curr
+      (recur curr
+             (->> grm
+                  (filter (comp (partial every? curr) second))
+                  (map first)
+                  (into curr))))))
 
 ;; Returns a single parse tree.
 (defn- single-parse [forest label]
@@ -133,12 +166,13 @@
                    :T "1" :T "2" :T "3" :T "4"]
                   :P))
   ;; Works with ambiguous grammars.
-  (:parse (earley "sssss"
+  (:forest (earley "sssss"
                   [:S [:S :S] :S "s"]
                   :S
                   :all-parses true))
-  ;; Nullable grammar test.
-  (earley "aa"
-          [:A [\a :B :B :B \a]
-           :B ""]
-          :A))
+  ;; Nullable grammar test. Skips production of C in parse tree.
+  (:parse (earley "aa"
+                  [:A [\a :B :B :B \a]
+                   :B [:C]
+                   :C ""]
+                  :A)))
