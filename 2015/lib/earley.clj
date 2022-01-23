@@ -41,8 +41,7 @@
                                       (update-in [:forest label] (fnil conj #{}) [prev symb])
                                       (update-in [:forest symb]
                                                  (fnil conj #{})
-                                                 [{:label {:rule [(next-symbol lr0) []]
-                                                           :pos 0}
+                                                 [{:label {:rule [(next-symbol lr0) []] :pos 0}
                                                    :start k
                                                    :finish k}
                                                   {:terminal [] :start k :finish k}])))
