@@ -166,9 +166,9 @@
                   :P))
   ;; Works with ambiguous grammars.
   (:parse (earley "sssss"
-                   [:S [:S :S] :S "s"]
-                   :S
-                   :all-parses true))
+                  [:S [:S :S] :S "s"]
+                  :S
+                  :all-parses true))
   ;; Nullable grammar test. Skips production of C in parse tree.
   (:parse (earley "aa"
                   [:A [\a :B :B :B \a]
