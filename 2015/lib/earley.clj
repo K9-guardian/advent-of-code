@@ -128,33 +128,33 @@
 (defn- all-parses [forest label]
   (let [forest (->> forest
                     (mapcat (fn [[k sppf]] (map (partial apply list node k) sppf)))
-                    (apply pldb/db))]
-    (letfn [(mapo [rel lst out]
-              (matche [lst out]
-                ([[] []])
-                ([[x . xs] [y . ys]]
-                 (rel x y)
-                 (mapo rel xs ys))))
-            (walko
-              ([label out] (walko label () out))
-              ([label acc out]
-               (fresh [pos lhs rhs left right acc*]
-                 (node label left right)
-                 (featurec left {:label {:rule [lhs rhs] :pos pos}})
-                 (conso right acc acc*)
-                 (matchu [pos]
-                   ([0] (conjo [lhs] acc* out))
-                   ([_] (walko left acc* out))))))
-            (parseo [label tree]
-              (fresh [rule symbs out]
-                (walko label [rule symbs])
-                (conso rule out tree)
-                (mapo #(conda
-                         [(featurec %1 {:terminal %2})]
-                         [(parseo %1 %2)])
-                      symbs
-                      out)))]
-      (pldb/with-db forest (run* [q] (parseo label q))))))
+                    (apply pldb/db))
+        mapo (fn mapo [rel lst out]
+               (matche [lst out]
+                 ([[] []])
+                 ([[x . xs] [y . ys]]
+                  (rel x y)
+                  (mapo rel xs ys))))
+        walko (fn walko
+                ([label out] (walko label () out))
+                ([label acc out]
+                 (fresh [pos lhs rhs left right acc*]
+                   (node label left right)
+                   (featurec left {:label {:rule [lhs rhs] :pos pos}})
+                   (conso right acc acc*)
+                   (matchu [pos]
+                     ([0] (conjo [lhs] acc* out))
+                     ([_] (walko left acc* out))))))
+        parseo (fn parseo [label tree]
+                 (fresh [rule symbs out]
+                   (walko label [rule symbs])
+                   (conso rule out tree)
+                   (mapo #(conda
+                            [(featurec %1 {:terminal %2})]
+                            [(parseo %1 %2)])
+                         symbs
+                         out)))]
+    (pldb/with-db forest (run* [q] (parseo label q)))))
 
 (comment
   ;; Example on Wikipedia.
