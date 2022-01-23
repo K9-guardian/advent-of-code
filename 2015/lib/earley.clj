@@ -166,10 +166,10 @@
                    :T "1" :T "2" :T "3" :T "4"]
                   :P))
   ;; Works with ambiguous grammars.
-  (:forest (earley "sssss"
-                  [:S [:S :S] :S "s"]
-                  :S
-                  :all-parses true))
+  (:parse (earley "sssss"
+                   [:S [:S :S] :S "s"]
+                   :S
+                   :all-parses true))
   ;; Nullable grammar test. Skips production of C in parse tree.
   (:parse (earley "aa"
                   [:A [\a :B :B :B \a]
