@@ -26,7 +26,7 @@
                                 ranges)]]
          (cond
            (and (= 1 l) (<= 2 n 3)) 1
-           (and (= 0 l) (= 3 n)) 1
+           (and (zero? l) (= 3 n)) 1
            :else 0))
        (partition board-size)
        (mapv vec)))
