@@ -27,15 +27,19 @@
        :to-range (mapv #(Integer/parseInt %) (str/split c2 #","))})))
 
 (defn update!-inclusive-range [^longs arr i1 i2 f]
-  (doseq [i (range i1 (inc i2))]
-    (aset arr i ^long (f (aget arr i)))))
+  (loop [i i1]
+    (when (<= i i2)
+      (aset arr i ^long (f (aget arr i)))
+      (recur (inc i)))))
 
 (defn update!-grid [^longs arr x1 x2 y1 y2 f]
-  (doseq [i (range y1 (inc y2))]
-    (update!-inclusive-range arr
-                             (+ (* 1000 i) x1)
-                             (+ (* 1000 i) x2)
-                             f)))
+  (loop [y y1]
+    (when (<= y y2)
+      (update!-inclusive-range arr
+                               (+ (* 1000 y) x1)
+                               (+ (* 1000 y) x2)
+                               f)
+      (recur (inc y)))))
 
 (defn p1 [input]
   (let [init (long-array 1000000 0)
