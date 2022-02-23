@@ -25,21 +25,14 @@ coord_dir_amt_(X-Y, Dir, Amt, X0-Y0) :-
     X0 #= X + Amt * Xunit,
     Y0 #= Y + Amt * Yunit.
 
-folder(coord_dir(X-Y, Dir), Turn-Amt, coord_dir(X0-Y0, Dir0)) :-
-    dir_turn_(Dir, Turn, Dir0),
-    coord_dir_amt_(X-Y, Dir0, Amt, X0-Y0).
-
 p1(S) :-
     read_file_to_string('input/d1.txt', Input, []),
     split_string(Input, ",", " ", Vs),
     maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Moves),
-    % foldl(folder, Moves, coord_dir(0-0, 'North'), X-Y),
-    % foldl([coord_dir(X-Y, Dir), Turn-Amt, coord_dir(X0-Y0, Dir0)]>>
-    %        (dir_turn_(Dir, Turn, Dir0),
-    %         coord_dir_amt_(X-Y, Dir0, Amt, X0-Y0)),
-    %       Moves,
-    %       coord_dir(0-0, 'North'),
-    %       X-Y).
-    S = Moves.
-    % S #= X + Y.
-    % S = X-Y.
+    foldl([Turn-Amt, coord_dir(X-Y, Dir), coord_dir(X0-Y0, Dir0)]>>
+            (dir_turn_(Dir, Turn, Dir0),
+             coord_dir_amt_(X-Y, Dir0, Amt, X0-Y0)),
+          Moves,
+          coord_dir(0-0, 'North'),
+          coord_dir(X-Y, _)),
+    S #= X + Y.
