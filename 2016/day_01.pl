@@ -61,14 +61,14 @@ p2(S) :-
     split_string(Input, ",", " ", Vs),
     maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Moves),
     foldl(
-        [Turn-Amt, coord_dir(X0-Y0, Dir0)-Locs0, coord_dir(X-Y, Dir)-Locs]>>(
+        [Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>(
             dir_turn_(Dir0, Turn, Dir),
             coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
             coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs1),
             append(Locs0, Locs1, Locs)
         ),
         Moves,
-        coord_dir(0-0, 'North')-[],
-        _-Locs),
+        coord_dir_locs(0-0, 'North', []),
+        coord_dir_locs(_, _, Locs)),
     first_duplicate(X-Y, Locs),
     S #= X + Y.
