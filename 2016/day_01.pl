@@ -6,18 +6,23 @@ move(T-Amt) --> turn(T), integer(Amt).
 turn('L') --> "L".
 turn('R') --> "R".
 
-dir_turn_('North', 'L', 'West').
-dir_turn_('North', 'R', 'East').
-dir_turn_('South', 'L', 'East').
-dir_turn_('South', 'R', 'West').
-dir_turn_('East', 'L', 'North').
-dir_turn_('East', 'R', 'South').
-dir_turn_('West', 'L', 'South').
-dir_turn_('West', 'R', 'North').
+dir_num('North', 0).
+dir_num('East', 1).
+dir_num('South', 2).
+dir_num('West', 3).
+
+turn_shift('L', -1).
+turn_shift('R', 1).
+
+dir_turn_(Dir0, Turn, Dir) :-
+    dir_num(Dir0, Num0),
+    turn_shift(Turn, Shift),
+    Num #= (Num0 + Shift) mod 4,
+    dir_num(Dir, Num).
 
 dir_unit('North', 0-1).
-dir_unit('South', 0-(-1)).
 dir_unit('East', 1-0).
+dir_unit('South', 0-(-1)).
 dir_unit('West', (-1)-0).
 
 coord_dir_amt_(X0-Y0, Dir, Amt, X-Y) :-
