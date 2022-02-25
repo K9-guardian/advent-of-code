@@ -33,8 +33,8 @@ coord_dir_amt_(X0-Y0, Dir, Amt, X-Y) :-
 coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs) :-
     dir_unit(Dir, Xunit-Yunit),
     findall(Num, between(1, Amt, Num), Nums),
-    maplist({X0, Y0, Xunit, Yunit}/[Num, X-Y]>>(
-                X #= X0 + Num * Xunit,
+    maplist({X0, Y0, Xunit, Yunit}/[Num, X-Y]>>
+            (   X #= X0 + Num * Xunit,
                 Y #= Y0 + Num * Yunit
             ),
             Nums,
@@ -50,8 +50,8 @@ p1(S) :-
     read_file_to_string('input/d1.txt', Input, []),
     split_string(Input, ",", " ", Vs),
     maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Moves),
-    foldl([Turn-Amt, coord_dir(X0-Y0, Dir0), coord_dir(X-Y, Dir)]>>(
-              dir_turn_(Dir0, Turn, Dir),
+    foldl([Turn-Amt, coord_dir(X0-Y0, Dir0), coord_dir(X-Y, Dir)]>>
+          (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y)
           ),
           Moves,
@@ -63,8 +63,8 @@ p2(S) :-
     read_file_to_string('input/d1.txt', Input, []),
     split_string(Input, ",", " ", Vs),
     maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Moves),
-    foldl([Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>(
-              dir_turn_(Dir0, Turn, Dir),
+    foldl([Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>
+          (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
               coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs1),
               append(Locs0, Locs1, Locs)
