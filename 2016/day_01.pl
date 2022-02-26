@@ -6,6 +6,11 @@ move(T-Amt) --> turn(T), integer(Amt).
 turn('L') --> "L".
 turn('R') --> "R".
 
+file_parsed(File, Parsed) :-
+    read_file_to_string(File, Input, []),
+    split_string(Input, ",", " ", Vs),
+    maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Parsed).
+
 dir_num('North', 0).
 dir_num('East', 1).
 dir_num('South', 2).
@@ -47,9 +52,7 @@ first_duplicate(E, [N|Ls]) :-
     first_duplicate(E, Ls).
 
 p1(S) :-
-    read_file_to_string('input/d1.txt', Input, []),
-    split_string(Input, ",", " ", Vs),
-    maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Moves),
+    file_parsed('input/d1.txt', Moves),
     foldl([Turn-Amt, coord_dir(X0-Y0, Dir0), coord_dir(X-Y, Dir)]>>
           (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y)
@@ -60,9 +63,7 @@ p1(S) :-
     S #= X + Y.
 
 p2(S) :-
-    read_file_to_string('input/d1.txt', Input, []),
-    split_string(Input, ",", " ", Vs),
-    maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Moves),
+    file_parsed('input/d1.txt', Moves),
     foldl([Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>
           (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
