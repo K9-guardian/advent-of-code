@@ -1,7 +1,3 @@
-:- use_module(library(readutil)).
-:- use_module(library(dcg/basics)).
-:- use_module(library(yall)).
-
 move(T-Amt) --> turn(T), integer(Amt).
 turn('L') --> "L".
 turn('R') --> "R".
