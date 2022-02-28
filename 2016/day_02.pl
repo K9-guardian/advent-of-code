@@ -43,26 +43,24 @@ p2_move_coord_(M, X0-Y0, C) :-
     Dist #=< 2 #<==> B,
     if_(B = 1, C = X-Y, C = X0-Y0).
 
+moves_coord_buttons([], _, []).
+moves_coord_buttons([Move|Moves], X0-Y0, [B|Bs]) :-
+    foldl(move_coord_, Move, X0-Y0, X-Y),
+    coord_button(X-Y, B),
+    moves_coord_buttons(Moves, X-Y, Bs).
+
+p2_moves_coord_buttons([], _, []).
+p2_moves_coord_buttons([Move|Moves], X0-Y0, [B|Bs]) :-
+    foldl(p2_move_coord_, Move, X0-Y0, X-Y),
+    p2_coord_button(X-Y, B),
+    p2_moves_coord_buttons(Moves, X-Y, Bs).
+
 p1(S) :-
     file_parsed('input/d2.txt', Moves),
-    foldl([Move, coord_buttons(X0-Y0, Bs0), coord_buttons(X-Y, Bs)]>>
-          (   foldl(move_coord_, Move, X0-Y0, X-Y),
-              coord_button(X-Y, B),
-              phrase((Bs0, [B]), Bs)
-          ),
-          Moves,
-          coord_buttons(1-1, []),
-          coord_buttons(_, Bs)),
+    moves_coord_buttons(Moves, 1-1, Bs),
     atomics_to_string(Bs, S).
 
 p2(S) :-
     file_parsed('input/d2.txt', Moves),
-    foldl([Move, coord_buttons(X0-Y0, Bs0), coord_buttons(X-Y, Bs)]>>
-          (   foldl(p2_move_coord_, Move, X0-Y0, X-Y),
-              p2_coord_button(X-Y, B),
-              phrase((Bs0, [B]), Bs)
-          ),
-          Moves,
-          coord_buttons(0-2, []),
-          coord_buttons(_, Bs)),
+    p2_moves_coord_buttons(Moves, 1-1, Bs),
     atomics_to_string(Bs, S).
