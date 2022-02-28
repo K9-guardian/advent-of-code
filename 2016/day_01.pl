@@ -62,13 +62,13 @@ p2(S) :-
     foldl([Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>
           (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
-              coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs_),
-              append(Locs0, Locs_, Locs)
+              coord_dir_amt_locs(X0-Y0, Dir, Amt, LocsP),
+              append(LocsP, Locs, Locs0)
           ),
           Moves,
-          coord_dir_locs(0-0, north, []),
-          coord_dir_locs(_, _, Locs)),
-    maplist(term_to_atom, Locs, Atoms),
+          coord_dir_locs(0-0, north, Locs),
+          coord_dir_locs(_, _, [])),
+    maplist(term_to_atom, [0-0|Locs], Atoms),
     list_duplicate(Atoms, Term),
     term_to_atom(X-Y, Term),
     S #= abs(X + Y).
