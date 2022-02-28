@@ -55,7 +55,7 @@ p1(S) :-
           Moves,
           coord_dir(0-0, north),
           coord_dir(X-Y, _)),
-    S #= X + Y.
+    S #= abs(X + Y).
 
 p2(S) :-
     file_parsed('input/d1.txt', Moves),
@@ -71,4 +71,4 @@ p2(S) :-
     maplist(term_to_atom, Locs, Atoms),
     list_duplicate(Atoms, Term),
     term_to_atom(X-Y, Term),
-    S #= X + Y.
+    S #= abs(X + Y).
