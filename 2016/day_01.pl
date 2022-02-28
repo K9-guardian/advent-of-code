@@ -63,7 +63,7 @@ p2(S) :-
           (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
               coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs_),
-              phrase((Locs0, Locs_), Locs)
+              append(Locs0, Locs_, Locs)
           ),
           Moves,
           coord_dir_locs(0-0, north, []),
