@@ -1,7 +1,10 @@
+:- use_module(library(apply)).
+:- use_module(library(yall)).
+
 file_parsed(File, Parsed) :-
-    read_file_to_string(File, Input, []),
-    split_string(Input, "\n", "\n", Parsed0),
-    maplist(string_chars, Parsed0, Parsed).
+    read_file_to_string(File, Input0, []),
+    split_string(Input0, "\n", "\n", Input1),
+    maplist(string_chars, Input1, Parsed).
 
 coord_button(X-Y, B) :- B #= Y * 3 + X + 1.
 

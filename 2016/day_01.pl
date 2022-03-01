@@ -1,13 +1,15 @@
+:- use_module(library(apply)).
 :- use_module(library(dcg/basics)).
+:- use_module(library(yall)).
 
 move(T-Amt) --> turn(T), integer(Amt).
 turn(l) --> "L".
 turn(r) --> "R".
 
 file_parsed(File, Parsed) :-
-    read_file_to_string(File, Input, []),
-    split_string(Input, ",", " ", Vs),
-    maplist([V, M]>>(string_chars(V, Cs), phrase(move(M), Cs)), Vs, Parsed).
+    read_file_to_string(File, Input0, []),
+    split_string(Input0, ",", " ", Input1),
+    maplist([I, M]>>(string_chars(I, Cs), phrase(move(M), Cs)), Input1, Parsed).
 
 dir_num_unit(north, 0, 0-1).
 dir_num_unit(east, 1, 1-0).
