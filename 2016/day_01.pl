@@ -1,15 +1,16 @@
 :- use_module(library(apply)).
 :- use_module(library(dcg/basics)).
+:- use_module(double_quotes).
+:- use_module(pio).
 :- use_module(library(yall)).
 
 move(T-Amt) --> turn(T), integer(Amt).
 turn(l) --> "L".
 turn(r) --> "R".
 
-file_parsed(File, Parsed) :-
-    read_file_to_string(File, Input0, []),
-    split_string(Input0, ",", " ", Input1),
-    maplist([I, M]>>(string_chars(I, Cs), phrase(move(M), Cs)), Input1, Parsed).
+csv([]) --> "".
+csv([M]) --> move(M).
+csv([M|Ms]) --> move(M), ",", blanks, csv(Ms).
 
 dir_num_unit(north, 0, 0-1).
 dir_num_unit(east, 1, 1-0).
@@ -49,7 +50,7 @@ list_duplicate_([L|Ls], Set, E) :-
     ).
 
 p1(S) :-
-    file_parsed('input/d1.txt', Moves),
+    phrase_from_file(csv(Moves), 'input/d1.txt'),
     foldl([Turn-Amt, coord_dir(X0-Y0, Dir0), coord_dir(X-Y, Dir)]>>
           (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y)
@@ -60,7 +61,7 @@ p1(S) :-
     S #= abs(X + Y).
 
 p2(S) :-
-    file_parsed('input/d1.txt', Moves),
+    phrase_from_file(csv(Moves), 'input/d1.txt'),
     foldl([Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>
           (   dir_turn_(Dir0, Turn, Dir),
               coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
