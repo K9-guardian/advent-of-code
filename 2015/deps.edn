@@ -3,4 +3,4 @@
   org.clojure/core.logic {:mvn/version "1.0.0"}
   org.clojure/data.int-map {:mvn/version "1.0.0"}
   org.clojure/math.combinatorics {:mvn/version "0.1.6"}}
- :paths ["src" "lib"]}
+ :paths ["dev" "src" "lib"]}
