@@ -19,16 +19,18 @@ frequencies(Es, Freqs) :-
           freqs{},
           Freqs).
 
-room_real(room(Name, _, Checksum), T) :-
-    tfilter(dif('-'), Name, Letters),
-    msort(Letters, Letters_Sorted),
-    frequencies(Letters_Sorted, Freqs),
-    dict_pairs(Freqs, _, Pairs),
-    sort(2, @>=, Pairs, Sorted),
-    pairs_keys(Sorted, Ks),
-    length(KsP, 5),
-    append(KsP, _, Ks),
-    if_(Checksum = KsP, T = true, T = false).
+room_real(Checksum) -->
+    tfilter(dif('-')),
+    msort,
+    frequencies,
+    [Fs, Ps]>>dict_pairs(Fs, _, Ps),
+    sort(2, @>=),
+    pairs_keys,
+    {Checksum}/[Ks, T]>>(
+        length(P, 5),
+        append(P, _, Ks),
+        if_(Checksum = P, T = true, T = false)
+    ).
 
 shift(ID, C0, C) :-
     if_(C0 = '-',
@@ -39,7 +41,7 @@ shift(ID, C0, C) :-
 
 p1(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),
-    tfilter(room_real, Rs0, Rs),
+    tfilter([room(Name, _, Sum)]>>call_dcg(room_real(Sum), Name), Rs0, Rs),
     maplist([room(_, ID, _), ID]>>true, Rs, IDs),
     sum_list(IDs, S).
 
