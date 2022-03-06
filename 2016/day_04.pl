@@ -37,9 +37,6 @@ shift(ID, C0, C) :-
          X #= ((X0 - 97) + ID) mod 26 + 97,
          char_code(C, X))).
 
-room_decrypted(room(Name, ID, _), Decrypted) :-
-    maplist(shift(ID), Name, Decrypted).
-
 p1(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),
     tfilter(room_real, Rs0, Rs),
@@ -49,8 +46,8 @@ p1(S) :-
 p2(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),
     maplist([Room, Decrypted-ID]>>
-            (Room = room(_, ID, _),
-             room_decrypted(Room, Decrypted)),
+            (Room = room(Name, ID, _),
+             maplist(shift(ID), Name, Decrypted)),
              Rs0,
              Rs),
     member("northpole object storage"-S, Rs).
