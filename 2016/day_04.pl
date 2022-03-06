@@ -40,10 +40,6 @@ shift(ID, C0, C) :-
 room_decrypted(room(Name, ID, _), Decrypted) :-
     maplist(shift(ID), Name, Decrypted).
 
-sublist(Xs, Ys) :-
-    append(P, _, Ys),
-    append(_, Xs, P).
-
 p1(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),
     tfilter(room_real, Rs0, Rs),
@@ -56,6 +52,5 @@ p2(S) :-
             (Room = room(_, ID, _),
              room_decrypted(Room, Decrypted)),
              Rs0,
-             Rs1),
-    include([S-_]>>sublist("north", S), Rs1, Rs),
-    S = Rs.
+             Rs),
+    member("northpole object storage"-S, Rs).
