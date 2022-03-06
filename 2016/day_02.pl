@@ -1,12 +1,20 @@
 :- use_module(library(apply)).
 :- use_module(library(dcg/basics)).
+:- use_module(library(dcg/high_order)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(library(yall)).
 
-s0([]) --> "".
-s0([L]) --> string_without("\n", L).
-s0([L|Ls]) --> string_without("\n", L), "\n", s0(Ls).
+% s0([]) --> "".
+% s0([L]) --> string_without("\n", L).
+% s0([L|Ls]) --> string_without("\n", L), "\n", s0(Ls).
+
+move(Ms) --> sequence(turn, Ms).
+
+turn('U') --> "U".
+turn('R') --> "R".
+turn('D') --> "D".
+turn('L') --> "L".
 
 coord_button(X-Y, B) :- B #= Y * 3 + X + 1.
 
@@ -49,7 +57,7 @@ p2_move_coord_(M, X0-Y0, C) :-
     if_(B = 1, C = X-Y, C = X0-Y0).
 
 p1(S) :-
-    phrase_from_file(s0(Moves), 'input/d2.txt'),
+    phrase_from_file(sequence(move, "\n", Moves), 'input/d2.txt'),
     foldl([Move, coord_buttons(X0-Y0, [B|Bs]), coord_buttons(X-Y, Bs)]>>
           (   foldl(move_coord_, Move, X0-Y0, X-Y),
               coord_button(X-Y, B)
@@ -60,7 +68,7 @@ p1(S) :-
     atomics_to_string(Bs, S).
 
 p2(S) :-
-    phrase_from_file(s0(Moves), 'input/d2.txt'),
+    phrase_from_file(sequence(move, "\n", Moves), 'input/d2.txt'),
     foldl([Move, coord_buttons(X0-Y0, [B|Bs]), coord_buttons(X-Y, Bs)]>>
           (   foldl(p2_move_coord_, Move, X0-Y0, X-Y),
               p2_coord_button(X-Y, B)
