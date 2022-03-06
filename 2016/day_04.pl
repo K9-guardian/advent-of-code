@@ -21,10 +21,9 @@ frequencies(Es, Freqs) :-
 
 room_real(Checksum) -->
     tfilter(dif('-')),
-    msort,
     frequencies,
     [Fs, Ps]>>dict_pairs(Fs, _, Ps),
-    sort(2, @>=),
+    predsort([D, K0-V0, K1-V1]>>compare(D, V1-K0, V0-K1)),
     pairs_keys,
     {Checksum}/[Ks, T]>>(
         length(P, 5),
