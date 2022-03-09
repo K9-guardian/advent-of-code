@@ -29,15 +29,15 @@ move_coord_('L', X0-Y, X-Y) :- X #= max(X0 - 1, 0).
 %   A B C
 %     D
 
-p2_coord_button(2-0, 1).
-p2_coord_button(1-1, 2).
-p2_coord_button(2-1, 3).
-p2_coord_button(3-1, 4).
-p2_coord_button(0-2, 5).
-p2_coord_button(1-2, 6).
-p2_coord_button(2-2, 7).
-p2_coord_button(3-2, 8).
-p2_coord_button(4-2, 9).
+p2_coord_button(2-0, '1').
+p2_coord_button(1-1, '2').
+p2_coord_button(2-1, '3').
+p2_coord_button(3-1, '4').
+p2_coord_button(0-2, '5').
+p2_coord_button(1-2, '6').
+p2_coord_button(2-2, '7').
+p2_coord_button(3-2, '8').
+p2_coord_button(4-2, '9').
 p2_coord_button(1-3, 'A').
 p2_coord_button(2-3, 'B').
 p2_coord_button(3-3, 'C').
@@ -76,4 +76,4 @@ p2(S) :-
           Moves,
           coord_buttons(0-2, Bs),
           coord_buttons(_, [])),
-    atomics_to_string(Bs, S).
+    S = Bs.
