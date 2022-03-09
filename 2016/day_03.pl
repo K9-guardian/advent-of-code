@@ -7,10 +7,8 @@
 
 line([X, Y, Z]) --> blanks, integer(X), blanks, integer(Y), blanks, integer(Z).
 
-triangle_t(Ls, T) :-
-    msort(Ls, S),
-    append([X, Y], [Z], S),
-    X + Y #> Z #<==> B,
+triangle_t([X, Y, Z], T) :-
+    (Z #< X + Y) #/\ (Z #> abs(X - Y)) #<==> B,
     if_(B = 1, T = true, T = false).
 
 list_partitioned(N, Ls0, Ls) :-
