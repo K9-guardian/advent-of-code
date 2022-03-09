@@ -28,7 +28,7 @@ room_tail_found_(ID, X, Found, Out) :-
     (   dict_size(Found, 8) -> dict_pairs(Found, _, Ps), pairs_values(Ps, Out)
     ;   atom_concat(ID, X, IDX),
         succ(X, Y),
-        (   input_keys(IDX, [N, C]),
+        (   input_keys(IDX, N-C),
             member(N, "01234567"),
             \+ get_dict(N, Found, _)
         ->  room_tail_found_(ID, Y, Found.put(N, C), Out)
