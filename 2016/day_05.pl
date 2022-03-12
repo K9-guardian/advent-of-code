@@ -1,9 +1,7 @@
-:- use_module(library(apply)).
 :- use_module(library(dcg/basics)).
 :- use_module(lib/double_quotes).
 :- use_module(library(md5)).
 :- use_module(lib/pio).
-:- use_module(library(yall)).
 
 % From library(dicts), won't load for some reason.
 dict_size(Dict, KeyCount) :-

@@ -1,9 +1,7 @@
-:- use_module(library(apply)).
 :- use_module(library(dcg/basics)).
 :- use_module(library(dcg/high_order)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
-:- use_module(library(yall)).
 
 lists_interleaved([], []) --> [].
 lists_interleaved([A|As], []) --> [A], string(As).
