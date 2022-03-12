@@ -9,8 +9,8 @@
 room(room(Name, ID, Checksum)) --> string(Name), "-", integer(ID), "[", string(Checksum), "]".
 
 frequencies(Es, Freqs) :-
-    foldl([E, Fs0, Fs]>>(
-              (   get_dict(E, Fs0, X0) -> succ(X0, X)
+    foldl([E, Fs0, Fs]>>
+          (   (   get_dict(E, Fs0, X0) -> succ(X0, X)
               ;   X = 1
               ),
               put_dict(E, Fs0, X, Fs)
@@ -25,8 +25,8 @@ room_real(Checksum) -->
     [Fs, Ps]>>dict_pairs(Fs, _, Ps),
     predsort([D, K0-V0, K1-V1]>>compare(D, V1-K0, V0-K1)),
     pairs_keys,
-    {Checksum}/[Ks, [T]]>>(
-        length(P, 5),
+    {Checksum}/[Ks, [T]]>>
+    (   length(P, 5),
         append(P, _, Ks),
         if_(Checksum = P, T = true, T = false)
     ).
@@ -47,8 +47,9 @@ p1(S) :-
 p2(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),
     maplist([Room, Decrypted-ID]>>
-            (Room = room(Name, ID, _),
-             maplist(shift(ID), Name, Decrypted)),
-             Rs0,
-             Rs),
+            (   Room = room(Name, ID, _),
+                maplist(shift(ID), Name, Decrypted)),
+                Rs0,
+                Rs
+            ),
     member("northpole object storage"-S, Rs).

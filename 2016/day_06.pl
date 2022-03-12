@@ -6,8 +6,8 @@
 :- use_module(library(yall)).
 
 frequencies(Es, Freqs) :-
-    foldl([E, Fs0, Fs]>>(
-              (   get_dict(E, Fs0, X0) -> succ(X0, X)
+    foldl([E, Fs0, Fs]>>
+          (   (   get_dict(E, Fs0, X0) -> succ(X0, X)
               ;   X = 1
               ),
               put_dict(E, Fs0, X, Fs)
