@@ -24,7 +24,8 @@ input_keys(A, C0-C1) :-
 room_passwd(ID, P) :- room_tail_found_(ID, 0, found{}, P).
 
 room_tail_found_(ID, X, Found, Out) :-
-    (   dict_size(Found, 8) -> dict_pairs(Found, _, Ps), pairs_values(Ps, Out)
+    (   dict_size(Found, 8)
+    ->  dict_pairs(Found, _, Ps), pairs_values(Ps, Out)
     ;   atom_concat(ID, X, IDX),
         succ(X, Y),
         (   input_keys(IDX, N-C),

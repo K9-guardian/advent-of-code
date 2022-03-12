@@ -42,7 +42,8 @@ coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs) :-
 list_duplicate(Ls, E) :- list_duplicate_(Ls, set{}, E).
 
 list_duplicate_([L|Ls], Set, E) :-
-    (   L = Set.get(L) -> E = L
+    (   L = Set.get(L)
+    ->  E = L
     ;   list_duplicate_(Ls, Set.put(L, L), E)
     ).
 
