@@ -10,14 +10,14 @@ room(room(Name, ID, Checksum)) --> string(Name), "-", integer(ID), "[", string(C
 
 frequencies(Es, Freqs) :-
     foldl([E, Fs0, Fs]>>
-          (   (   get_dict(E, Fs0, X0) -> succ(X0, X)
-              ;   X = 1
-              ),
-              put_dict(E, Fs0, X, Fs)
-          ),
-          Es,
-          freqs{},
-          Freqs).
+        (   (   get_dict(E, Fs0, X0) -> succ(X0, X)
+            ;   X = 1
+            ),
+            put_dict(E, Fs0, X, Fs)
+        ),
+        Es,
+        freqs{},
+        Freqs).
 
 room_real(Checksum) -->
     tfilter(dif('-')),
@@ -34,9 +34,11 @@ room_real(Checksum) -->
 shift(ID, C0, C) :-
     if_(C0 = '-',
         C = ' ',
-        (char_code(C0, X0),
-         X #= ((X0 - 97) + ID) mod 26 + 97,
-         char_code(C, X))).
+        (   char_code(C0, X0),
+            X #= ((X0 - 97) + ID) mod 26 + 97,
+            char_code(C, X)
+        )
+    ).
 
 p1(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),

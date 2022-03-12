@@ -49,25 +49,25 @@ list_duplicate_([L|Ls], Set, E) :-
 p1(S) :-
     phrase_from_file(sequence(move, ", ", Moves), 'input/d1.txt'),
     foldl([Turn-Amt, coord_dir(X0-Y0, Dir0), coord_dir(X-Y, Dir)]>>
-          (   dir_turn_(Dir0, Turn, Dir),
-              coord_dir_amt_(X0-Y0, Dir, Amt, X-Y)
-          ),
-          Moves,
-          coord_dir(0-0, north),
-          coord_dir(X-Y, _)),
+        (   dir_turn_(Dir0, Turn, Dir),
+            coord_dir_amt_(X0-Y0, Dir, Amt, X-Y)
+        ),
+        Moves,
+        coord_dir(0-0, north),
+        coord_dir(X-Y, _)),
     S #= abs(X + Y).
 
 p2(S) :-
     phrase_from_file(sequence(move, ", ", Moves), 'input/d1.txt'),
     foldl([Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>
-          (   dir_turn_(Dir0, Turn, Dir),
-              coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
-              coord_dir_amt_locs(X0-Y0, Dir, Amt, LocsP),
-              append(LocsP, Locs, Locs0)
-          ),
-          Moves,
-          coord_dir_locs(0-0, north, Locs),
-          coord_dir_locs(_, _, [])),
+        (   dir_turn_(Dir0, Turn, Dir),
+            coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
+            coord_dir_amt_locs(X0-Y0, Dir, Amt, LocsP),
+            append(LocsP, Locs, Locs0)
+        ),
+        Moves,
+        coord_dir_locs(0-0, north, Locs),
+        coord_dir_locs(_, _, [])),
     maplist(term_to_atom, [0-0|Locs], Atoms),
     list_duplicate(Atoms, Term),
     term_to_atom(X-Y, Term),
