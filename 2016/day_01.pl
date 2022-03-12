@@ -30,7 +30,7 @@ coord_dir_amt_(X0-Y0, Dir, Amt, X-Y) :-
 
 coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs) :-
     dir_num_unit(Dir, _, Xunit-Yunit),
-    findall(Num, between(1, Amt, Num), Nums),
+    numlist(1, Amt, Nums),
     maplist({X0, Y0, Xunit, Yunit}/[Num, X-Y]>>
             (   X #= X0 + Num * Xunit,
                 Y #= Y0 + Num * Yunit
