@@ -20,16 +20,16 @@ sort_list_mode(M) -->
     frequencies,
     [D, Ps]>>dict_pairs(D, _, Ps),
     sort(2, M),
-    [[C-_|_], C]>>true.
+    [[C-_|_], [C]]>>true.
 
 p1(S) :-
     phrase_from_file(sequence(string, "\n", Rows), 'input/d6.txt'),
     transpose(Rows, Cols),
-    maplist(call_dcg(sort_list_mode(@>)), Cols, Modes),
+    maplist([Col, C]>>phrase(sort_list_mode(@>), Col, [C]), Cols, Modes),
     S = Modes.
 
 p2(S) :-
     phrase_from_file(sequence(string, "\n", Rows), 'input/d6.txt'),
     transpose(Rows, Cols),
-    maplist(call_dcg(sort_list_mode(@<)), Cols, Modes),
+    maplist([Col, C]>>phrase(sort_list_mode(@<), Col, [C]), Cols, Modes),
     S = Modes.

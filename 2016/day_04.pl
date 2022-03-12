@@ -25,7 +25,7 @@ room_real(Checksum) -->
     [Fs, Ps]>>dict_pairs(Fs, _, Ps),
     predsort([D, K0-V0, K1-V1]>>compare(D, V1-K0, V0-K1)),
     pairs_keys,
-    {Checksum}/[Ks, T]>>(
+    {Checksum}/[Ks, [T]]>>(
         length(P, 5),
         append(P, _, Ks),
         if_(Checksum = P, T = true, T = false)
@@ -40,7 +40,7 @@ shift(ID, C0, C) :-
 
 p1(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),
-    tfilter([room(Name, _, Sum)]>>call_dcg(room_real(Sum), Name), Rs0, Rs),
+    tfilter([room(Name, _, Sum), T]>>phrase(room_real(Sum), Name, [T]), Rs0, Rs),
     maplist([room(_, ID, _), ID]>>true, Rs, IDs),
     sum_list(IDs, S).
 
