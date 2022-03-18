@@ -36,7 +36,7 @@ room_tail_found_(ID, X, Found, Out) :-
 p1(S) :-
     phrase_from_file(string(ID0), 'input/d5.txt'),
     atom_chars(ID, ID0),
-    findnsols(8, C, (between(0, inf, X), atom_concat(ID, X, IDX), input_key(IDX, C)), Cs),
+    findnsols(8, C, (length(_, X), atom_concat(ID, X, IDX), input_key(IDX, C)), Cs),
     S = Cs.
 
 p2(S) :-
