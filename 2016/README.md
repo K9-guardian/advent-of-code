@@ -13,4 +13,7 @@ Usage: Your `init.pl` must have the following:
 :- set_prolog_flag(back_quotes, string).
 :- set_prolog_flag(double_quotes, chars).
 ```
-To get `library(reif)`, do `pack_install(reif).` in `swipl`.
+To get `library(reif)`, execute the following in `swipl` and choose an install location.
+```prolog
+pack_install(reif).
+```
