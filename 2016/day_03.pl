@@ -1,9 +1,5 @@
-:- use_module(library(apply)).
-:- use_module(library(dcg/basics)).
-:- use_module(library(dcg/high_order)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
-:- use_module(library(yall)).
 
 maplist_appended(G_2, Ls0, Ls) :-
     foldl({G_2}/[E0, Es0, Es]>>(call(G_2, E0, E), append(E, Es, Es0)), Ls0, Ls, []).

@@ -1,9 +1,5 @@
-:- use_module(library(apply)).
-:- use_module(library(dcg/basics)).
-:- use_module(library(dcg/high_order)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
-:- use_module(library(yall)).
 
 frequencies(Es, Freqs) :-
     foldl([E, Fs0, Fs]>>

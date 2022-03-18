@@ -1,10 +1,5 @@
-:- use_module(library(apply)).
-:- use_module(library(dcg/basics)).
-:- use_module(library(dcg/high_order)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
-:- use_module(library(pairs)).
-:- use_module(library(yall)).
 
 room(room(Name, ID, Checksum)) --> string(Name), "-", integer(ID), "[", string(Checksum), "]".
 

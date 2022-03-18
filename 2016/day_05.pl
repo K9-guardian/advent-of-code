@@ -1,4 +1,3 @@
-:- use_module(library(dcg/basics)).
 :- use_module(lib/double_quotes).
 :- use_module(library(md5)).
 :- use_module(lib/pio).
