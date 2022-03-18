@@ -26,8 +26,7 @@ room_tail_found_(ID, X, Found, Out) :-
     ;   atom_concat(ID, X, IDX),
         succ(X, Y),
         (   input_keys(IDX, N-C),
-            member(N, "012345678"),
-            call_dcg((char_code,in), N, 48..56),
+            call_dcg((atom_number,in), N, 0..8),
             \+ get_dict(N, Found, _)
         ->  room_tail_found_(ID, Y, Found.put(N, C), Out)
         ;   room_tail_found_(ID, Y, Found, Out)
