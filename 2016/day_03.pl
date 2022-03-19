@@ -2,7 +2,15 @@
 :- use_module(lib/pio).
 
 maplist_appended(G_2, Ls0, Ls) :-
-    foldl({G_2}/[E0, Es0, Es]>>(call(G_2, E0, E), append(E, Es, Es0)), Ls0, Ls, []).
+    foldl(
+        {G_2}/[E0, Es0, Es]>>
+        (   call(G_2, E0, E),
+            append(E, Es, Es0)
+        ),
+        Ls0,
+        Ls,
+        []
+    ).
 
 line([X, Y, Z]) --> blanks, integer(X), blanks, integer(Y), blanks, integer(Z).
 

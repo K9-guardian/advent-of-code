@@ -19,6 +19,7 @@ input_keys(A, C0-C1) :-
     atom_concat('00000', S, H),
     atom_chars(S, [C0, C1|_]).
 
+% I can't improve this.
 room_tail_found_(ID, X, Found, Out) :-
     (   dict_size(Found, 8)
     ->  dict_pairs(Found, _, Ps), pairs_values(Ps, Out)
@@ -35,7 +36,16 @@ room_tail_found_(ID, X, Found, Out) :-
 p1(S) :-
     phrase_from_file(string(ID0), 'input/d5.txt'),
     atom_chars(ID, ID0),
-    findnsols(8, C, (length(_, X), call_dcg((atom_concat(ID), input_key), X, C)), Cs),
+    findnsols(
+        8,
+        C,
+        (   length(_, X),
+            call_dcg((atom_concat(ID), input_key),
+            X,
+            C)
+        ),
+        Cs
+    ),
     S = Cs.
 
 p2(S) :-

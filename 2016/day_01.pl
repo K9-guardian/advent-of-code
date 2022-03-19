@@ -1,3 +1,4 @@
+:- use_module(library(assoc)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 
@@ -27,36 +28,43 @@ coord_dir_amt_(X0-Y0, Dir, Amt, X-Y) :-
 coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs) :-
     dir_num_unit(Dir, _, Xunit-Yunit),
     numlist(1, Amt, Nums),
-    maplist({X0, Y0, Xunit, Yunit}/[Num, X-Y]>>
-            (   X #= X0 + Num * Xunit,
-                Y #= Y0 + Num * Yunit
-            ),
-            Nums,
-            Locs).
+    maplist(
+        {X0, Y0, Xunit, Yunit}/[Num, X-Y]>>
+        (   X #= X0 + Num * Xunit,
+            Y #= Y0 + Num * Yunit
+        ),
+        Nums,
+        Locs
+    ).
 
-% Bad but performant predicate.
-list_duplicate(Ls, E) :- list_duplicate_(Ls, set{}, E).
+list_firstdup(Ls, E) :-
+    empty_assoc(Set),
+    list_firstdup_(Ls, E, Set).
 
-list_duplicate_([L|Ls], Set, E) :-
-    (   L = Set.get(L)
+list_firstdup_([L|Ls], E, Set0) :-
+    (   get_assoc(L, Set0, L)
     ->  E = L
-    ;   list_duplicate_(Ls, Set.put(L, L), E)
+    ;   put_assoc(L, Set0, L, Set),
+        list_firstdup_(Ls, E, Set)
     ).
 
 p1(S) :-
     phrase_from_file(sequence(move, ", ", Moves), 'input/d1.txt'),
-    foldl([Turn-Amt, coord_dir(X0-Y0, Dir0), coord_dir(X-Y, Dir)]>>
+    foldl(
+        [Turn-Amt, coord_dir(X0-Y0, Dir0), coord_dir(X-Y, Dir)]>>
         (   dir_turn_(Dir0, Turn, Dir),
             coord_dir_amt_(X0-Y0, Dir, Amt, X-Y)
         ),
         Moves,
         coord_dir(0-0, north),
-        coord_dir(X-Y, _)),
+        coord_dir(X-Y, _)
+    ),
     S #= abs(X + Y).
 
 p2(S) :-
     phrase_from_file(sequence(move, ", ", Moves), 'input/d1.txt'),
-    foldl([Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>
+    foldl(
+        [Turn-Amt, coord_dir_locs(X0-Y0, Dir0, Locs0), coord_dir_locs(X-Y, Dir, Locs)]>>
         (   dir_turn_(Dir0, Turn, Dir),
             coord_dir_amt_(X0-Y0, Dir, Amt, X-Y),
             coord_dir_amt_locs(X0-Y0, Dir, Amt, LocsP),
@@ -64,8 +72,7 @@ p2(S) :-
         ),
         Moves,
         coord_dir_locs(0-0, north, Locs),
-        coord_dir_locs(_, _, [])),
-    maplist(term_to_atom, [0-0|Locs], Atoms),
-    list_duplicate(Atoms, Term),
-    term_to_atom(X-Y, Term),
+        coord_dir_locs(_, _, [])
+    ),
+    list_firstdup([0-0|Locs], X-Y),
     S #= abs(X + Y).
