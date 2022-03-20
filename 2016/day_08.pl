@@ -1,15 +1,6 @@
-:- use_module(library(assoc)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
-
-n_list_partitioned(N, Ls0, Ls) :-
-    n_list_partitioned_(Ls0, N, Ls).
-
-n_list_partitioned_([], _,  []).
-n_list_partitioned_([L|Ls0], N, [P|R]) :-
-    length(P, N),
-    append(P, S, [L|Ls0]),
-    n_list_partitioned_(S, N, R).
+:- use_module(lib/util).
 
 move(rect(M, N)) --> "rect ", integer(M), "x", integer(N).
 move(rotate(row, Y, D)) --> "rotate row y=", integer(Y), " by ", integer(D).
@@ -25,7 +16,15 @@ grid(G) :-
 
 grid_list(G, Ls) :-
     height(H),
-    call_dcg((assoc_to_list, maplist([(_-_)-V, V]>>true), n_list_partitioned(H), transpose), G, Ls).
+    call_dcg(
+        (   assoc_to_list,
+            maplist([(_-_)-V, V]>>true),
+            n_list_partitioned(H),
+            transpose
+        ),
+        G,
+        Ls
+    ).
 
 n_list_rotated(N, Ls0, Ls) :-
     length(S, N),
@@ -61,7 +60,7 @@ move_grid0_grid(rotate(col, X0, D), G0, G) :-
     foldl([K-V, A0, A]>>put_assoc(K, A0, V, A), Vs, G0, G).
 
 char_value(' ', 0).
-char_value('X', 1).
+char_value('#', 1).
 
 p1(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),

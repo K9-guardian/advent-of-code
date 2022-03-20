@@ -2,6 +2,7 @@
 :- use_module(library(md5)).
 :- use_module(library(pairs)).
 :- use_module(lib/pio).
+:- use_module(lib/util).
 
 % From library(dicts), won't load for some reason.
 dict_size(Dict, KeyCount) :-

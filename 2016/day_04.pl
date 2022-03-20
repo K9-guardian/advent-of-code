@@ -1,23 +1,8 @@
-:- use_module(library(assoc)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
+:- use_module(lib/util).
 
 room(room(Name, ID, Checksum)) --> string(Name), "-", integer(ID), "[", string(Checksum), "]".
-
-frequencies(Es, Freqs) :-
-    empty_assoc(Freqs0),
-    foldl(
-        [E, Fs0, Fs]>>
-        (   (   get_assoc(E, Fs0, X0)
-            ->  succ(X0, X)
-            ;   X = 1
-            ),
-            put_assoc(E, Fs0, X, Fs)
-        ),
-        Es,
-        Freqs0,
-        Freqs
-    ).
 
 room_real(Checksum) -->
     tfilter(dif('-')),

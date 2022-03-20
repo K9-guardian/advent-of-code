@@ -1,6 +1,6 @@
-:- use_module(library(assoc)).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
+:- use_module(lib/util).
 
 move(T-Amt) --> turn(T), integer(Amt).
 turn(l) --> "L".
@@ -35,17 +35,6 @@ coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs) :-
         ),
         Nums,
         Locs
-    ).
-
-list_firstdup(Ls, E) :-
-    empty_assoc(Set),
-    list_firstdup_(Ls, E, Set).
-
-list_firstdup_([L|Ls], E, Set0) :-
-    (   get_assoc(L, Set0, L)
-    ->  E = L
-    ;   put_assoc(L, Set0, L, Set),
-        list_firstdup_(Ls, E, Set)
     ).
 
 p1(S) :-

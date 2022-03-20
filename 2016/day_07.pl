@@ -1,10 +1,6 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
-
-lists_interleaved([], []) --> [].
-lists_interleaved([A|As], []) --> [A], string(As).
-lists_interleaved([], [B|Bs]) --> [B], string(Bs).
-lists_interleaved([A|As], [B|Bs]) --> [A], [B], lists_interleaved(As, Bs).
+:- use_module(lib/util).
 
 abba --> string(_), [A], [B], [B], [A], string(_), { dif(A, B) }.
 
@@ -15,7 +11,7 @@ tls_supported(S) :-
     length(Split, Z),
     Z #= X + Y, X #= (Z + 1) div 2,
     length(As, X), length(Bs, Y),
-    phrase(lists_interleaved(As, Bs), Split),
+    lists_interleaved(As, Bs, Split),
     phrase(sequence(string, "    ", As), Cs),
     phrase(sequence(string, "    ", Bs), Ds),
     phrase(abba, Cs), \+ phrase(abba, Ds).
@@ -25,7 +21,7 @@ ssl_supported(S) :-
     length(Split, Z),
     Z #= X + Y, X #= (Z + 1) div 2,
     length(As, X), length(Bs, Y),
-    phrase(lists_interleaved(As, Bs), Split),
+    lists_interleaved(As, Bs, Split),
     phrase(sequence(string, "   ", As), Cs),
     phrase(sequence(string, "   ", Bs), Ds),
     phrase(aba(A, B), Cs), phrase(aba(B, A), Ds).
