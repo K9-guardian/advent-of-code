@@ -61,7 +61,7 @@ move_grid0_grid(rotate(col, X0, D), G0, G) :-
     foldl([K-V, A0, A]>>put_assoc(K, A0, V, A), Vs, G0, G).
 
 char_value(' ', 0).
-char_value('*', 1).
+char_value('X', 1).
 
 p1(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
@@ -74,5 +74,13 @@ p2(S) :-
     grid(G0),
     foldl(move_grid0_grid, Moves, G0, G),
     grid_list(G, Ls),
-    maplist([L, Cs]>>maplist(char_value, Cs, L), Ls, S),
+    maplist(
+        [L, Cs]>>
+        (   maplist(char_value, Cs0, L),
+            n_list_partitioned(5, Cs0, Cs1),
+            phrase(sequence(string, " ", Cs1), Cs)
+        ),
+        Ls,
+        S
+    ),
     maplist([L]>>format('~s~n', [L]), S).
