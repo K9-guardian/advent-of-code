@@ -12,9 +12,8 @@ tls_supported(S) :-
     Z #= X + Y, X #= (Z + 1) div 2,
     length(As, X), length(Bs, Y),
     lists_interleaved(As, Bs, Split),
-    phrase(sequence(string, "    ", As), Cs),
-    phrase(sequence(string, "    ", Bs), Ds),
-    phrase(abba, Cs), \+ phrase(abba, Ds).
+    convlist(phrase(abba), As, [_|_]),
+    convlist(phrase(abba), Bs, []).
 
 ssl_supported(S) :-
     phrase(sequence(string, ("[" | "]"), Split), S),
@@ -22,9 +21,9 @@ ssl_supported(S) :-
     Z #= X + Y, X #= (Z + 1) div 2,
     length(As, X), length(Bs, Y),
     lists_interleaved(As, Bs, Split),
-    phrase(sequence(string, "   ", As), Cs),
-    phrase(sequence(string, "   ", Bs), Ds),
-    phrase(aba(A, B), Cs), phrase(aba(B, A), Ds).
+    phrase(sequence(string, "  ", As), S0),
+    phrase(sequence(string, "  ", Bs), S1),
+    phrase(aba(A, B), S0), phrase(aba(B, A), S1).
 
 p1(S) :-
     phrase_from_file(sequence(string, "\n", Ls), 'input/d7.txt'),
