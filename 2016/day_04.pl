@@ -49,7 +49,7 @@ p2(S) :-
         [Room, Decrypted-ID]>>
         (   Room = room(Name, ID, _),
             maplist(
-                call_dcg((char_code,id_code_shifted(ID),[X, C]>>char_code(C, X))),
+                call_dcg((char_code, id_code_shifted(ID), [X, C]>>char_code(C, X))),
                 Name,
                 Decrypted
             )

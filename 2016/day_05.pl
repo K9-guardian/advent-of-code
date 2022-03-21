@@ -41,9 +41,7 @@ p1(S) :-
         8,
         C,
         (   length(_, X),
-            call_dcg((atom_concat(ID), input_key),
-            X,
-            C)
+            call_dcg((atom_concat(ID), input_key), X, C)
         ),
         Cs
     ),
