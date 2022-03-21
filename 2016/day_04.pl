@@ -16,13 +16,25 @@ room_real(Checksum) -->
         if_(Checksum = P, T = true, T = false)
     ).
 
-shift(ID, C0, C) :-
-    if_(C0 = '-',
+shift_char_(ID, C0, C) :-
+    char_type(C0, ascii),
+    (   char_type(C0, lower)
+    ;   C0 = '-'
+    ),
+    if_(
+        C0 = '-',
         C = ' ',
         (   char_code(C0, X0),
             X #= ((X0 - 97) + ID) mod 26 + 97,
             char_code(C, X)
         )
+    ).
+
+id_code_shifted(ID, X0, X) :-
+    X0 in 0'- \/ 0'a..0'z,
+    if_(X0 = 0'-,
+        X = 0' ,
+        X #= ((X0 - 97) + ID) mod 26 + 97
     ).
 
 p1(S) :-
@@ -36,7 +48,11 @@ p2(S) :-
     maplist(
         [Room, Decrypted-ID]>>
         (   Room = room(Name, ID, _),
-            maplist(shift(ID), Name, Decrypted)
+            maplist(
+                call_dcg((char_code,id_code_shifted(ID),[X, C]>>char_code(C, X))),
+                Name,
+                Decrypted
+            )
         ),
         Rs0,
         Rs
