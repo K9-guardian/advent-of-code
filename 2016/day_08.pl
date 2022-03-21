@@ -11,14 +11,14 @@ height(6).
 
 grid(G) :-
     width(W), height(H),
-    findall((X-Y)-0, (between(1, H, Y), between(1, W, X)), Ls),
+    findall(X-Y-0, (between(1, H, Y), between(1, W, X)), Ls),
     list_to_assoc(Ls, G).
 
 grid_list(G, Ls) :-
     height(H),
     call_dcg(
         (   assoc_to_list,
-            maplist([(_-_)-V, V]>>true),
+            maplist([_-_-V, V]>>true),
             n_list_partitioned(H),
             transpose
         ),
@@ -40,7 +40,7 @@ move_grid0_grid(rotate(row, Y0, D), G0, G) :-
     phrase(
         (   maplist({G0}/[X, V]>>get_assoc(X-Y, G0, V)),
             n_list_rotated(D),
-            maplist([X, V, (X-Y)-V]>>true, Xs)
+            maplist([X, V, X-Y-V]>>true, Xs)
         ),
         Xs,
         Vs
@@ -52,7 +52,7 @@ move_grid0_grid(rotate(col, X0, D), G0, G) :-
     phrase(
         (   maplist({G0}/[Y, V]>>get_assoc(X-Y, G0, V)),
             n_list_rotated(D),
-            maplist([Y, V, (X-Y)-V]>>true, Ys)
+            maplist([Y, V, X-Y-V]>>true, Ys)
         ),
         Ys,
         Vs
@@ -66,7 +66,7 @@ p1(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
     grid(G0),
     foldl(move_grid0_grid, Moves, G0, G),
-    call_dcg((assoc_to_values,sum_list), G, S).
+    call_dcg((assoc_to_values, sum_list), G, S).
 
 p2(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
