@@ -7,18 +7,17 @@ marker(D, R) --> "(", integer(D), "x", integer(R), ")".
 n_list_repeated(N, Ls0, Ls) :-
     length(Ls0, M),
     NM #= N * M,
-    length(Ls, NM),
     append(Ls0, Ls1, Ls1),
-    append(Ls, _, Ls1).
+    n_list_split(NM, Ls1, Ls-_).
 
 string_decompressed("", "").
 string_decompressed([C|Cs0], Cs) :-
     if_(
         C = '(',
         (   phrase(marker(D, R), [C|Cs0], More),
-            length(Run, D), append(Run, Rest0, More),
-            n_list_repeated(R, Run, Runs),
-            append(Runs, Rest, Cs),
+            n_list_split(D, More, Run0-Rest0),
+            n_list_repeated(R, Run0, Run),
+            append(Run, Rest, Cs),
             string_decompressed(Rest0, Rest)
         ),
         (   Cs = [C|Cs1],
@@ -31,7 +30,7 @@ string_decomplength([C|Cs0], N) :-
     if_(
         C = '(',
         (   phrase(marker(D, R), [C|Cs0], More),
-            length(Run, D), append(Run, Rest, More),
+            n_list_split(D, More, Run-Rest),
             N #= N0 * R + N1,
             string_decomplength(Run, N0),
             string_decomplength(Rest, N1)

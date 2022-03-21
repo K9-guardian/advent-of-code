@@ -27,8 +27,9 @@ grid_list(G, Ls) :-
     ).
 
 n_list_rotated(N, Ls0, Ls) :-
-    length(S, N),
-    append(P, S, Ls0),
+    length(Ls0, X),
+    M #= X - N,
+    n_list_split(M, Ls0, P-S),
     append(S, P, Ls).
 
 move_grid0_grid(rect(M, N), G0, G) :-

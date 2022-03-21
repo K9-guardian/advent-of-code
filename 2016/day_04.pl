@@ -4,16 +4,15 @@
 
 room(room(Name, ID, Checksum)) --> string(Name), "-", integer(ID), "[", string(Checksum), "]".
 
-room_real(Checksum) -->
+room_real(Sum) -->
     tfilter(dif('-')),
     frequencies,
     assoc_to_list,
     predsort([D, K0-V0, K1-V1]>>compare(D, V1-K0, V0-K1)),
     pairs_keys,
-    {Checksum}/[Ks, T]>>
-    (   length(P, 5),
-        append(P, _, Ks),
-        if_(Checksum = P, T = true, T = false)
+    {Sum}/[Ks, T]>>
+    (   n_list_split(5, Ks, P-_),
+        if_(Sum = P, T = true, T = false)
     ).
 
 shift_char_(ID, C0, C) :-
