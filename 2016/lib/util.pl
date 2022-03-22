@@ -5,26 +5,21 @@
         lists_interleaved/3,
         maplist_appended/3,
         n_list_partitioned/3,
-        n_list_split/3
+        n_list_split/4
     ]
 ).
 
 :- use_module(library(assoc)).
 
-frequencies(Es, Freqs) :-
-    empty_assoc(Freqs0),
-    foldl(
-        [E, Fs0, Fs]>>
-        (   (   get_assoc(E, Fs0, X0), !
-            ;   X0 = 1
-            ),
-            succ(X0, X),
-            put_assoc(E, Fs0, X, Fs)
-        ),
-        Es,
-        Freqs0,
-        Freqs
-    ).
+frequencies(Es, Freqs) :- phrase((msort, clumped), Es, Freqs).
+
+item_pairs0_pairs(K, [], [K-1]).
+item_pairs0_pairs(K, [P-V0|Ps0], Ps) :-
+    if_(K = P, (succ(V0, V), Ps = [K-V|Ps0]), Ps = [K-1, P-V0|Ps0]).
+
+clumped(Items, Pairs) :-
+    foldl(item_pairs0_pairs, Items, [], PairsR),
+    reverse(PairsR, Pairs).
 
 list_firstdup(Ls, E) :-
     empty_assoc(Set),
@@ -55,7 +50,7 @@ maplist_appended(G_2, Ls0, Ls) :-
         []
     ).
 
-n_list_split(N, Ls, P-S) :-
+n_list_split(N, Ls, P, S) :-
     length(P, N),
     append(P, S, Ls).
 
@@ -64,5 +59,5 @@ n_list_partitioned(N, Ls0, Ls) :-
 
 n_list_partitioned_([], _,  []).
 n_list_partitioned_([L|Ls0], N, [P|R]) :-
-    n_list_split(N, [L|Ls0], P-S),
+    n_list_split(N, [L|Ls0], P, S),
     n_list_partitioned_(S, N, R).

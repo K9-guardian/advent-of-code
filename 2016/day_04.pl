@@ -7,12 +7,11 @@ room(room(Name, ID, Checksum)) --> string(Name), "-", integer(ID), "[", string(C
 room_real(Sum) -->
     tfilter(dif('-')),
     frequencies,
-    assoc_to_list,
     predsort([D, K0-V0, K1-V1]>>compare(D, V1-K0, V0-K1)),
     pairs_keys,
     {Sum}/[Ks, T]>>
-    (   n_list_split(5, Ks, P-_),
-        if_(Sum = P, T = true, T = false)
+    (   n_list_split(5, Ks, P, _),
+        =(P, Sum, T)
     ).
 
 shift_char_(ID, C0, C) :-

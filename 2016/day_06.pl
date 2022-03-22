@@ -4,7 +4,6 @@
 
 sort_list_mode(M) -->
     frequencies,
-    assoc_to_list,
     sort(2, M),
     [[C-_|_], C]>>true.
 
