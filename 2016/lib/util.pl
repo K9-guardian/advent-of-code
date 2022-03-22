@@ -14,10 +14,10 @@ frequencies(Es, Freqs) :-
     empty_assoc(Freqs0),
     foldl(
         [E, Fs0, Fs]>>
-        (   (   get_assoc(E, Fs0, X0)
-            ->  succ(X0, X)
-            ;   X = 1
+        (   (   get_assoc(E, Fs0, X0), !
+            ;   X0 = 1
             ),
+            succ(X0, X),
             put_assoc(E, Fs0, X, Fs)
         ),
         Es,
