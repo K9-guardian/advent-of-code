@@ -8,14 +8,14 @@ n_list_repeated(N, Ls0, Ls) :-
     length(Ls0, M),
     NM #= N * M,
     append(Ls0, Ls1, Ls1),
-    n_list_split(NM, Ls1, Ls-_).
+    n_list_split(NM, Ls1, Ls, _).
 
 string_decompressed("", "").
 string_decompressed([C|Cs0], Cs) :-
     if_(
         C = '(',
         (   phrase(marker(D, R), [C|Cs0], More),
-            n_list_split(D, More, Run0-Rest0),
+            n_list_split(D, More, Run0, Rest0),
             n_list_repeated(R, Run0, Run),
             append(Run, Rest, Cs),
             string_decompressed(Rest0, Rest)
@@ -30,7 +30,7 @@ string_decomplength([C|Cs0], N) :-
     if_(
         C = '(',
         (   phrase(marker(D, R), [C|Cs0], More),
-            n_list_split(D, More, Run-Rest),
+            n_list_split(D, More, Run, Rest),
             N #= N0 * R + N1,
             string_decomplength(Run, N0),
             string_decomplength(Rest, N1)
