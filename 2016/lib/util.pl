@@ -1,6 +1,7 @@
 :- module(
     util,
-    [   frequencies/2,
+    [   clumped/2,
+        frequencies/2,
         list_firstdup/2,
         lists_interleaved/3,
         maplist_appended/3,
@@ -13,13 +14,20 @@
 
 frequencies(Es, Freqs) :- phrase((msort, clumped), Es, Freqs).
 
-item_pairs0_pairs(K, [], [K-1]).
-item_pairs0_pairs(K, [P-V0|Ps0], Ps) :-
-    if_(K = P, (succ(V0, V), Ps = [K-V|Ps0]), Ps = [K-1, P-V0|Ps0]).
+item_pairs0_pairs(K, [K-V|Ps0], Ps) :-
+    if_(V = 1,
+        (   (   Ps0 = []
+            ;   Ps0 = [J-_|_],
+                dif(K, J)
+            ),
+            Ps = Ps0
+        ),
+        (   V #= V0 + 1,
+            Ps = [K-V0|Ps0]
+        )
+    ).
 
-clumped(Items, Pairs) :-
-    foldl(item_pairs0_pairs, Items, [], PairsR),
-    reverse(PairsR, Pairs).
+clumped(Items, Pairs) :- foldl(item_pairs0_pairs, Items, Pairs, []).
 
 list_firstdup(Ls, E) :-
     empty_assoc(Set),
