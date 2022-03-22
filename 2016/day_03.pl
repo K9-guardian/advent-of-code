@@ -6,7 +6,7 @@ line([X, Y, Z]) --> blanks, integer(X), blanks, integer(Y), blanks, integer(Z).
 
 triangle_t([X, Y, Z], T) :-
     Z #< X + Y #/\ Z #> abs(X - Y) #<==> B,
-    if_(B = 1, T = true, T = false).
+    =(B, 1, T).
 
 p1(S) :-
     phrase_from_file(sequence(line, "\n", Ls), 'input/d3.txt'),
