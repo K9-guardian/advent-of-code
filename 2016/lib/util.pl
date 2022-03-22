@@ -3,6 +3,7 @@
     [   frequencies/2,
         list_firstdup/2,
         lists_interleaved/3,
+        maplist_appended/3,
         n_list_partitioned/3,
         n_list_split/3
     ]
@@ -42,6 +43,17 @@ lists_interleaved_([], []) --> [].
 lists_interleaved_([A|As], []) --> [A], string(As).
 lists_interleaved_([], [B|Bs]) --> [B], string(Bs).
 lists_interleaved_([A|As], [B|Bs]) --> [A], [B], lists_interleaved_(As, Bs).
+
+maplist_appended(G_2, Ls0, Ls) :-
+    foldl(
+        {G_2}/[E0, Es0, Es]>>
+        (   call(G_2, E0, E),
+            append(E, Es, Es0)
+        ),
+        Ls0,
+        Ls,
+        []
+    ).
 
 n_list_split(N, Ls, P-S) :-
     length(P, N),
