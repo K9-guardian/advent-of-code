@@ -11,7 +11,7 @@ line(B-value(V)) --> "value ", integer(V), " goes to ", loc(B).
 line(B-low_high(L, H)) --> loc(B), " gives low to ", loc(L), " and high to ", loc(H).
 
 moves_botchips0_botchips(BotMoves, BotChips0, BotChips) :-
-    gen_assoc(bot(B), BotChips0, [Min, Max]),
+    once(gen_assoc(bot(B), BotChips0, [Min, Max])),
     get_assoc(bot(B), BotMoves, low_high(L, H)),
     ( get_assoc(L, BotChips0, Ls0), ! ; Ls0 = [] ),
     ( get_assoc(H, BotChips0, Hs0), ! ; Hs0 = [] ),
@@ -47,6 +47,7 @@ p2(S) :-
         BotChips0,
         BotChips
     ),
+    assoc_to_list(BotChips, Ls), writeln(Ls),
     get_assoc(output(0), BotChips, [value(X)]),
     get_assoc(output(1), BotChips, [value(Y)]),
     get_assoc(output(2), BotChips, [value(Z)]),
