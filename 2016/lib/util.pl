@@ -2,6 +2,7 @@
     util,
     [   clumped/2,
         frequencies/2,
+        check_iterate_init_/4,
         list_firstdup/2,
         lists_interleaved/3,
         maplist_appended/3,
@@ -11,8 +12,6 @@
 ).
 
 :- use_module(library(assoc)).
-
-frequencies(Es, Freqs) :- phrase((msort, clumped), Es, Freqs).
 
 item_pairs0_pairs(K, [K-V|Ps0], Ps) :-
     if_(V = 1,
@@ -28,6 +27,15 @@ item_pairs0_pairs(K, [K-V|Ps0], Ps) :-
     ).
 
 clumped(Items, Pairs) :- foldl(item_pairs0_pairs, Items, Pairs, []).
+
+frequencies(Es, Freqs) :- phrase((msort, clumped), Es, Freqs).
+
+check_iterate_init_(C_1, I_2, S0, V) :-
+    (   call(C_1, S0)
+    ->  V = S0
+    ;   call(I_2, S0, S),
+        check_iterate_init_(C_1, I_2, S, V)
+    ).
 
 list_firstdup(Ls, E) :-
     empty_assoc(Set),
