@@ -1,54 +1,59 @@
 :- use_module(lib/double_quotes).
-:- use_module(library(ordsets)).
-:- use_module(library(pairs)).
 :- use_module(lib/pio).
 :- use_module(lib/util).
+:- use_module(library(pairs)).
+:- use_module(library(ugraphs)).
+
+update_assoc(K, A0, G_2, D, A) :-
+    (   get_assoc(K, A0, V0), !
+    ;   V0 = D
+    ),
+    call(G_2, V0, V),
+    put_assoc(K, A0, V, A).
 
 loc(bot(B)) --> "bot ", integer(B).
-loc(output(B)) --> "output ", integer(B).
+loc(output(O)) --> "output ", integer(O).
 
-line(B-value(V)) --> "value ", integer(V), " goes to ", loc(B).
-line(B-low_high(L, H)) --> loc(B), " gives low to ", loc(L), " and high to ", loc(H).
+move(value_bot(value(V), B)) --> "value ", integer(V), " goes to ", loc(B).
+move(bot_low_high(B, L, H)) --> loc(B), " gives low to ", loc(L), " and high to ", loc(H).
 
-moves_botchips0_botchips(BotMoves, BotChips0, BotChips) :-
-    once(gen_assoc(bot(B), BotChips0, [Min, Max])),
-    get_assoc(bot(B), BotMoves, low_high(L, H)),
-    ( get_assoc(L, BotChips0, Ls0), ! ; Ls0 = [] ),
-    ( get_assoc(H, BotChips0, Hs0), ! ; Hs0 = [] ),
-    ord_add_element(Ls0, Min, Ls),
-    ord_add_element(Hs0, Max, Hs),
-    del_assoc(bot(B), BotChips0, _, BotChips1),
-    put_assoc(L, BotChips1, Ls, BotChips2),
-    put_assoc(H, BotChips2, Hs, BotChips).
+move_edges0_edges(value_bot(V, B), Es, [V-B|Es]).
+move_edges0_edges(bot_low_high(B, L, H), Es, [B-L, B-H|Es]).
+
+move_instrs0_instrs(value_bot(V, B), Is, [V-B|Is]).
+move_instrs0_instrs(bot_low_high(B, L, H), Is, [B-(L-H)|Is]).
+
+assoc_vertex_botcomps0_botcomps(A, value(V), BCs0, BCs) :-
+    get_assoc(value(V), A, B),
+    update_assoc(B, BCs0, {V}/[Vs, [V|Vs]]>>true, [], BCs).
+assoc_vertex_botcomps0_botcomps(A, bot(B), BCs0, BCs) :-
+    get_assoc(bot(B), A, L-H),
+    get_assoc(bot(B), BCs0, Chips),
+    sort(Chips, [Min, Max]),
+    update_assoc(L, BCs0, {Min}/[Vs, [Min|Vs]]>>true, [], BCs1),
+    update_assoc(H, BCs1, {Max}/[Vs, [Max|Vs]]>>true, [], BCs).
+assoc_vertex_botcomps0_botcomps(_, output(_), BCs, BCs).
 
 p1(S) :-
-    phrase_from_file(sequence(line, "\n", Lines), 'input/d10.txt'),
-    partition([_-value(_)]>>true, Lines, ValueLines, BotLines),
-    list_to_assoc(BotLines, BotMoves),
-    call_dcg((msort, group_pairs_by_key, ord_list_to_assoc), ValueLines, BotChips0),
-    Target = [value(17), value(61)],
-    check_iterate_init_(
-        [BCs]>>gen_assoc(_, BCs, Target),
-        moves_botchips0_botchips(BotMoves),
-        BotChips0,
-        BotChips
-    ),
-    assoc_to_list(BotChips, BCs),
-    member(bot(S)-Target, BCs).
+    phrase_from_file(sequence(move, "\n", Moves), 'input/d10.txt'),
+    foldl(move_edges0_edges, Moves, [], Edges),
+    vertices_edges_to_ugraph([], Edges, Graph),
+    call_dcg((foldl(move_instrs0_instrs, Moves), list_to_assoc), [], Assoc),
+    top_sort(Graph, TopSorted),
+    empty_assoc(BotComps0),
+    foldl(assoc_vertex_botcomps0_botcomps(Assoc), TopSorted, BotComps0, BotComps),
+    ( Target = [17, 61] ; Target = [61, 17] ),
+    gen_assoc(bot(S), BotComps, Target).
 
 p2(S) :-
-    phrase_from_file(sequence(line, "\n", Lines), 'input/d10.txt'),
-    partition([_-value(_)]>>true, Lines, ValueLines, BotLines),
-    list_to_assoc(BotLines, BotMoves),
-    call_dcg((msort, group_pairs_by_key, ord_list_to_assoc), ValueLines, BotChips0),
-    check_iterate_init_(
-        [BCs]>>(\+ gen_assoc(bot(_), BCs, _)),
-        moves_botchips0_botchips(BotMoves),
-        BotChips0,
-        BotChips
-    ),
-    assoc_to_list(BotChips, Ls), writeln(Ls),
-    get_assoc(output(0), BotChips, [value(X)]),
-    get_assoc(output(1), BotChips, [value(Y)]),
-    get_assoc(output(2), BotChips, [value(Z)]),
+    phrase_from_file(sequence(move, "\n", Moves), 'input/d10.txt'),
+    foldl(move_edges0_edges, Moves, [], Edges),
+    vertices_edges_to_ugraph([], Edges, Graph),
+    call_dcg((foldl(move_instrs0_instrs, Moves), list_to_assoc), [], Assoc),
+    top_sort(Graph, TopSorted),
+    empty_assoc(BotComps0),
+    foldl(assoc_vertex_botcomps0_botcomps(Assoc), TopSorted, BotComps0, BotComps),
+    get_assoc(output(0), BotComps, [X]),
+    get_assoc(output(1), BotComps, [Y]),
+    get_assoc(output(2), BotComps, [Z]),
     S #= X * Y * Z.
