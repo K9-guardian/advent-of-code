@@ -28,8 +28,8 @@ assoc_vertex_botcomps0_botcomps(A, value(V), BCs0, BCs) :-
     update_assoc(B, BCs0, {V}/[Vs, [V|Vs]]>>true, [], BCs).
 assoc_vertex_botcomps0_botcomps(A, bot(B), BCs0, BCs) :-
     get_assoc(bot(B), A, L-H),
-    get_assoc(bot(B), BCs0, Chips),
-    sort(Chips, [Min, Max]),
+    get_assoc(bot(B), BCs0, Values),
+    sort(Values, [Min, Max]),
     update_assoc(L, BCs0, {Min}/[Vs, [Min|Vs]]>>true, [], BCs1),
     update_assoc(H, BCs1, {Max}/[Vs, [Max|Vs]]>>true, [], BCs).
 assoc_vertex_botcomps0_botcomps(_, output(_), BCs, BCs).
