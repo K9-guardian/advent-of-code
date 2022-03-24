@@ -2,38 +2,33 @@
 :- use_module(lib/pio).
 :- use_module(lib/util).
 
-move(T-Amt) --> turn(T), integer(Amt).
 turn(l) --> "L".
 turn(r) --> "R".
+move(T-Amt) --> turn(T), integer(Amt).
 
-dir_num_unit(north, 0, 0-1).
-dir_num_unit(east, 1, 1-0).
-dir_num_unit(south, 2, 0-(-1)).
-dir_num_unit(west, 3, (-1)-0).
+dir_unit(0, 0-1). % North
+dir_unit(1, 1-0). % East
+dir_unit(2, 0-(-1)). % South
+dir_unit(3, (-1)-0). % West
 
 turn_shift(l, -1).
 turn_shift(r, 1).
 
-dir_turn_(Dir0, Turn, Dir) :-
-    dir_num_unit(Dir0, Num0, _),
-    turn_shift(Turn, Shift),
-    Num #= (Num0 + Shift) mod 4,
-    dir_num_unit(Dir, Num, _).
+dir_turn_(Dir0, Turn, Dir) :- Dir #= (Dir0 + (turn_shift $ Turn)) mod 4.
 
 coord_dir_amt_(X0-Y0, Dir, Amt, X-Y) :-
-    dir_num_unit(Dir, _, Xunit-Yunit),
-    X #= X0 + Amt * Xunit,
-    Y #= Y0 + Amt * Yunit.
+    dir_unit(Dir, I-J),
+    X #= X0 + Amt * I,
+    Y #= Y0 + Amt * J.
 
 coord_dir_amt_locs(X0-Y0, Dir, Amt, Locs) :-
-    dir_num_unit(Dir, _, Xunit-Yunit),
-    numlist(1, Amt, Nums),
+    dir_unit(Dir, I-J),
     maplist(
-        {X0, Y0, Xunit, Yunit}/[Num, X-Y]>>
-        (   X #= X0 + Num * Xunit,
-            Y #= Y0 + Num * Yunit
+        {X0, Y0, I, J}/[Num, X-Y]>>
+        (   X #= X0 + Num * I,
+            Y #= Y0 + Num * J
         ),
-        Nums,
+        numlist(1, Amt, ~),
         Locs
     ).
 
@@ -45,7 +40,7 @@ p1(S) :-
             coord_dir_amt_(X0-Y0, Dir, Amt, X-Y)
         ),
         Moves,
-        coord_dir(0-0, north),
+        coord_dir(0-0, 0),
         coord_dir(X-Y, _)
     ),
     S #= abs(X + Y).
@@ -60,7 +55,7 @@ p2(S) :-
             append(LocsP, Locs, Locs0)
         ),
         Moves,
-        coord_dir_locs(0-0, north, Locs),
+        coord_dir_locs(0-0, 0, Locs),
         coord_dir_locs(_, _, [])
     ),
     list_firstdup([0-0|Locs], X-Y),

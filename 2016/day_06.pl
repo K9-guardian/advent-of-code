@@ -2,9 +2,9 @@
 :- use_module(lib/pio).
 :- use_module(lib/util).
 
-sort_list_mode(M) -->
+sort_list_mode(S) -->
     frequencies,
-    sort(2, M),
+    sort(2, S),
     [[C-_|_], C]>>true.
 
 p1(S) :-

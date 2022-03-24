@@ -42,10 +42,10 @@ move_unit('D', 0-1).
 move_unit('L', (-1)-0).
 
 p2_move_coord_(M, X0-Y0, C) :-
-    move_unit(M, Xshift-Yshift),
-    X #= X0 + Xshift,
-    Y #= Y0 + Yshift,
-    Dist = abs(X - 2) + abs(Y - 2),
+    move_unit(M, I-J),
+    X #= X0 + I,
+    Y #= Y0 + J,
+    Dist #= abs(X - 2) + abs(Y - 2),
     Dist #=< 2 #<==> B,
     if_(B = 1, C = X-Y, C = X0-Y0).
 

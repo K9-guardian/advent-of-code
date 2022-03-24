@@ -10,16 +10,14 @@ width(50).
 height(6).
 
 grid(G) :-
-    width(W), height(H),
-    findall(X-Y-0, (between(1, H, Y), between(1, W, X)), Ls),
+    findall(X-Y-0, (between(1, height(~), Y), between(1, width(~), X)), Ls),
     list_to_assoc(Ls, G).
 
 grid_list(G, Ls) :-
-    height(H),
     call_dcg(
         (   assoc_to_list,
             maplist([_-_-V, V]>>true),
-            n_list_partitioned(H),
+            n_list_partitioned(height(~)),
             transpose
         ),
         G,
@@ -28,8 +26,7 @@ grid_list(G, Ls) :-
 
 n_list_rotated(N, Ls0, Ls) :-
     length(Ls0, X),
-    M #= X - N,
-    n_list_split(M, Ls0, P, S),
+    n_list_split(~ #= X - N, Ls0, P, S),
     append(S, P, Ls).
 
 move_grid0_grid(rect(M, N), G0, G) :-
@@ -37,7 +34,7 @@ move_grid0_grid(rect(M, N), G0, G) :-
     foldl([C, A0, A]>>put_assoc(C, A0, 1, A), Cs, G0, G).
 
 move_grid0_grid(rotate(row, Y0, D), G0, G) :-
-    Y #= Y0 + 1, width(W), numlist(1, W, Xs),
+    Y #= Y0 + 1, numlist(1, width(~), Xs),
     phrase(
         (   maplist({G0}/[X, V]>>get_assoc(X-Y, G0, V)),
             n_list_rotated(D),
@@ -49,7 +46,7 @@ move_grid0_grid(rotate(row, Y0, D), G0, G) :-
     foldl([K-V, A0, A]>>put_assoc(K, A0, V, A), Vs, G0, G).
 
 move_grid0_grid(rotate(col, X0, D), G0, G) :-
-    X #= X0 + 1, height(H), numlist(1, H, Ys),
+    X #= X0 + 1, numlist(1, height(~), Ys),
     phrase(
         (   maplist({G0}/[Y, V]>>get_assoc(X-Y, G0, V)),
             n_list_rotated(D),
@@ -65,14 +62,12 @@ char_value('#', 1).
 
 p1(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
-    grid(G0),
-    foldl(move_grid0_grid, Moves, G0, G),
+    foldl(move_grid0_grid, Moves, grid(~), G),
     call_dcg((assoc_to_values, sum_list), G, S).
 
 p2(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
-    grid(G0),
-    foldl(move_grid0_grid, Moves, G0, G),
+    foldl(move_grid0_grid, Moves, grid(~), G),
     grid_list(G, Ls),
     maplist(
         [L, Cs]>>

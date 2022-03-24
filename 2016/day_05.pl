@@ -23,14 +23,12 @@ input_keys(A, C0-C1) :-
 % I can't improve this.
 room_tail_found_(ID, X, Found, Out) :-
     (   dict_size(Found, 8)
-    ->  dict_pairs(Found, _, Ps), pairs_values(Ps, Out)
-    ;   atom_concat(ID, X, IDX),
-        succ(X, Y),
-        (   input_keys(IDX, N-C),
+    ->  pairs_values(dict_pairs(Found, _, ~), Out)
+    ;   (   input_keys(atom_concat(ID, X, ~), N-C),
             call_dcg((atom_number, in), N, 0..8),
             \+ get_dict(N, Found, _)
-        ->  room_tail_found_(ID, Y, Found.put(N, C), Out)
-        ;   room_tail_found_(ID, Y, Found, Out)
+        ->  room_tail_found_(ID, succ $ X, Found.put(N, C), Out)
+        ;   room_tail_found_(ID, succ $ X, Found, Out)
         )
     ).
 

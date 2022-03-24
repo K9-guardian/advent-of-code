@@ -4,29 +4,12 @@
 
 room(room(Name, ID, Checksum)) --> string(Name), "-", integer(ID), "[", string(Checksum), "]".
 
-room_real(Sum) -->
+sum_room_real(Sum) -->
     tfilter(dif('-')),
     frequencies,
     predsort([D, K0-V0, K1-V1]>>compare(D, V1-K0, V0-K1)),
     pairs_keys,
-    {Sum}/[Ks, T]>>
-    (   n_list_split(5, Ks, P, _),
-        =(P, Sum, T)
-    ).
-
-shift_char_(ID, C0, C) :-
-    char_type(C0, ascii),
-    (   char_type(C0, lower)
-    ;   C0 = '-'
-    ),
-    if_(
-        C0 = '-',
-        C = ' ',
-        (   char_code(C0, X0),
-            X #= ((X0 - 97) + ID) mod 26 + 97,
-            char_code(C, X)
-        )
-    ).
+    {Sum}/[Ks, T]>>(n_list_split(5, Ks, P, _), =(P, Sum, T)).
 
 id_code_shifted(ID, X0, X) :-
     X0 in 0'- \/ 0'a..0'z,
@@ -37,7 +20,7 @@ id_code_shifted(ID, X0, X) :-
 
 p1(S) :-
     phrase_from_file(sequence(room, "\n", Rs0), 'input/d4.txt'),
-    tfilter([room(Name, _, Sum), T]>>call_dcg(room_real(Sum), Name, T), Rs0, Rs),
+    tfilter([room(Name, _, Sum), T]>>call_dcg(sum_room_real(Sum), Name, T), Rs0, Rs),
     maplist([room(_, ID, _), ID]>>true, Rs, IDs),
     sum_list(IDs, S).
 
