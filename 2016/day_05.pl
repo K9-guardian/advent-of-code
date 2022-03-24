@@ -27,7 +27,7 @@ room_tail_found_(ID, X, Found, Out) :-
     ;   atom_concat(ID, X, IDX),
         succ(X, Y),
         (   input_keys(IDX, N-C),
-            call_dcg((atom_number,in), N, 0..8),
+            call_dcg((atom_number, in), N, 0..8),
             \+ get_dict(N, Found, _)
         ->  room_tail_found_(ID, Y, Found.put(N, C), Out)
         ;   room_tail_found_(ID, Y, Found, Out)
@@ -37,14 +37,7 @@ room_tail_found_(ID, X, Found, Out) :-
 p1(S) :-
     phrase_from_file(string(ID0), 'input/d5.txt'),
     atom_chars(ID, ID0),
-    findnsols(
-        8,
-        C,
-        (   length(_, X),
-            call_dcg((atom_concat(ID), input_key), X, C)
-        ),
-        Cs
-    ),
+    findnsols(8, C, (length(_, X), call_dcg((atom_concat(ID), input_key), X, C)), Cs),
     S = Cs.
 
 p2(S) :-
