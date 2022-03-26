@@ -5,6 +5,7 @@
         list_firstdup/2,
         lists_interleaved/3,
         maplist_appended/3,
+        memberd/2,
         n_list_partitioned/3,
         n_list_split/4,
         update_assoc/5
@@ -18,18 +19,16 @@
 :- use_module(library(yall)).
 
 item_pairs0_pairs(K, [K-V0|Ps0], Ps) :-
-    if_(V0 = 1,
-        (   (   Ps0 = []
-            ;   Ps0 = [J-_|_],
-                dif(K, J)
-            ),
-            Ps = Ps0
-        ),
-        (   V0 #= V + 1,
-            Ps = [K-V|Ps0]
-        )
-    ).
+    zcompare(C, 1, V0),
+    encoding_remainder_pairs_(C, K-V0, Ps0, Ps).
 
+remainder_key([], _).
+remainder_key([J-_|_], K) :- dif(K, J).
+
+encoding_remainder_pairs_(=, K-_, Ps, Ps) :- remainder_key(Ps, K).
+encoding_remainder_pairs_(<, K-V0, Ps, [K-V|Ps]) :- V0 #= V + 1.
+
+% TODO: Make this deterministic.
 clumped(Items, Pairs) :- foldl(item_pairs0_pairs, Items, Pairs, []).
 
 update_assoc(K, A0, G_2, D, A) :-
@@ -42,14 +41,9 @@ frequencies(Es, Freqs) :-
     foldl([K, Fs0, Fs]>>update_assoc(K, Fs0, succ, 0, Fs), Es, empty_assoc(~), Freqs0),
     assoc_to_list(Freqs0, Freqs).
 
-list_firstdup(Ls, E) :- list_firstdup_(Ls, E, empty_assoc(~)).
+memberd(X, [E|Es]) :- if_(X = E, true, memberd(X, Es)).
 
-list_firstdup_([L|Ls], E, Set0) :-
-    (   get_assoc(L, Set0, L)
-    ->  E = L
-    ;   put_assoc(L, Set0, L, Set),
-        list_firstdup_(Ls, E, Set)
-    ).
+list_firstdup([L|Ls], E) :- if_(memberd_t(L, Ls), E = L, list_firstdup(Ls, E)).
 
 lists_interleaved(As, Bs, Cs) :- phrase(lists_interleaved_(As, Bs), Cs).
 
