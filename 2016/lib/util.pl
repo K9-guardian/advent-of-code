@@ -28,7 +28,7 @@ list_clumped_([], E, [E]).
 list_clumped_([J-M|Ps0], K-N, Ps) :-
     if_(J = K,
         (X #= M + N, Ps = Ps1),
-        (X = M, Ps = [K-N|Ps1])
+        (X #= M, Ps = [K-N|Ps1])
     ),
     list_clumped_(Ps0, J-X, Ps1).
 
