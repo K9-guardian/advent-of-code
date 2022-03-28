@@ -1,6 +1,8 @@
 :- module(
     dcg,
-    [digit//1,
+    [blank//0,
+     blanks//0,
+     digit//1,
      integer//1,
      natural//1,
      sequence//2,
@@ -27,6 +29,9 @@ sequence_([L|Ls], G_3) --> call(G_3, L), sequence_(Ls, G_3).
 sequence_([], _, _) --> [].
 sequence_([L], G_3, _) --> call(G_3, L).
 sequence_([L|Ls], G_3, Sep) --> call(G_3, L), Sep, sequence_(Ls, G_3, Sep).
+
+blank --> [V], { char_type(V, space) }.
+blanks --> blank | blank, blanks.
 
 digit(0) --> "0".
 digit(1) --> "1".
