@@ -10,8 +10,11 @@
      n_list_split/4,
      selectd/3,
      update_assoc/4,
-     update_assoc/5]
+     update_assoc/5
+    ]
 ).
+
+:- use_module(dcg).
 :- use_module(library(apply)).
 :- use_module(library(assoc)).
 :- use_module(library(clpfd)).
@@ -20,15 +23,13 @@
 :- use_module(library(yall)).
 
 list_clumped([], []).
-list_clumped([L|Ls], Ps) :-
-    maplist([E, E-1]>>true, Ls, Ps0),
-    list_clumped_(Ps0, L-1, Ps).
+list_clumped([L|Ls], Ps) :- list_clumped_(Ls, L-1, Ps).
 
 list_clumped_([], E, [E]).
-list_clumped_([J-M|Ps0], K-N, Ps) :-
+list_clumped_([J|Ps0], K-N, Ps) :-
     if_(J = K,
-        (X #= M + N, Ps = Ps1),
-        (X #= M, Ps = [K-N|Ps1])
+        (X #= 1 + N, Ps = Ps1),
+        (X #= 1, Ps = [K-N|Ps1])
     ),
     list_clumped_(Ps0, J-X, Ps1).
 
