@@ -48,7 +48,7 @@
                 (mapcat (juxt identity (comp vector str/lower-case)))
                 (concat rs))
         m (mapv str/lower-case m)]
-    (->> (earley m rs "e")
+    (->> (earley rs "e" m)
          :parse
          (tree-seq seq? identity)
          (remove seq?)

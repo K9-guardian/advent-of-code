@@ -17,7 +17,7 @@
 
 (def ^:private indexed?* (some-fn string? indexed?))
 
-(defn earley [s grm S & {all-parses* :all-parses :or {all-parses false}}]
+(defn earley [grm S s & {all-parses* :all-parses :or {all-parses false}}]
   {:pre [(even? (count grm)) (indexed?* s) (->> grm (partition 2) (map second) (every? indexed?*))]}
   (let [grm (->> grm (partition 2) (map vec))
         nullable? (nullables grm)
@@ -158,20 +158,20 @@
 
 (comment
   ;; Example on Wikipedia.
-  (:parse (earley "2+3*4"
-                  [:P [:S]
+  (:parse (earley [:P [:S]
                    :S [:S \+ :M] :S [:M]
                    :M [:M \* :T] :M [:T]
                    :T "1" :T "2" :T "3" :T "4"]
-                  :P))
+                  :P
+                  "2+3*4"))
   ;; Works with ambiguous grammars.
-  (:parse (earley "sssss"
-                  [:S [:S :S] :S "s"]
+  (:parse (earley [:S [:S :S] :S "s"]
                   :S
+                  "sssss"
                   :all-parses true))
   ;; Nullable grammar test. Skips production of C in parse tree.
-  (:parse (earley "aa"
-                  [:A [\a :B :B :B \a]
+  (:parse (earley [:A [\a :B :B :B \a]
                    :B [:C]
                    :C ""]
-                  :A)))
+                  :A
+                  "aa")))
