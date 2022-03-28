@@ -16,6 +16,7 @@ p2(S) :-
     phrase_from_file(sequence(line, "\n", Ls), 'input/d3.txt'),
     S = length
         of tfilter(triangle_t)
-        of maplist_appended(n_list_partitioned(3))
+        of append
+        of maplist(n_list_partitioned(3))
         of transpose
         $ Ls.

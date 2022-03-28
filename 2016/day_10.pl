@@ -17,11 +17,14 @@ move_edges0_edges(bot_low_high(B, L, H), Es, [B-L, B-H|Es]).
 move_instrs0_instrs(value_bot(V, B), Is, [V-B|Is]).
 move_instrs0_instrs(bot_low_high(B, L, H), Is, [B-(L-H)|Is]).
 
-assoc_vertex_botcomps0_botcomps(_, output(_), BCs, BCs).
-assoc_vertex_botcomps0_botcomps(A, value(V), BCs0, BCs) :-
+assoc_vertex_botcomps0_botcomps(A, V, BCs0, BCs) :-
+    vertex_assoc_botcomps0_botcomps(V, A, BCs0, BCs).
+
+vertex_assoc_botcomps0_botcomps(output(_), _, BCs, BCs).
+vertex_assoc_botcomps0_botcomps(value(V), A, BCs0, BCs) :-
     get_assoc(value(V), A, B),
     update_assoc(B, BCs0, {V}/[Vs, [V|Vs]]>>true, [], BCs).
-assoc_vertex_botcomps0_botcomps(A, bot(B), BCs0, BCs) :-
+vertex_assoc_botcomps0_botcomps(bot(B), A, BCs0, BCs) :-
     get_assoc(bot(B), A, L-H),
     sort(get_assoc(bot(B), BCs0, ~), [Min, Max]),
     update_assoc(L, BCs0, {Min}/[Vs, [Min|Vs]]>>true, [], BCs1),

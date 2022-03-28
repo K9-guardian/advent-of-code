@@ -38,4 +38,4 @@ p2(S) :-
         Rs0,
         Rs
     ),
-    member("northpole object storage"-S, Rs).
+    memberd("northpole object storage"-S, Rs).
