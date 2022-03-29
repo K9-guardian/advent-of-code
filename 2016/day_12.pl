@@ -2,6 +2,7 @@
 :- use_module(lib/pio).
 :- use_module(lib/util).
 
+% Tfw integer//1 only checks sign when you're using codes.
 int(Z, [L|Ls], Rs) :-
     if_(L = '-',
         (phrase(integer(N), Ls, Rs), Z #= -N),
