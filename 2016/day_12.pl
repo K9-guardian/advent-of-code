@@ -2,21 +2,9 @@
 :- use_module(lib/pio).
 :- use_module(lib/util).
 
-% ¯\_(ツ)_/¯
-dig(0) --> "0".
-dig(1) --> "1".
-dig(2) --> "2".
-dig(3) --> "3".
-dig(4) --> "4".
-dig(5) --> "5".
-dig(6) --> "6".
-dig(7) --> "7".
-dig(8) --> "8".
-dig(9) --> "9".
-
 horny([L|Ls], N) :- foldl([V, S0, S]>>(S #= S0 * 10 + V), [L|Ls], 0, N).
 
-nat(N) --> sequence(dig, Vs), { horny(Vs, N) }.
+nat(N) --> sequence(digit, Vs0), { maplist(atom_number, Vs0, Vs), horny(Vs, N) }.
 
 int(Z, [L|Ls], Rs) :-
     if_(L = '-',

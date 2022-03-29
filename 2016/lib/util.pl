@@ -14,7 +14,6 @@
     ]
 ).
 
-:- use_module(dcg).
 :- use_module(library(apply)).
 :- use_module(library(assoc)).
 :- use_module(library(clpfd)).
