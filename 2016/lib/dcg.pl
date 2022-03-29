@@ -21,14 +21,42 @@ string([]) --> "".
 string([L|Ls]) --> [L], string(Ls).
 
 sequence(G_3, Ls) --> sequence_(Ls, G_3).
+
 sequence(G_3, Sep, Ls) --> sequence_(Ls, G_3, Sep).
 
 sequence_([], _) --> [].
 sequence_([L|Ls], G_3) --> call(G_3, L), sequence_(Ls, G_3).
 
-sequence_([], _, _) --> [].
-sequence_([L], G_3, _) --> call(G_3, L).
-sequence_([L|Ls], G_3, Sep) --> call(G_3, L), Sep, sequence_(Ls, G_3, Sep).
+% Source: library(dcg/high_order).
+sequence_(List, OnElem, OnSep) -->
+    {var(List)},
+    !,
+    (   call(OnElem, H)
+    *-> (   OnSep
+        ->  !,
+            {List = [H|T]},
+            sequence_as(T, OnElem, OnSep)
+        ;   {List=[H]}
+        )
+    ;   {List=[]}
+    ).
+sequence_([H|T], OnElem, OnSep) -->
+    call(OnElem, H),
+    (   {T==[]}
+    ->  []
+    ;   OnSep,
+        sequence_(T, OnElem, OnSep)
+    ).
+sequence_([], _, _) -->
+    [].
+
+sequence_as([H|T], OnElem, OnSep) -->
+    call(OnElem, H),
+    (   OnSep
+    ->  !,
+        sequence_as(T, OnElem, OnSep)
+    ;   {T=[]}
+    ).
 
 blank --> [V], { char_type(V, space) }.
 blanks --> blank | blank, blanks.

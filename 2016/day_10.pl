@@ -1,3 +1,4 @@
+:- use_module(lib/dcg).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(lib/util).

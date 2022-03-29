@@ -10,14 +10,16 @@ sample(
     [[chip-hydrogen, chip-lithium],
      [gen-hydrogen],
      [gen-lithium],
-     []]
+     []
+    ]
 ).
 
 input(
     [[gen-promethium, chip-promethium],
      [gen-cobalt, gen-curium, gen-ruthenium, gen-plutonium],
      [chip-cobalt, chip-curium, chip-ruthenium, chip-plutonium],
-     []]
+     []
+    ]
 ).
 
 % Change the elements to numbers to faciliate pruning.
