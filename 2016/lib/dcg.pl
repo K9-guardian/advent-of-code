@@ -13,8 +13,9 @@
 
 :- set_prolog_flag(double_quotes, chars).
 
-:- use_module(library(apply)).
 :- use_module(double_quotes).
+:- use_module(library(apply)).
+:- use_module(library(reif)).
 :- use_module(pio).
 
 string([]) --> "".
@@ -76,8 +77,11 @@ natural(N) --> sequence(digit, Vs), { horny(Vs, N) }.
 
 horny([L|Ls], N) :- foldl([V, S0, S]>>(S #= S0 * 10 + V), [L|Ls], 0, N).
 
+sign_integer('+', 1).
+sign_integer('-', -1).
+
 integer(Z, [L|Ls], Rs) :-
-    if_(L = '-',
-        (phrase(natural(N), Ls, Rs), Z #= -N),
+    if_(memberd_t(L, "+-"),
+        (phrase(natural(N), Ls, Rs), sign_integer(L, P), Z #= P * N),
         phrase(natural(Z), [L|Ls], Rs)
     ).
