@@ -2,14 +2,10 @@
 :- use_module(lib/pio).
 :- use_module(lib/util).
 
-horny([L|Ls], N) :- foldl([V, S0, S]>>(S #= S0 * 10 + V), [L|Ls], 0, N).
-
-nat(N) --> sequence(digit, Vs0), { maplist(atom_number, Vs0, Vs), horny(Vs, N) }.
-
 int(Z, [L|Ls], Rs) :-
     if_(L = '-',
-        (phrase(nat(N), Ls, Rs), Z #= -N),
-        phrase(nat(Z), [L|Ls], Rs)
+        (phrase(integer(N), Ls, Rs), Z #= -N),
+        phrase(integer(Z), [L|Ls], Rs)
     ).
 
 reg(a) --> "a".
