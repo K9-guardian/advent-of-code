@@ -6,21 +6,15 @@
 
 % I'd rather not parse this.
 
-sample(
-    [[chip-hydrogen, chip-lithium],
-     [gen-hydrogen],
-     [gen-lithium],
-     []
-    ]
-).
+sample([[chip-hydrogen, chip-lithium],
+        [gen-hydrogen],
+        [gen-lithium],
+        []]).
 
-input(
-    [[gen-promethium, chip-promethium],
-     [gen-cobalt, gen-curium, gen-ruthenium, gen-plutonium],
-     [chip-cobalt, chip-curium, chip-ruthenium, chip-plutonium],
-     []
-    ]
-).
+input([[gen-promethium, chip-promethium],
+       [gen-cobalt, gen-curium, gen-ruthenium, gen-plutonium],
+       [chip-cobalt, chip-curium, chip-ruthenium, chip-plutonium],
+       []]).
 
 % Change the elements to numbers to faciliate pruning.
 % Ordered by order of chips from floor 1 to 4.

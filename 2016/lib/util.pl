@@ -1,18 +1,16 @@
-:- module(
-    util,
-    [frequencies/2,
-     list_clumped/2,
-     list_deduped/2,
-     list_firstdup/2,
-     lists_interleaved/3,
-     memberd/2,
-     n_list_partitioned/3,
-     n_list_split/4,
-     selectd/3,
-     update_assoc/4,
-     update_assoc/5
-    ]
-).
+:- module(util,
+          [frequencies/2,
+           get_assoc/4,
+           list_clumped/2,
+           list_deduped/2,
+           list_firstdup/2,
+           lists_interleaved/3,
+           memberd/2,
+           n_list_partitioned/3,
+           n_list_split/4,
+           selectd/3,
+           update_assoc/4,
+           update_assoc/5]).
 
 :- use_module(library(apply)).
 :- use_module(library(assoc)).
@@ -28,8 +26,7 @@ list_clumped_([], E, [E]).
 list_clumped_([J|Ps0], K-N, Ps) :-
     if_(J = K,
         (X #= 1 + N, Ps = Ps1),
-        (X #= 1, Ps = [K-N|Ps1])
-    ),
+        (X #= 1, Ps = [K-N|Ps1])),
     list_clumped_(Ps0, J-X, Ps1).
 
 frequencies(Es, Freqs) :- phrase((msort, list_clumped), Es, Freqs).
@@ -44,10 +41,7 @@ list_deduped([L|Ls0], Ls) :- list_deduped_(Ls0, L, Ls).
 
 list_deduped_([], E, [E]).
 list_deduped_([L|Ls0], E, Ls) :-
-    if_(E = L,
-        Ls = Ls1,
-        Ls = [E|Ls1]
-    ),
+    if_(E = L, Ls = Ls1, Ls = [E|Ls1]),
     list_deduped_(Ls0, L, Ls1).
 
 list_firstdup([L|Ls], E) :- if_(memberd_t(L, Ls), E = L, list_firstdup(Ls, E)).
@@ -70,6 +64,11 @@ n_list_partitioned_([], _,  []).
 n_list_partitioned_([L|Ls0], N, [P|R]) :-
     n_list_split(N, [L|Ls0], P, S),
     n_list_partitioned_(S, N, R).
+
+get_assoc(K, A, D, V) :-
+    (   get_assoc(K, A, V), !
+    ;   V = D
+    ).
 
 update_assoc(K, A0, G_2, A) :-
     get_assoc(K, A0, V0),

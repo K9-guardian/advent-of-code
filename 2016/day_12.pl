@@ -6,8 +6,7 @@
 int(Z, [L|Ls], Rs) :-
     if_(L = '-',
         (phrase(integer(N), Ls, Rs), Z #= -N),
-        phrase(integer(Z), [L|Ls], Rs)
-    ).
+        phrase(integer(Z), [L|Ls], Rs)).
 
 reg(a) --> "a".
 reg(b) --> "b".
@@ -18,11 +17,6 @@ instr(cpy(X, Y)) --> "cpy ", (reg(X) | int(X)), " ", reg(Y).
 instr(inc(X)) --> "inc ", reg(X).
 instr(dec(X)) --> "dec ", reg(X).
 instr(jnz(X, Y)) --> "jnz ", (reg(X) | int(X)), " ", int(Y).
-
-get_assoc(K, A, D, V) :-
-    (   get_assoc(K, A, V), !
-    ;   V = D
-    ).
 
 mov_instrs_state0_state(cpy(X, Y), _, N0-Regs0, N-Regs) :-
     N #= N0 + 1, get_assoc(X, Regs0, X, V), put_assoc(Y, Regs0, V, Regs).

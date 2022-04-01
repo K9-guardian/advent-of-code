@@ -51,26 +51,18 @@ p2_move_coord_(M, X0-Y0, C) :-
 
 p1(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d2.txt'),
-    foldl(
-        [Move, coord_buttons(X0-Y0, [B|Bs]), coord_buttons(X-Y, Bs)]>>
-        (   foldl(move_coord_, Move, X0-Y0, X-Y),
-            coord_button(X-Y, B)
-        ),
-        Moves,
-        coord_buttons(1-1, Bs),
-        coord_buttons(_, [])
-    ),
+    foldl([Move, coord_buttons(X0-Y0, [B|Bs]), coord_buttons(X-Y, Bs)]>>
+          (foldl(move_coord_, Move, X0-Y0, X-Y), coord_button(X-Y, B)),
+          Moves,
+          coord_buttons(1-1, Bs),
+          coord_buttons(_, [])),
     maplist(atom_number, S, Bs).
 
 p2(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d2.txt'),
-    foldl(
-        [Move, coord_buttons(X0-Y0, [B|Bs]), coord_buttons(X-Y, Bs)]>>
-        (   foldl(p2_move_coord_, Move, X0-Y0, X-Y),
-            p2_coord_button(X-Y, B)
-        ),
-        Moves,
-        coord_buttons(0-2, Bs),
-        coord_buttons(_, [])
-    ),
+    foldl([Move, coord_buttons(X0-Y0, [B|Bs]), coord_buttons(X-Y, Bs)]>>
+          (foldl(p2_move_coord_, Move, X0-Y0, X-Y), p2_coord_button(X-Y, B)),
+          Moves,
+          coord_buttons(0-2, Bs),
+          coord_buttons(_, [])),
     S = Bs.

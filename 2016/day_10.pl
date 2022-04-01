@@ -17,9 +17,6 @@ move_edges0_edges(bot_low_high(B, L, H), Es, [B-L, B-H|Es]).
 move_instrs0_instrs(value_bot(V, B), Is, [V-B|Is]).
 move_instrs0_instrs(bot_low_high(B, L, H), Is, [B-(L-H)|Is]).
 
-assoc_vertex_botcomps0_botcomps(A, V, BCs0, BCs) :-
-    vertex_assoc_botcomps0_botcomps(V, A, BCs0, BCs).
-
 vertex_assoc_botcomps0_botcomps(output(_), _, BCs, BCs).
 vertex_assoc_botcomps0_botcomps(value(V), A, BCs0, BCs) :-
     get_assoc(value(V), A, B),
@@ -35,7 +32,10 @@ p1(S) :-
     foldl(move_edges0_edges, Moves, [], Edges),
     top_sort(vertices_edges_to_ugraph([], Edges, ~), Ts),
     call_dcg((foldl(move_instrs0_instrs, Moves), list_to_assoc), [], Assoc),
-    foldl(assoc_vertex_botcomps0_botcomps(Assoc), Ts, empty_assoc(~), BotComps),
+    foldl({Assoc}/[V, BCs0, BCs]>>vertex_assoc_botcomps0_botcomps(V, Assoc, BCs0, BCs),
+          Ts,
+          empty_assoc(~),
+          BotComps),
     ( Target = [17, 61] ; Target = [61, 17] ),
     gen_assoc(bot(S), BotComps, Target).
 
@@ -44,6 +44,9 @@ p2(S) :-
     foldl(move_edges0_edges, Moves, [], Edges),
     top_sort(vertices_edges_to_ugraph([], Edges, ~), Ts),
     call_dcg((foldl(move_instrs0_instrs, Moves), list_to_assoc), [], Assoc),
-    foldl(assoc_vertex_botcomps0_botcomps(Assoc), Ts, empty_assoc(~), BotComps),
+    foldl({Assoc}/[V, BCs0, BCs]>>vertex_assoc_botcomps0_botcomps(V, Assoc, BCs0, BCs),
+          Ts,
+          empty_assoc(~),
+          BotComps),
     maplist({BotComps}/[N, O]>>get_assoc(output(N), BotComps, [O]), [0, 1, 2], [X, Y, Z]),
     S #= X * Y * Z.

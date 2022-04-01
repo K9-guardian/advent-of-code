@@ -14,15 +14,12 @@ grid(G) :-
     list_to_assoc(Ls, G).
 
 grid_list(G, Ls) :-
-    call_dcg(
-        (   assoc_to_list,
-            maplist([_-_-V, V]>>true),
-            n_list_partitioned(height(~)),
-            transpose
-        ),
-        G,
-        Ls
-    ).
+    call_dcg((assoc_to_list,
+              maplist([_-_-V, V]>>true),
+              n_list_partitioned(height(~)),
+              transpose),
+             G,
+             Ls).
 
 n_list_rotated(N, Ls0, Ls) :-
     length(Ls0, X),
@@ -35,26 +32,20 @@ move_grid0_grid(rect(M, N), G0, G) :-
 
 move_grid0_grid(rotate(row, Y0, D), G0, G) :-
     Y #= Y0 + 1, numlist(1, width(~), Xs),
-    phrase(
-        (   maplist({G0}/[X, V]>>get_assoc(X-Y, G0, V)),
+    phrase((maplist({G0}/[X, V]>>get_assoc(X-Y, G0, V)),
             n_list_rotated(D),
-            maplist([X, V, X-Y-V]>>true, Xs)
-        ),
-        Xs,
-        Vs
-    ),
+            maplist([X, V, X-Y-V]>>true, Xs)),
+           Xs,
+           Vs),
     foldl([K-V, A0, A]>>put_assoc(K, A0, V, A), Vs, G0, G).
 
 move_grid0_grid(rotate(col, X0, D), G0, G) :-
     X #= X0 + 1, numlist(1, height(~), Ys),
-    phrase(
-        (   maplist({G0}/[Y, V]>>get_assoc(X-Y, G0, V)),
+    phrase((maplist({G0}/[Y, V]>>get_assoc(X-Y, G0, V)),
             n_list_rotated(D),
-            maplist([Y, V, X-Y-V]>>true, Ys)
-        ),
-        Ys,
-        Vs
-    ),
+            maplist([Y, V, X-Y-V]>>true, Ys)),
+           Ys,
+           Vs),
     foldl([K-V, A0, A]>>put_assoc(K, A0, V, A), Vs, G0, G).
 
 char_value(' ', 0).
@@ -69,13 +60,10 @@ p2(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
     foldl(move_grid0_grid, Moves, grid(~), G),
     grid_list(G, Ls),
-    maplist(
-        [L, Cs]>>
-        (   maplist(char_value, Cs0, L),
-            n_list_partitioned(5, Cs0, Cs1),
-            phrase(sequence(string, " ", Cs1), Cs)
-        ),
-        Ls,
-        S
-    ),
+    maplist([L, Cs]>>
+            (maplist(char_value, Cs0, L),
+             n_list_partitioned(5, Cs0, Cs1),
+             phrase(sequence(string, " ", Cs1), Cs)),
+            Ls,
+            S),
     maplist([L]>>format('~s~n', [L]), S).
