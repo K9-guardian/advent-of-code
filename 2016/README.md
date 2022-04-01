@@ -4,7 +4,7 @@ Solutions in SWI-Prolog.
 
 Usage: Your `init.pl` must have the following:
 ```prolog
-:- set_prolog_flag(back_quotes, string).
+:- set_prolog_flag(back_quotes, codes).
 :- set_prolog_flag(double_quotes, chars).
 :- use_module(library(apply)).
 :- use_module(library(clpfd)).
