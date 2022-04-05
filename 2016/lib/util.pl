@@ -7,6 +7,7 @@
            lists_interleaved/3,
            memberd/2,
            n_list_partitioned/3,
+           n_list_repeated/3,
            n_list_split/4,
            selectd/3,
            update_assoc/4,
@@ -19,15 +20,36 @@
 :- use_module(library(reif)).
 :- use_module(library(yall)).
 
-list_clumped([], []).
-list_clumped([L|Ls], Ps) :- list_clumped_(Ls, L-1, Ps).
+list_clumped(Items, Pairs) :-
+    (   nonvar(Items)
+    ->  list_to_clumped(Items, Pairs)
+    ;   nonvar(Pairs)
+    ->  clumped_to_list(Pairs, Items)
+    ;   list_to_clumped(Items, Pairs)
+    ).
 
-list_clumped_([], E, [E]).
-list_clumped_([J|Ps0], K-N, Ps) :-
+list_to_clumped([], []).
+list_to_clumped([L|Ls], Ps) :- list_to_clumped_(Ls, L-1, Ps).
+
+list_to_clumped_([], E, [E]).
+list_to_clumped_([J|Ps0], K-N, Ps) :-
     if_(J = K,
         (X #= 1 + N, Ps = Ps1),
         (X #= 1, Ps = [K-N|Ps1])),
-    list_clumped_(Ps0, J-X, Ps1).
+    list_to_clumped_(Ps0, J-X, Ps1).
+
+remainder_prevkey([], _).
+remainder_prevkey([J-_|_], K) :- dif(J, K).
+
+clumped_to_list(Ps, Ks) :- phrase(clumped_to_list_(Ps), Ks).
+
+clumped_to_list_([]) --> [].
+clumped_to_list_([K-V|Ps0]) -->
+    { V in 1..sup,
+      remainder_prevkey(Ps0, V),
+      n_list_repeated(V, [K], Vs) },
+    Vs,
+    clumped_to_list_(Ps0).
 
 frequencies(Es, Freqs) :- phrase((msort, list_clumped), Es, Freqs).
 
@@ -56,6 +78,11 @@ lists_interleaved_([A|As], [B|Bs]) --> [A], [B], lists_interleaved_(As, Bs).
 n_list_split(N, Ls, P, S) :-
     length(P, N),
     append(P, S, Ls).
+
+n_list_repeated(N, Ls0, Ls) :-
+    length(Ls0, M),
+    append(Ls0, Ls1, Ls1),
+    n_list_split(~ #= N * M, Ls1, Ls, _).
 
 n_list_partitioned(N, Ls0, Ls) :-
     n_list_partitioned_(Ls0, N, Ls).

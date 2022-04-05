@@ -4,11 +4,6 @@
 
 marker(D, R) --> "(", integer(D), "x", integer(R), ")".
 
-n_list_repeated(N, Ls0, Ls) :-
-    length(Ls0, M),
-    append(Ls0, Ls1, Ls1),
-    n_list_split(~ #= N * M, Ls1, Ls, _).
-
 string_decompressed("", "").
 string_decompressed([C|Cs0], Cs) :-
     if_(C = '(',
