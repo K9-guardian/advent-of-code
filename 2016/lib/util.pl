@@ -10,6 +10,7 @@
            n_list_repeated/3,
            n_list_split/4,
            selectd/3,
+           selectd/4,
            update_assoc/4,
            update_assoc/5]).
 
@@ -57,6 +58,8 @@ memberd(X, [E|Es]) :- if_(X = E, true, memberd(X, Es)).
 
 % Like selectchk but general.
 selectd(X, [E|Es0], Es) :- if_(X = E, Es = Es0, (Es = [E|Es1], selectd(X, Es0, Es1))).
+
+selectd(X, [E|Es0], Y, Es) :- if_(X = E, Es = [Y|Es0], (Es = [E|Es1], selectd(X, Es0, Y, Es1))).
 
 list_deduped([], []).
 list_deduped([L|Ls0], Ls) :- list_deduped_(Ls0, L, Ls).

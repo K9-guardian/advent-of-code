@@ -16,36 +16,47 @@ input([[gen-promethium, chip-promethium],
        [chip-cobalt, chip-curium, chip-ruthenium, chip-plutonium],
        []]).
 
-% Change the elements to numbers to faciliate pruning.
-% Ordered by order of chips from floor 1 to 4.
-element_num(hydrogen, 1).
-element_num(lithium, 2).
+% TODO: A pure version of memberchk. Probably named first_memberd_t.
+count_elements_normalized(X, Es0, Ns) :-
+    (   memberchk(gen-e(E), Es0)
+    ->  selectd(gen-e(E), Es0, gen-X, Es1),
+        selectd(chip-e(E), Es1, chip-X, Es),
+        count_elements_normalized(succ $ X, Es, Ns)
+    ;   Ns = Es0
+    ).
 
-element_num(promethium, 1).
-element_num(cobalt, 2).
-element_num(curium, 3).
-element_num(ruthenium, 4).
-element_num(plutonium, 5).
+% Apply the MOST IMPORTANT, ABSOLUTELY ESSENTIAL OPTIMIZATION for pruning states.
+% Replaces the elements with integers in ascending order from bottom to top floor.
+floors_normalized(Fs0, Fs) :-
+    append(Fs0, Es0),
+    maplist([F-E, F-e(E)]>>true, Es0, Es1),
+    count_elements_normalized(1, Es1, Es),
+    maplist(same_length, Fs0, Fs),
+    append(Fs, Es).
 
-% Prioritize moving up and taking 2 items, and if going down taking 1 item.
-floor_move_items(1, 2, [_, _]).
-floor_move_items(1, 2, [_]).
-floor_move_items(2, 3, [_, _]).
-floor_move_items(2, 3, [_]).
-floor_move_items(2, 1, [_]).
-floor_move_items(2, 1, [_, _]).
-floor_move_items(3, 4, [_, _]).
-floor_move_items(3, 4, [_]).
-floor_move_items(3, 2, [_]).
-floor_move_items(3, 2, [_, _]).
-floor_move_items(4, 3, [_]).
-floor_move_items(4, 3, [_, _]).
+fd_int_t(FD, X, T) :- X in FD #<==> B, =(B, 1, T).
+zsucc(X0, X) :- X #= X0 + 1.
+zpred(X0, X) :- X #= X0 - 1.
 
-moves(E0-[F10, F20, F30, F40]) -->
-    { floor_move_items(E0, E, Is) },
-    [takes_from_to(Is, E0, E)],
-    moves(E-[F1, F2, F3, F4]).
+state0_state(E0-F0, E-F) :-
+    member(E, tfilter(fd_int_t(1..4)) $ [zsucc $ E0, zpred $ E0]),
+    % TODO: Add state transitions.
+
+queue_seen_dist([], _, _).
+queue_seen_dist([E-F|EFs0], S0, D) :-
+    (   F = [[], [], [], [_|_]]
+    ->  true
+    ;   get_assoc(E-(floors_normalized $ F), S0, _)
+    ->  queue_seen_dist(EFs0, S0, D)
+    ;   findall(L, state0_state(E-F, L), EFs1),
+        append(EFs0, EFs1, EFs),
+        foldl([X, A0, A]>>put_assoc(X, A0, X, A),
+              maplist([E-F0, E-F]>>floors_normalized(F0, F)) $ EFs1,
+              S0,
+              S),
+        queue_seen_dist(EFs, S, succ $ D)
+    ).
 
 p1(S) :-
-    maplist(maplist([F-E, F-N]>>element_num(E, N)), input(~), Init),
-    S = Init.
+    floors_normalized(sample(~), Norm),
+    S = Norm.
