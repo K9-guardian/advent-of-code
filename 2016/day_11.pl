@@ -47,15 +47,15 @@ floor_valid_([I|F0]) :-
 
 items_floors0_floors([chip-E, gen-E], FF0-TF0, FF-TF) :-
     foldl(selectd, [chip-E, gen-E], FF0, FF),
-    ord_union(TF0, [chip-E, gen-E], TF),
+    foldl([X, S0, S]>>ord_add_element(S0, X, S), [chip-E, gen-E], TF0, TF),
     floor_valid(TF).
 items_floors0_floors([chip-E, chip-F], FF0-TF0, FF-TF) :-
     foldl(selectd, [chip-E, chip-F], FF0, FF),
-    ord_union(TF0, [chip-E, chip-F], TF),
+    foldl([X, S0, S]>>ord_add_element(S0, X, S), [chip-E, chip-F], TF0, TF),
     floor_valid(TF).
 items_floors0_floors([gen-E, gen-F], FF0-TF0, FF-TF) :-
     foldl(selectd, [gen-E, gen-F], FF0, FF),
-    ord_union(TF0, [gen-E, gen-F], TF),
+    foldl([X, S0, S]>>ord_add_element(S0, X, S), [gen-E, gen-F], TF0, TF),
     floor_valid(FF),
     floor_valid(TF).
 items_floors0_floors([chip-E], FF0-TF0, FF-TF) :-
@@ -79,15 +79,18 @@ state0_state(3-[F1, F2, F30, F40], 4-[F1, F2, F3, F4]) :-
 state0_state(3-[F1, F20, F30, F4], 2-[F1, F2, F3, F4]) :-
     items_floors0_floors(_, F30-F20, F3-F2).
 state0_state(4-[F1, F2, F30, F40], 3-[F1, F2, F3, F4]) :-
-    items_floors0_floors(_, F30-F40, F3-F4).
+    items_floors0_floors(_, F40-F30, F4-F3).
 
 queue_seen_dists_([E-F|EFs0], S0, Ds0, Ds) :-
-    format('~k ~k ~k~n', [E, maplist(length) $ F, max_list of assoc_to_values $ Ds0]),
+    % format('~p ~p ~p~n', [E, maplist(length) $ F, max_list of assoc_to_values $ Ds0]),
     (   F = [[], [], [], [_|_]]
     ->  Ds = Ds0
     ;   get_assoc(E-(floors_normalized $ F), S0, _)
-    ->  queue_seen_dists_(EFs0, S0, Ds0, Ds)
+    ->  % format('Skip ~p\n', E-F),
+        queue_seen_dists_(EFs0, S0, Ds0, Ds)
     ;   findall(L, state0_state(E-F, L), EFs1),
+        % writeln(E-F),
+        % maplist([E-F]>>writeln(E-F), EFs1),
         append(EFs0, EFs1, EFs),
         put_assoc(E-(floors_normalized $ F), S0, _, S),
         get_assoc(E-F, Ds0, D0), succ(D0, D),
@@ -103,10 +106,21 @@ queue_seen_dists_([E-F|EFs0], S0, Ds0, Ds) :-
     ).
 
 p1(S) :-
-    queue_seen_dists_([1-sample(~)],
+    queue_seen_dists_([1-input(~)],
                       empty_assoc(~),
-                      list_to_assoc $ [1-(maplist(sort) $ sample(~))-0],
+                      list_to_assoc $ [1-input(~)-0],
                       Ds),
-    gen_assoc(E-[[], [], [], [L|Ls]], Ds, D),
-    S = E-[L|Ls]-D.
-    % assoc_to_list(Ds, S).
+    gen_assoc(_-[[], [], [], [_|_]], Ds, S).
+
+p2(S) :-
+    input([F10, F2, F3, F4]),
+    foldl([X, S0, S]>>ord_add_element(S0, X, S),
+          [gen-elerium, chip-elerium, gen-dilithium, chip-dilithium],
+          F10,
+          F1),
+    Input = [F1, F2, F3, F4],
+    queue_seen_dists_([1-Input],
+                      empty_assoc(~),
+                      list_to_assoc $ [1-Input-0],
+                      Ds),
+    gen_assoc(_-[[], [], [], [_|_]], Ds, S).
