@@ -88,9 +88,11 @@ queue_seen_dists_([E-F|EFs0], S0, Ds0, Ds) :-
     ;   get_assoc(E-(floors_normalized $ F), S0, _)
     ->  % format('Skip ~p\n', E-F),
         queue_seen_dists_(EFs0, S0, Ds0, Ds)
-    ;   findall(L, state0_state(E-F, L), EFs1),
-        % writeln(E-F),
-        % maplist([E-F]>>writeln(E-F), EFs1),
+    ;   succ(E, Above), succ(Below, E),
+        findall(Above-L, state0_state(E-F, Above-L), As),
+        findall(Below-L, state0_state(E-F, Below-L), Bs),
+        append(As, reverse $ Bs, EFs1),
+        % writeln(E-F), % maplist([E-F]>>writeln(E-F), EFs1),
         append(EFs0, EFs1, EFs),
         put_assoc(E-(floors_normalized $ F), S0, _, S),
         get_assoc(E-F, Ds0, D0), succ(D0, D),
