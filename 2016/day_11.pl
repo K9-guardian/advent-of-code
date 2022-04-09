@@ -123,9 +123,8 @@ p2(S) :-
           [gen-elerium, chip-elerium, gen-dilithium, chip-dilithium],
           F10,
           F1),
-    Input = [F1, F2, F3, F4],
-    queue_seen_dists_([1-Input],
+    queue_seen_dists_([1-[F1, F2, F3, F4]],
                       empty_assoc(~),
-                      list_to_assoc $ [1-Input-0],
+                      list_to_assoc $ [1-[F1, F2, F3, F4]-0],
                       Ds),
     gen_assoc(_-[[], [], [], [_|_]], Ds, S).
