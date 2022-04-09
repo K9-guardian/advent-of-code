@@ -68,31 +68,34 @@ items_floors0_floors([gen-E], FF0-TF0, FF-TF) :-
     floor_valid(FF),
     floor_valid(TF).
 
-state0_state(1-[F10, F20, F3, F4], 2-[F1, F2, F3, F4]) :-
-    items_floors0_floors(_, F10-F20, F1-F2).
-state0_state(2-[F1, F20, F30, F4], 3-[F1, F2, F3, F4]) :-
-    items_floors0_floors(_, F20-F30, F2-F3).
-state0_state(2-[F10, F20, F3, F4], 1-[F1, F2, F3, F4]) :-
-    items_floors0_floors(_, F20-F10, F2-F1).
-state0_state(3-[F1, F2, F30, F40], 4-[F1, F2, F3, F4]) :-
-    items_floors0_floors(_, F30-F40, F3-F4).
-state0_state(3-[F1, F20, F30, F4], 2-[F1, F2, F3, F4]) :-
-    items_floors0_floors(_, F30-F20, F3-F2).
-state0_state(4-[F1, F2, F30, F40], 3-[F1, F2, F3, F4]) :-
-    items_floors0_floors(_, F40-F30, F4-F3).
+state0_items_state(1-[F10, F20, F3, F4], Is, 2-[F1, F2, F3, F4]) :-
+    items_floors0_floors(Is, F10-F20, F1-F2).
+state0_items_state(2-[F1, F20, F30, F4], Is, 3-[F1, F2, F3, F4]) :-
+    items_floors0_floors(Is, F20-F30, F2-F3).
+state0_items_state(2-[F10, F20, F3, F4], Is, 1-[F1, F2, F3, F4]) :-
+    F10 = [_|_],
+    items_floors0_floors(Is, F20-F10, F2-F1).
+state0_items_state(3-[F1, F2, F30, F40], Is, 4-[F1, F2, F3, F4]) :-
+    items_floors0_floors(Is, F30-F40, F3-F4).
+state0_items_state(3-[F1, F20, F30, F4], Is, 2-[F1, F2, F3, F4]) :-
+    ( F1 = [_|_] ; F20 = [_|_] ),
+    items_floors0_floors(Is, F30-F20, F3-F2).
+state0_items_state(4-[F1, F2, F30, F40], Is, 3-[F1, F2, F3, F4]) :-
+    items_floors0_floors(Is, F40-F30, F4-F3).
 
 queue_seen_dists_([E-F|EFs0], S0, Ds0, Ds) :-
-    % format('~p ~p ~p~n', [E, maplist(length) $ F, max_list of assoc_to_values $ Ds0]),
     (   F = [[], [], [], [_|_]]
     ->  Ds = Ds0
     ;   get_assoc(E-(floors_normalized $ F), S0, _)
-    ->  % format('Skip ~p\n', E-F),
-        queue_seen_dists_(EFs0, S0, Ds0, Ds)
+    ->  queue_seen_dists_(EFs0, S0, Ds0, Ds)
     ;   succ(E, Above), succ(Below, E),
-        findall(Above-L, state0_state(E-F, Above-L), As),
-        findall(Below-L, state0_state(E-F, Below-L), Bs),
-        append(As, reverse $ Bs, EFs1),
-        % writeln(E-F), % maplist([E-F]>>writeln(E-F), EFs1),
+        findall(Above-L, state0_items_state(E-F, [_, _], Above-L), As0),
+        findall(Above-L, state0_items_state(E-F, [_], Above-L), As1),
+        findall(Below-L, state0_items_state(E-F, [_], Below-L), Bs0),
+        findall(Below-L, state0_items_state(E-F, [_, _], Below-L), Bs1),
+        ( As0 = [_|_] -> As = As0 ; As = As1 ),
+        ( Bs0 = [_|_] -> Bs = Bs0 ; Bs = Bs1 ),
+        append(As, Bs, EFs1),
         append(EFs0, EFs1, EFs),
         put_assoc(E-(floors_normalized $ F), S0, _, S),
         get_assoc(E-F, Ds0, D0), succ(D0, D),
