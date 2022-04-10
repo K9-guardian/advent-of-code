@@ -1,6 +1,7 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(lib/util).
+:- use_module(library(heaps)).
 :- use_module(library(pairs)).
 :- use_module(library(ordsets)).
 
