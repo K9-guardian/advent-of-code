@@ -33,6 +33,11 @@ count_elements_normalized(X, Es0, Ns) :-
     ;   Ns = Es0
     ).
 
+% Heuristic for A* search. This is the sum of distances of items from floor 4.
+floor_heuristic(F, H) :-
+    maplist(length, F, [A, B, C, D]),
+    H #= 3 * A + 2 * B + 1 * C + 0 * D.
+
 floor_valid([]).
 floor_valid([F-E|FEs]) :-
     (   maplist(=(F), pairs_keys $ FEs), !
@@ -84,7 +89,8 @@ state0_items_state(3-[F1, F20, F30, F4], Is, 2-[F1, F2, F3, F4]) :-
 state0_items_state(4-[F1, F2, F30, F40], Is, 3-[F1, F2, F3, F4]) :-
     items_floors0_floors(Is, F40-F30, F4-F3).
 
-queue_seen_dists_([E-F|EFs0], S0, Ds0, Ds) :-
+queue_seen_dists_(H, S0, Ds0, Ds) :-
+    get_from_heap(H, _, E-F, EFs0),
     (   F = [[], [], [], [_|_]]
     ->  Ds = Ds0
     ;   get_assoc(E-(floors_normalized $ F), S0, _)
@@ -97,9 +103,6 @@ queue_seen_dists_([E-F|EFs0], S0, Ds0, Ds) :-
         ( As0 = [_|_] -> As = As0 ; As = As1 ),
         ( Bs0 = [_|_] -> Bs = Bs0 ; Bs = Bs1 ),
         append(As, Bs, EFs1),
-        append(EFs0, EFs1, EFs),
-        put_assoc(E-(floors_normalized $ F), S0, _, S),
-        get_assoc(E-F, Ds0, D0), succ(D0, D),
         foldl({S0, D}/[E-F, A0, A]>>
               (   get_assoc(E-(floors_normalized $ F), S0, _)
               ->  A = A0
@@ -108,11 +111,14 @@ queue_seen_dists_([E-F|EFs0], S0, Ds0, Ds) :-
               EFs1,
               Ds0,
               Ds1),
+        foldl([E-F, H0, H]>>(floor_heuristic(F, X), add_to_heap(H0, X, E-F, H)), EFs1, EFs0, EFs),
+        put_assoc(E-(floors_normalized $ F), S0, _, S),
+        get_assoc(E-F, Ds0, D0), succ(D0, D),
         queue_seen_dists_(EFs, S, Ds1, Ds)
     ).
 
 p1(S) :-
-    queue_seen_dists_([1-input(~)],
+    queue_seen_dists_(singleton_heap(~, floor_heuristic $ input(~), 1-input(~)),
                       empty_assoc(~),
                       list_to_assoc $ [1-input(~)-0],
                       Ds),
@@ -124,7 +130,7 @@ p2(S) :-
           [gen-elerium, chip-elerium, gen-dilithium, chip-dilithium],
           F10,
           F1),
-    queue_seen_dists_([1-[F1, F2, F3, F4]],
+    queue_seen_dists_(singleton_heap(~, floor_heuristic $ [F1, F2, F3, F4], 1-[F1, F2, F3, F4]),
                       empty_assoc(~),
                       list_to_assoc $ [1-[F1, F2, F3, F4]-0],
                       Ds),
