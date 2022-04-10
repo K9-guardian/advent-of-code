@@ -103,6 +103,9 @@ queue_seen_dists_(H, S0, Ds0, Ds) :-
         ( As0 = [_|_] -> As = As0 ; As = As1 ),
         ( Bs0 = [_|_] -> Bs = Bs0 ; Bs = Bs1 ),
         append(As, Bs, EFs1),
+        foldl([E-F, H0, H]>>(floor_heuristic(F, X), add_to_heap(H0, X, E-F, H)), EFs1, EFs0, EFs),
+        put_assoc(E-(floors_normalized $ F), S0, _, S),
+        get_assoc(E-F, Ds0, D0), succ(D0, D),
         foldl({S0, D}/[E-F, A0, A]>>
               (   get_assoc(E-(floors_normalized $ F), S0, _)
               ->  A = A0
@@ -111,9 +114,6 @@ queue_seen_dists_(H, S0, Ds0, Ds) :-
               EFs1,
               Ds0,
               Ds1),
-        foldl([E-F, H0, H]>>(floor_heuristic(F, X), add_to_heap(H0, X, E-F, H)), EFs1, EFs0, EFs),
-        put_assoc(E-(floors_normalized $ F), S0, _, S),
-        get_assoc(E-F, Ds0, D0), succ(D0, D),
         queue_seen_dists_(EFs, S, Ds1, Ds)
     ).
 
