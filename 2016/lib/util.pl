@@ -22,7 +22,14 @@
 :- use_module(library(yall)).
 
 list_clumped([], []).
-list_clumped([L|Ls], Ps) :- list_clumped_(Ls, L-1, Ps).
+list_clumped([L|Ls], Ps) :-
+    (   nonvar(Ps)
+    ->  pairs_values(Ps, Vs),
+        sum(Vs, #=, N),
+        length([L|Ls], N)
+    ;   true
+    ),
+    list_clumped_(Ls, L-1, Ps).
 
 list_clumped_([], E, [E]).
 list_clumped_([J|Ps0], K-N, Ps) :-
