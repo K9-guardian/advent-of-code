@@ -2,6 +2,8 @@
 :- use_module(lib/pio).
 :- use_module(lib/util).
 
+:- table num/1.
+
 num(N) :- phrase_from_file(integer(N), 'input/d13.txt').
 
 decimal_binary(N, Bs) :-
