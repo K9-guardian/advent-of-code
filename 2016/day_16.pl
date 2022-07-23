@@ -40,7 +40,7 @@ p1(S) :-
     phrase_from_file(string(Cs), 'input/d16.txt'),
     length(Cs, L0), L #= 272 // (L0 + 1),
     length(Js, L), append(Js, _, Ls), once(joiner(Ls)),
-    272 #= X * 2^N, N #>= 0, once(labeling([max(N)], [X])), M #= 2^N,
+    272 #= X * 2^N, N #>= 0, once(labeling([max(N)], [N, X])), M #= 2^N,
     joiner_merged(Js, Qs),
     foldl({M}/[_, Qs0-[O|Os], Qs-Os]>>
           (n_list_split(M, Qs0, Buf, Qs),
@@ -53,7 +53,7 @@ p2(S) :-
     phrase_from_file(string(Cs), 'input/d16.txt'),
     length(Cs, L0), L #= 35651584 // (L0 + 1),
     length(Js, L), append(Js, _, Ls), once(joiner(Ls)),
-    35651584 #= X * 2^N, N #>= 0, once(labeling([max(N)], [X])), M #= 2^N,
+    35651584 #= X * 2^N, N #>= 0, once(labeling([max(N)], [N, X])), M #= 2^N,
     joiner_merged(Js, Qs),
     foldl({M}/[_, Qs0-[O|Os], Qs-Os]>>
           (n_list_split(M, Qs0, Buf, Qs),

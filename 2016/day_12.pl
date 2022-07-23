@@ -3,10 +3,8 @@
 :- use_module(lib/util).
 
 % Tfw integer//1 only checks sign when you're using codes.
-int(Z, [L|Ls], Rs) :-
-    if_(L = '-',
-        (phrase(integer(N), Ls, Rs), Z #= -N),
-        phrase(integer(Z), [L|Ls], Rs)).
+int(Z) --> "-", integer(N), { Z #= -N }.
+int(N) --> integer(N).
 
 reg(a) --> "a".
 reg(b) --> "b".
@@ -47,13 +45,13 @@ instrs_state0_state(Instrs, N-Regs, S) :-
     ).
 
 p1(S) :-
-    phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt'),
+    once(phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt')),
     list_to_assoc(pairs_keys_values(~, numlist(1, length $ Lines, ~), Lines), Instrs),
     instrs_state0_state(Instrs, 1-(list_to_assoc $ [a-0, b-0, c-0, d-0]), _-Regs),
     get_assoc(a, Regs, S).
 
 p2(S) :-
-    phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt'),
+    once(phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt')),
     list_to_assoc(pairs_keys_values(~, numlist(1, length $ Lines, ~), Lines), Instrs),
     instrs_state0_state(Instrs, 1-(list_to_assoc $ [a-0, b-0, c-1, d-0]), _-Regs),
     get_assoc(a, Regs, S).
