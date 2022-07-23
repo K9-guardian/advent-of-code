@@ -1,39 +1,63 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(lib/util).
+:- use_module(library(lazy_lists)).
 
 bit_inverse('0') --> "1".
 bit_inverse('1') --> "0".
 
 inverse([]) --> [].
-inverse([B|Bs]) --> inverse(Bs), bit_inverse(B).
+inverse([L|Ls]) --> inverse(Ls), bit_inverse(L).
 
-dragon(Bs) :- phrase_from_file(string(Bs), 'input/d16.txt').
+joiner("0").
+joiner(Cs) :-
+    joiner(Cs0),
+    phrase((string(Cs0), "0", inverse(Cs0)), Cs).
 
-dragon(Bs) :-
-    dragon(Bs0),
-    phrase((string(Bs0), "0", inverse(Bs0)), Bs).
+input_inversed_stream(S) :-
+    phrase_from_file(string(Cs), 'input/d16.txt'),
+    phrase(inverse(Cs), Inv),
+    lazy_list([A-B, B-A, A]>>true, Cs-Inv, S).
 
-string_checksum(S, C) :-
-    (length $ S) mod 2 #= R,
-    if_(R = 1,
-        C = S,
-        (phrase(string_checksum_(S), S1),
-         string_checksum(S1, C))).
+joiner_merged(Js, Ms) :-
+    phrase_from_file(string(Cs), 'input/d16.txt'),
+    phrase(inverse(Cs), Inv),
+    S = [Cs, Inv|S],
+    phrase(joiner_stream_merged_(Js, S), Ms).
 
-string_checksum_([]) --> [].
-string_checksum_([A,B|Ls]) --> { if_(A = B, C = '1', C = '0') }, [C], string_checksum_(Ls).
+joiner_stream_merged_([], [A|_]) --> string(A).
+joiner_stream_merged_([J|Js], [A|S]) -->
+    string(A),
+    [J],
+    joiner_stream_merged_(Js, S).
+
+xnor('0', '0', '1').
+xnor('0', '1', '0').
+xnor('1', '0', '0').
+xnor('1', '1', '1').
 
 p1(S) :-
-    length(Bs, 272),
-    append(Bs, _, Ls),
-    once(dragon(Ls)),
-    string_checksum(Bs, C),
-    S = C.
+    phrase_from_file(string(Cs), 'input/d16.txt'),
+    length(Cs, L0), L #= 272 // (L0 + 1),
+    length(Js, L), append(Js, _, Ls), once(joiner(Ls)),
+    272 #= X * 2^N, N #>= 0, once(labeling([max(N)], [X])), M #= 2^N,
+    joiner_merged(Js, Qs),
+    foldl({M}/[_, Qs0-[O|Os], Qs-Os]>>
+          (n_list_split(M, Qs0, Buf, Qs),
+           foldl(xnor, Buf, '1', O)),
+          numlist(1, X, ~),
+          Qs-S,
+          _-[]).
 
 p2(S) :-
-    length(Bs, 35651584),
-    append(Bs, _, Ls),
-    once(dragon(Ls)),
-    string_checksum(Bs, C),
-    S = C.
+    phrase_from_file(string(Cs), 'input/d16.txt'),
+    length(Cs, L0), L #= 35651584 // (L0 + 1),
+    length(Js, L), append(Js, _, Ls), once(joiner(Ls)),
+    35651584 #= X * 2^N, N #>= 0, once(labeling([max(N)], [X])), M #= 2^N,
+    joiner_merged(Js, Qs),
+    foldl({M}/[_, Qs0-[O|Os], Qs-Os]>>
+          (n_list_split(M, Qs0, Buf, Qs),
+           foldl(xnor, Buf, '1', O)),
+          numlist(1, X, ~),
+          Qs-S,
+          _-[]).
