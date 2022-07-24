@@ -80,10 +80,12 @@ get_assoc(K, A, D, V) :-
 
 update_assoc(K, A0, G_2, A) :-
     get_assoc(K, A0, V0),
-    put_assoc(K, A0, G_2 $ V0, A).
+    call(G_2, V0, V),
+    put_assoc(K, A0, V, A).
 
 update_assoc(K, A0, G_2, D, A) :-
     (   get_assoc(K, A0, V0), !
     ;   V0 = D
     ),
-    put_assoc(K, A0, G_2 $ V0, A).
+    call(G_2, V0, V),
+    put_assoc(K, A0, V, A).

@@ -19,9 +19,9 @@ instr(jnz(X, Y)) --> "jnz ", (reg(X) | int(X)), " ", int(Y).
 mov_instrs_state0_state(cpy(X, Y), _, N0-Regs0, N-Regs) :-
     N #= N0 + 1, get_assoc(X, Regs0, X, V), put_assoc(Y, Regs0, V, Regs).
 mov_instrs_state0_state(inc(X), _, N0-Regs0, N-Regs) :-
-    N #= N0 + 1, update_assoc(X, Regs0, [V0, V]>>(V #= V0 + 1), Regs).
+    N #= N0 + 1, V #= V0 + 1, get_assoc(X, Regs0, V0, Regs, V).
 mov_instrs_state0_state(dec(X), _, N0-Regs0, N-Regs) :-
-    N #= N0 + 1, update_assoc(X, Regs0, [V0, V]>>(V #= V0 - 1), Regs).
+    N #= N0 + 1, V #= V0 - 1, get_assoc(X, Regs0, V0, Regs, V).
 mov_instrs_state0_state(jnz(X, Y), Instrs, N0-Regs0, N-Regs) :-
     get_assoc(X, Regs0, X, V),
     (   V == 0
