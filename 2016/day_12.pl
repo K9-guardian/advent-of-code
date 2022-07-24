@@ -45,13 +45,13 @@ instrs_state0_state(Instrs, N-Regs, S) :-
     ).
 
 p1(S) :-
-    once(phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt')),
+    phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt'),
     list_to_assoc(pairs_keys_values(~, numlist(1, length $ Lines, ~), Lines), Instrs),
     instrs_state0_state(Instrs, 1-(list_to_assoc $ [a-0, b-0, c-0, d-0]), _-Regs),
     get_assoc(a, Regs, S).
 
 p2(S) :-
-    once(phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt')),
+    phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt'),
     list_to_assoc(pairs_keys_values(~, numlist(1, length $ Lines, ~), Lines), Instrs),
     instrs_state0_state(Instrs, 1-(list_to_assoc $ [a-0, b-0, c-1, d-0]), _-Regs),
     get_assoc(a, Regs, S).

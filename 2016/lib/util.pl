@@ -17,19 +17,10 @@
 :- use_module(library(apply)).
 :- use_module(library(assoc)).
 :- use_module(library(clpfd)).
-:- use_module(library(func)).
 :- use_module(library(reif)).
-:- use_module(library(yall)).
 
 list_clumped([], []).
-list_clumped([L|Ls], Ps) :-
-    (   nonvar(Ps)
-    ->  pairs_values(Ps, Vs),
-        sum(Vs, #=, N),
-        length([L|Ls], N)
-    ;   true
-    ),
-    list_clumped_(Ls, L-1, Ps).
+list_clumped([L|Ls], Ps) :- list_clumped_(Ls, L-1, Ps).
 
 list_clumped_([], E, [E]).
 list_clumped_([J|Ps0], K-N, Ps) :-
@@ -71,7 +62,8 @@ n_list_split(N, Ls, P, S) :-
 n_list_repeated(N, Ls0, Ls) :-
     length(Ls0, M),
     append(Ls0, Ls1, Ls1),
-    n_list_split(~ #= N * M, Ls1, Ls, _).
+    NM #= N * M,
+    n_list_split(NM, Ls1, Ls, _).
 
 n_list_partitioned(N, Ls0, Ls) :-
     n_list_partitioned_(Ls0, N, Ls).
