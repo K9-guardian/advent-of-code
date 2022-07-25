@@ -47,12 +47,10 @@
                           (run! visit (g n))
                           (swap! marks assoc n :perm)
                           (swap! l conj n))))]
-    (while (->> @marks vals (some #{:none :temp}))
+    (while (->> @marks vals (some #{:none}))
       (let [n (->> @marks (filter (comp #{:none} val)) ffirst)]
         (visit n)))
     @l))
-
-(->> input str/split-lines (map parse-line) prog->graph topsort (drop-while number?))
 
 (def clamp (partial comp (partial bit-and 0xFFFF)))
 
