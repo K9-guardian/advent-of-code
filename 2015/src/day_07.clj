@@ -1,6 +1,5 @@
 (ns day-07
-  (:require [clojure.string :as str]
-            [clojure.set :as set]))
+  (:require [clojure.string :as str]))
 
 (def input (slurp "input/d7.txt"))
 
