@@ -51,8 +51,6 @@
         (visit n)))
     @l))
 
-(->> input str/split-lines (map parse-line) prog->graph topsort)
-
 (def clamp (partial comp (partial bit-and 0xFFFF)))
 
 (defn evaluate [k prog]
