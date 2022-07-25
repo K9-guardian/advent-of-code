@@ -36,7 +36,7 @@
 
 ;; https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search
 (defn topsort [g]
-  (let [l (atom '())
+  (let [l (atom ())
         marks (atom (zipmap (keys g) (repeat :none)))
         visit (fn visit [n]
                 (case (@marks n)
