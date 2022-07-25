@@ -30,27 +30,28 @@
        (mapcat (fn [[v {x :x y :y}]]
                   (->> [x y]
                        (remove nil?)
-                       (map #(hash-map % #{v}))
-                       (cons {v #{}})))) ; Ensures that every node is a key
+                       (map #(hash-map % #{v}))))) ; Ensures that every node is a key
        (apply merge-with into)))
 
 ;; https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search
 (defn topsort [g]
   (let [l (atom ())
-        marks (atom (zipmap (keys g) (repeat :none)))
+        marks (atom (zipmap (keys g) (repeat nil)))
         visit (fn visit [n]
                 (case (@marks n)
                   :perm nil
                   :temp (throw (IllegalArgumentException. "Not a DAG"))
-                  :none (do
-                          (swap! marks assoc n :temp)
-                          (run! visit (g n))
-                          (swap! marks assoc n :perm)
-                          (swap! l conj n))))]
-    (while (->> @marks vals (some #{:none}))
-      (let [n (->> @marks (filter (comp #{:none} val)) ffirst)]
+                  (do
+                    (swap! marks assoc n :temp)
+                    (run! visit (g n))
+                    (swap! marks assoc n :perm)
+                    (swap! l conj n))))]
+    (while (->> @marks vals (some nil?))
+      (let [n (->> @marks (filter (comp nil? val)) ffirst)]
         (visit n)))
     @l))
+
+(->> input str/split-lines (map parse-line) prog->graph topsort)
 
 (def clamp (partial comp (partial bit-and 0xFFFF)))
 
