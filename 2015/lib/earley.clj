@@ -6,18 +6,30 @@
 
 (declare nullables single-parse all-parses)
 
+;; An Earley set is a tuple of a vector and a set.
+;; This lets us iterate over them as well as keep track of seen values.
 (defn- set-conj [{:keys [seen?] :as all} & xs]
   (let [xs (remove seen? xs)]
     (into {} (map (fn [[k v]] [k (into v xs)])) all)))
 
+;; LR(0) items in the literature are a tuple of a grammar rule, matched position, and  origin.
+;; In this implementation, the tuple (rule, pos) is referred to as lr0.
+;; The tuple ((rule, pos), origin) is referred to as item.
 (defn- next-symbol [{[_ rhs] :rule pos :pos}] (get rhs pos ::complete))
 
-(defn- state->label [{{[lhs _] :rule :as lr0} :lr0 origin :origin :as st} k]
+;; Labels are used for the shared pack parse forest.
+;; They indicate the rule and it's match, and the section of corresponding input.
+;; This function takes an item and creates a label using its origin and an inputted finish.
+(defn- item->label [{{[lhs _] :rule :as lr0} :lr0 origin :origin :as item} k]
   {:label (if (= ::complete (next-symbol lr0)) lhs lr0) :start origin :finish k})
 
+;; Strings aren't indexed? even though you can call get on them.
 (def ^:private indexed?* (some-fn string? indexed?))
 
-(defn earley [grm S s & {all-parses* :all-parses :or {all-parses false}}]
+;; https://en.wikipedia.org/wiki/Earley_parser#The_algorithm
+;; https://en.wikipedia.org/wiki/Earley_parser#Constructing_the_parse_forest
+;; https://courses.engr.illinois.edu/cs421/sp2012/project/PracticalEarleyParsing.pdf
+(defn earley [grm S s & {all-parses :all-parses :or {all-parses false}}]
   {:pre [(even? (count grm)) (indexed?* s) (->> grm (partition 2) (map second) (every? indexed?*))]}
   (let [grm (->> grm (partition 2) (map vec))
         nullable? (nullables grm)
@@ -25,69 +37,83 @@
         top-levels (->> grm
                         (filter (comp #{S} first))
                         (map #(hash-map :lr0 {:rule % :pos 0} :origin 0)))
-        parse (if all-parses* all-parses single-parse)
-        predict (fn [chart {:keys [lr0] :as st} k]
+        parse (if all-parses earley/all-parses single-parse) ; Namespace qualify to grab function
+
+        predict (fn [state {:keys [lr0] :as input-item} k]
                   (let [predictions (->> grm
                                          (filter (comp #{(next-symbol lr0)} first))
                                          (map #(hash-map :lr0 {:rule % :pos 0} :origin k)))]
-                    (reduce (fn [chart {{[lhs _] :rule} :lr0 :as pred}]
-                              (if (nullable? lhs)
-                                (let [prev (state->label st k)
-                                      symb {:label (next-symbol lr0) :start k :finish k}
-                                      st (update-in st [:lr0 :pos] inc)
-                                      label (state->label st k)]
-                                  (-> chart
-                                      (update-in [:chart k] set-conj st pred)
-                                      (update-in [:forest label] (fnil conj #{}) [prev symb])
-                                      (update-in [:forest symb]
+                    (reduce (fn [state {{[lhs _] :rule} :lr0 :as item}]
+                              (if (nullable? lhs) ; Short circuit nullable productions.
+                                (let [item-label (item->label input-item k)
+                                      next-label {:label (next-symbol lr0) :start k :finish k}
+                                      input-item* (update-in input-item [:lr0 :pos] inc)
+                                      input-item*-label (item->label input-item* k)]
+                                  (-> state
+                                      (update-in [:chart k] set-conj input-item* item)
+                                      (update-in [:forest input-item*-label]
+                                                 (fnil conj #{})
+                                                 [item-label next-label])
+                                      (update-in [:forest next-label]
                                                  (fnil conj #{})
                                                  [{:label {:rule [(next-symbol lr0) []] :pos 0}
                                                    :start k
                                                    :finish k}
                                                   {:terminal [] :start k :finish k}])))
-                                (update-in chart [:chart k] set-conj pred)))
-                            chart
+                                (update-in state [:chart k] set-conj item)))
+                            state
                             predictions)))
-        scan (fn [chart {:keys [lr0] :as st} k]
-               (if (= (next-symbol lr0) (get s k ::end-of-string))
-                 (let [prev (state->label st k)
-                       symb {:terminal (next-symbol lr0) :start k :finish (inc k)}
-                       st (update-in st [:lr0 :pos] inc)
-                       label (state->label st (inc k))]
-                   (-> chart
-                       (update-in [:chart (inc k)] (fnil set-conj {:seen? #{} :items []}) st)
-                       (update-in [:forest label] (fnil conj #{}) [prev symb])))
-                 chart))
-        complete (fn [chart {{[lhs _] :rule} :lr0 origin :origin :as st} k]
+
+        scan (fn [state {:keys [lr0] :as item} k]
+               (if (= (next-symbol lr0) (get s k ::eos))
+                 (let [item-label (item->label item k)
+                       next-label {:terminal (next-symbol lr0) :start k :finish (inc k)}
+                       item* (update-in item [:lr0 :pos] inc)
+                       item*-label (item->label item* (inc k))]
+                   (-> state
+                       (update-in [:chart (inc k)] (fnil set-conj {:seen? #{} :items []}) item*)
+                       (update-in [:forest item*-label] (fnil conj #{}) [item-label next-label])))
+                 state))
+
+        complete (fn [state {{[lhs _] :rule} :lr0 origin :origin} k]
                    (let [completions (filter (comp #{lhs} next-symbol :lr0)
-                                             (-> chart :chart (get origin) :items))]
+                                             (-> state :chart (get origin) :items))]
                      (reduce
-                      (fn [chart {:keys [lr0] :as st}]
-                        (let [prev (state->label st origin)
-                              symb {:label (next-symbol lr0) :start origin :finish k}
-                              st (update-in st [:lr0 :pos] inc)
-                              label (state->label st k)]
-                          (-> chart
-                              (update-in [:chart k] set-conj st)
-                              (update-in [:forest label] (fnil conj #{}) [prev symb]))))
-                      chart
+                      (fn [state {:keys [lr0] :as item}]
+                        ;; Note: this origin is bound to the one in the input item.
+                        (let [item-label (item->label item origin)
+                              next-label {:label (next-symbol lr0) :start origin :finish k}
+                              item* (update-in item [:lr0 :pos] inc)
+                              item*-label (item->label item* k)]
+                          (-> state
+                              (update-in [:chart k] set-conj item*)
+                              (update-in [:forest item*-label]
+                                         (fnil conj #{})
+                                         [item-label next-label]))))
+                      state
                       completions)))
-        chart (->> (range (inc (count s)))
+
+        ;; The state is a tuple of the earley chart and the shared pack parse forest.
+        state (->> (range (inc (count s)))
                    (reduce
-                    (fn [chart k]
-                      (loop [chart chart i 0]
-                        (let [items (-> chart :chart (get k) :items)]
+                    (fn [state k]
+                      (loop [state state i 0]
+                        (let [items (-> state :chart (get k) :items)]
                           (if (= i (count items))
-                            chart
+                            state
                             (let [{:keys [lr0] :as st} (items i)]
                               (condp apply [(next-symbol lr0)] ; Unary predicates with condp.
-                                #{::complete} (recur (complete chart st k) (inc i))
-                                terminal? (recur (scan chart st k) (inc i))
-                                (recur (predict chart st k) (inc i))))))))
-                    {:chart [{:seen? (set top-levels) :items (vec top-levels)}] :forest {}}))]
-    (-> chart
-        (update :chart (partial map :items))
-        (assoc :parse (parse (:forest chart) {:label S :start 0 :finish (count s)})))))
+                                #{::complete} (recur (complete state st k) (inc i))
+                                terminal? (recur (scan state st k) (inc i))
+                                (recur (predict state st k) (inc i))))))))
+                    {:chart (-> (count s)
+                                (repeat {:seen? #{} :items []})
+                                (conj {:seen? (set top-levels) :items (vec top-levels)})
+                                vec)
+                     :forest {}}))]
+    (-> state
+        (update :chart (partial map :items)) ; We don't need the duplicate items from the set
+        (assoc :parse (parse (:forest state) {:label S :start 0 :finish (count s)})))))
 
 ;; Returns all the nullable nonterminals in a grammar.
 (defn- nullables [grm]
@@ -104,7 +130,7 @@
                   (map first)
                   (into curr))))))
 
-;; Returns a single parse tree.
+;; Returns a single parse tree by walking down the left tree of the forest.
 (defn- single-parse [forest label]
   (letfn [(walk [label]
             (loop [label label lst ()]
@@ -120,6 +146,9 @@
     (parse label)))
 
 (pldb/db-rel ^:private node ^:index label left right)
+
+
+;; TODO: Change this so it doesn't use core.logic lol
 
 ;; Returns a lazy sequence of all possible parse trees.
 ;; I made it return all potential parses mainly for fun.
