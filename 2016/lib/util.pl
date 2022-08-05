@@ -8,6 +8,8 @@
            memberd/2,
            n_list_partitioned/3,
            n_list_repeated/3,
+           n_list_rotated_left/3,
+           n_list_rotated_right/3,
            n_list_split/4,
            selectd/3,
            selectd/4,
@@ -64,6 +66,18 @@ n_list_repeated(N, Ls0, Ls) :-
     append(Ls0, Ls1, Ls1),
     NM #= N * M,
     n_list_split(NM, Ls1, Ls, _).
+
+n_list_rotated_left(N, Ls0, Ls) :-
+    length(Ls0, X),
+    M #= N mod X,
+    n_list_split(M, Ls0, P, S),
+    append(S, P, Ls).
+
+n_list_rotated_right(N, Ls0, Ls) :-
+    length(Ls0, X),
+    M #= (X - N) mod X,
+    n_list_split(M, Ls0, P, S),
+    append(S, P, Ls).
 
 n_list_partitioned(N, Ls0, Ls) :-
     n_list_partitioned_(Ls0, N, Ls).
