@@ -8,10 +8,10 @@ tile_boolean('^', 1). % Trap
 % clpfd is faster than clpb lmao
 left_center_right_trap(L, C, R, T) :-
     [L, C, R, T] ins 0..1,
-    (L * C * (1 - R))
-  + ((1 - L) * C * R)
-  + (L * (1 - C) * (1 - R))
-  + ((1 - L) * (1 - C) * R) #= T.
+    (L * C * (R xor 1))
+  + ((L xor 1) * C * R)
+  + (L * (C xor 1) * (R xor 1))
+  + ((L xor 1) * (C xor 1) * R) #= T.
 
 top_bottom(Ts, Bs) :-
     same_length(Ts, Bs),
