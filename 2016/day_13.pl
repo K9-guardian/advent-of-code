@@ -13,8 +13,7 @@ decimal_binary(N, Bs) :-
 comp_decimal_acc_binary(<, 0, Bs, [0|Bs]).
 comp_decimal_acc_binary(=, 1, Bs, [1|Bs]).
 comp_decimal_acc_binary(>, N, Bs0, Bs) :-
-    B #= N mod 2,
-    R #= N // 2,
+    divmod(N, 2, R, B),
     zcompare(C, R, 1),
     comp_decimal_acc_binary(C, R, [B|Bs0], Bs).
 
