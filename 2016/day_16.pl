@@ -3,61 +3,77 @@
 :- use_module(lib/util).
 :- use_module(library(lazy_lists)).
 
+:- set_prolog_flag(optimise, true).
+
+% Precompute input and inverted input.
+
+:- table input/1.
+
+input(S) :- phrase_from_file(string(S), 'input/d16.txt').
+
+:- table input_length/1.
+
+input_length(L) :- input(S), length(S, L).
+
+:- table input_inverted/1.
+
+input_inverted(I) :- input(S), phrase(inverted_(S), I).
+
 bit_inverse('0') --> "1".
 bit_inverse('1') --> "0".
 
-inverse([]) --> [].
-inverse([L|Ls]) --> inverse(Ls), bit_inverse(L).
+inverted_([]) --> [].
+inverted_([B|Bs]) --> inverted_(Bs), bit_inverse(B).
 
-joiner("0").
-joiner(Cs) :-
-    joiner(Cs0),
-    phrase((string(Cs0), "0", inverse(Cs0)), Cs).
+dragon("0").
+dragon(Ds) :-
+    dragon(Ds0),
+    phrase((Ds0, "0", inverted_(Ds0)), Ds).
 
-input_inversed_stream(S) :-
-    phrase_from_file(string(Cs), 'input/d16.txt'),
-    phrase(inverse(Cs), Inv),
-    lazy_list([A-B, B-A, A]>>true, Cs-Inv, S).
+dragon_segment(D0, D1) --> { input(S), input_inverted(I) }, S, [D0], I, [D1].
 
-joiner_merged(Js, Ms) :-
-    phrase_from_file(string(Cs), 'input/d16.txt'),
-    phrase(inverse(Cs), Inv),
-    S = [Cs, Inv|S],
-    phrase(joiner_stream_merged_(Js, S), Ms).
+bitstring_ones([], 0).
+bitstring_ones(['0'|Bs], N) :- bitstring_ones(Bs, N).
+bitstring_ones(['1'|Bs], N) :- N #= 1 + N1, bitstring_ones(Bs, N1).
 
-joiner_stream_merged_([], [A|_]) --> string(A).
-joiner_stream_merged_([J|Js], [A|S]) -->
-    string(A),
-    [J],
-    joiner_stream_merged_(Js, S).
+% Could generalize this but hard.
+cycle(A-B, B-A, A).
+
+join(inputs_dragon([[I|Is]|Iss], []), inputs_dragon([Is|Iss], []), I).
+join(inputs_dragon([[]|Is], [D|Ds]), inputs_dragon(Is, Ds), D).
+join(inputs_dragon([[I|Is]|Iss], Ds), inputs_dragon([Is|Iss], Ds), I).
+
+dragon_total(Ds, S) :-
+    lazy_list(cycle, input(~)-input_inverted(~), Is),
+    lazy_list(join, inputs_dragon(Is, Ds), S).
 
 xnor('0', '0', '1').
-xnor('0', '1', '0').
 xnor('1', '0', '0').
+xnor('0', '1', '0').
 xnor('1', '1', '1').
 
+segments_partition_total_checksum(0, _, _) --> !, [].
+segments_partition_total_checksum(N0, P, T0) -->
+    { n_list_split(P, T0, Ls, T),
+      foldl(xnor, Ls, '1', V),
+      N is N0 - 1 },
+    [V],
+    segments_partition_total_checksum(N, P, T).
+
 p1(S) :-
-    phrase_from_file(string(Cs), 'input/d16.txt'),
-    length(Cs, L0), L #= 272 // (L0 + 1),
-    length(Js, L), append(Js, _, Ls), once(joiner(Ls)),
-    272 #= X * 2^N, N #>= 0, once(labeling([max(N)], [N, X])), M #= 2^N,
-    joiner_merged(Js, Qs),
-    foldl({M}/[_, Qs0-[O|Os], Qs-Os]>>
-          (n_list_split(M, Qs0, Buf, Qs),
-           foldl(xnor, Buf, '1', O)),
-          numlist(1, X, ~),
-          Qs-S,
-          _-[]).
+    L is ceiling(272 / 18),
+    length(Cs, L), append(Cs, _, Ds),
+    once(dragon(Ds)),
+    dragon_total(Ds, T),
+    2^N * R #= 272, P #= 2^N, N in 0..272, once(labeling([max(N)], [N, R])),
+    phrase(segments_partition_total_checksum(R, P, T), S).
 
 p2(S) :-
-    phrase_from_file(string(Cs), 'input/d16.txt'),
-    length(Cs, L0), L #= 35651584 // (L0 + 1),
-    length(Js, L), append(Js, _, Ls), once(joiner(Ls)),
-    35651584 #= X * 2^N, N #>= 0, once(labeling([max(N)], [N, X])), M #= 2^N,
-    joiner_merged(Js, Qs),
-    foldl({M}/[_, Qs0-[O|Os], Qs-Os]>>
-          (n_list_split(M, Qs0, Buf, Qs),
-           foldl(xnor, Buf, '1', O)),
-          numlist(1, X, ~),
-          Qs-S,
-          _-[]).
+    L is ceiling(35651584 / 18),
+    length(Cs, L), append(Cs, _, Ds),
+    once(dragon(Ds)),
+    dragon_total(Ds, T),
+    number_chars(S, T).
+    % n_list_split(200, T, S, _).
+    % 2^N * R #= 35651584, P #= 2^N, N in 0..35651584, once(labeling([max(N)], [N, R])),
+    % phrase(segments_partition_total_checksum(R, P, T), S).
