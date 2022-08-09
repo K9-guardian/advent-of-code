@@ -1,5 +1,10 @@
 :- module(util,
-          [frequencies/2,
+          [(#<)/3,
+           (#=)/3,
+           (#=<)/3,
+           (#>)/3,
+           (#>=)/3,
+           frequencies/2,
            get_assoc/4,
            list_clumped/2,
            list_deduped/2,
@@ -20,6 +25,12 @@
 :- use_module(library(assoc)).
 :- use_module(library(clpfd)).
 :- use_module(library(reif)).
+
+#<(X, Y, T) :- X #< Y #<==> B, =(B, 1, T).
+#=(X, Y, T) :- X #= Y #<==> B, =(B, 1, T).
+#=<(X, Y, T) :- X #=< Y #<==> B, =(B, 1, T).
+#>(X, Y, T) :- X #> Y #<==> B, =(B, 1, T).
+#>=(X, Y, T) :- X #>= Y #<==> B, =(B, 1, T).
 
 list_clumped([], []).
 list_clumped([L|Ls], Ps) :- list_clumped_(Ls, L-1, Ps).

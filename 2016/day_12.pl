@@ -2,56 +2,69 @@
 :- use_module(lib/pio).
 :- use_module(lib/util).
 
-% Tfw integer//1 only checks sign when you're using codes.
-int(Z) --> "-", integer(N), { Z #= -N }.
-int(N) --> integer(N).
+int(int(Z)) --> "-", integer(N), { Z #= -N }.
+int(int(N)) --> integer(N).
 
-reg(a) --> "a".
-reg(b) --> "b".
-reg(c) --> "c".
-reg(d) --> "d".
+reg(reg(a)) --> "a".
+reg(reg(b)) --> "b".
+reg(reg(c)) --> "c".
+reg(reg(d)) --> "d".
 
-instr(cpy(X, Y)) --> "cpy ", (reg(X) | int(X)), " ", reg(Y).
-instr(inc(X)) --> "inc ", reg(X).
-instr(dec(X)) --> "dec ", reg(X).
-instr(jnz(X, Y)) --> "jnz ", (reg(X) | int(X)), " ", int(Y).
+instr(cpy(X, Y)) --> "cpy ", (reg(X) | int(X)), " ", reg(reg(Y)).
+instr(inc(X)) --> "inc ", reg(reg(X)).
+instr(dec(X)) --> "dec ", reg(reg(X)).
+instr(jnz(X, Y)) --> "jnz ", (reg(X) | int(X)), " ", int(int(Y)).
 
-mov_instrs_state0_state(cpy(X, Y), _, N0-Regs0, N-Regs) :-
-    N #= N0 + 1, get_assoc(X, Regs0, X, V), put_assoc(Y, Regs0, V, Regs).
-mov_instrs_state0_state(inc(X), _, N0-Regs0, N-Regs) :-
-    N #= N0 + 1, V #= V0 + 1, get_assoc(X, Regs0, V0, Regs, V).
-mov_instrs_state0_state(dec(X), _, N0-Regs0, N-Regs) :-
-    N #= N0 + 1, V #= V0 - 1, get_assoc(X, Regs0, V0, Regs, V).
-mov_instrs_state0_state(jnz(X, Y), Instrs, N0-Regs0, N-Regs) :-
-    get_assoc(X, Regs0, X, V),
-    (   V == 0
-    ->  N #= N0 + 1, Regs = Regs0
-    ;   (   Y == -2
-        ->  get_assoc(~ #= N0 - 2, Instrs, inc(A)),
-            get_assoc(~ #= N0 - 1, Instrs, dec(B)),
-            S #= get_assoc(A, Regs0, ~) + get_assoc(B, Regs0, ~),
-            put_assoc(A, Regs0, S, Regs1),
-            put_assoc(B, Regs1, 0, Regs),
-            N #= N0 + 1
-        ;   N #= N0 + Y, Regs = Regs0
-        )
-    ).
+% Our input has the pattern to add 2 numbers.
+% inc a
+% dec b
+% jnz b -2
+% To optimize this pattern, we replace it with an add instruction.
+% To make sure that other jumps are the same, we pad the instructions.
+instrs_optimized_([]) --> [].
+instrs_optimized_([inc(A), dec(B), jnz(reg(B), -2)|Is]) -->
+    !,
+    [jnz(int(0), 0), jnz(int(0), 0), add(A, B)],
+    instrs_optimized_(Is).
+instrs_optimized_([dec(B), inc(A), jnz(reg(B), -2)|Is]) -->
+    !,
+    [jnz(int(0), 0), jnz(int(0), 0), add(A, B)],
+    instrs_optimized_(Is).
+instrs_optimized_([I|Is]) --> [I], instrs_optimized_(Is).
+
+in_regs_val(int(X), _, X).
+in_regs_val(reg(R), Regs, V) :- memberd(R-V, Regs).
+
+mov_state0_state(cpy(X, Y), N0-Regs0, N-Regs) :-
+    N #= N0 + 1, in_regs_val(X, Regs0, V), selectd(Y-_, Regs0, Y-V, Regs).
+mov_state0_state(inc(X), N0-Regs0, N-Regs) :-
+    N #= N0 + 1, V #= V0 + 1, selectd(X-V0, Regs0, X-V, Regs).
+mov_state0_state(dec(X), N0-Regs0, N-Regs) :-
+    N #= N0 + 1, V #= V0 - 1, selectd(X-V0, Regs0, X-V, Regs).
+mov_state0_state(jnz(X, Y), N0-Regs, N-Regs) :-
+    in_regs_val(X, Regs, V),
+    if_(V = 0, N #= N0 + 1, N #= N0 + Y).
+mov_state0_state(add(X, Y), N0-Regs0, N-Regs) :-
+    N #= N0 + 1,
+    memberd(X-V0, Regs0),
+    memberd(Y-V1, Regs0),
+    V #= V0 + V1,
+    selectd(X-_, Regs0, X-V, Regs1),
+    selectd(Y-_, Regs1, Y-0, Regs).
 
 instrs_state0_state(Instrs, N-Regs, S) :-
-    (   N #> length of assoc_to_list $ Instrs
-    ->  S = N-Regs
-    ;   mov_instrs_state0_state(get_assoc(N, Instrs, ~), Instrs, N-Regs, S1),
+    length(Instrs, L),
+    (   N > L -> S = N-Regs
+    ;   mov_state0_state(nth1(N, Instrs, ~), N-Regs, S1),
         instrs_state0_state(Instrs, S1, S)
     ).
 
 p1(S) :-
-    phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt'),
-    list_to_assoc(pairs_keys_values(~, numlist(1, length $ Lines, ~), Lines), Instrs),
-    instrs_state0_state(Instrs, 1-(list_to_assoc $ [a-0, b-0, c-0, d-0]), _-Regs),
-    get_assoc(a, Regs, S).
+    phrase_from_file(sequence(instr, "\n", Instrs0), 'input/d12.txt'),
+    phrase(instrs_optimized_(Instrs0), Instrs),
+    instrs_state0_state(Instrs, 1-[a-0, b-0, c-0, d-0], _-[a-S|_]).
 
 p2(S) :-
-    phrase_from_file(sequence(instr, "\n", Lines), 'input/d12.txt'),
-    list_to_assoc(pairs_keys_values(~, numlist(1, length $ Lines, ~), Lines), Instrs),
-    instrs_state0_state(Instrs, 1-(list_to_assoc $ [a-0, b-0, c-1, d-0]), _-Regs),
-    get_assoc(a, Regs, S).
+    phrase_from_file(sequence(instr, "\n", Instrs0), 'input/d12.txt'),
+    phrase(instrs_optimized_(Instrs0), Instrs),
+    instrs_state0_state(Instrs, 1-[a-0, b-0, c-1, d-0], _-[a-S|_]).
