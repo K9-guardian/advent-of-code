@@ -37,7 +37,7 @@ p2_n_index_hashes(N, I, Hs) :-
         n_index_hashes(succ $ N, succ $ I, Hs1)
     ).
 
-hashes0_hashes1_keys([], _, []).
+hashes0_hashes1_keys([], _, []) :- !.
 hashes0_hashes1_keys([I-H|Hs0], Hs1, Ks) :-
     (   once(phrase(three_in_row(A), H)),
         append(Hs0, Hs1, Hs), n_list_split(1000, Hs, HsP, _),
@@ -70,10 +70,10 @@ p1(S) :-
     L #>= 64,
     length(Ks, L),
     phrase(part_index_keys0_keys(1, 0), Ks),
-    nth1(64, Ks, S).
+    nth1(64, Ks, S-_).
 
 p2(S) :-
     L #>= 64,
     length(Ks, L),
     phrase(part_index_keys0_keys(2, 0), Ks),
-    nth1(64, Ks, S).
+    nth1(64, Ks, S-_).

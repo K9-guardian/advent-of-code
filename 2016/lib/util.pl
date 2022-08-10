@@ -18,6 +18,7 @@
            n_list_split/4,
            selectd/3,
            selectd/4,
+           state//2,
            update_assoc/4,
            update_assoc/5]).
 
@@ -31,6 +32,8 @@
 #=<(X, Y, T) :- X #=< Y #<==> B, =(B, 1, T).
 #>(X, Y, T) :- X #> Y #<==> B, =(B, 1, T).
 #>=(X, Y, T) :- X #>= Y #<==> B, =(B, 1, T).
+
+state(S0, S), [S] --> [S0].
 
 list_clumped([], []).
 list_clumped([L|Ls], Ps) :- list_clumped_(Ls, L-1, Ps).

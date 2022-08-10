@@ -3,13 +3,6 @@
 :- use_module(lib/queue).
 :- use_module(lib/util).
 
-% Josephus problem (https://en.wikipedia.org/wiki/Josephus_problem)
-p1(S) :-
-    phrase_from_file(integer(N), 'input/d19.txt'),
-    2^A + L #= N, [L, A] ins 0..N,
-    once(labeling([max(A)], [A, L])),
-    S #= 2 * L + 1.
-
 elves_state0_state(1, Left-Right, Left-Right).
 elves_state0_state(N0, Left0-Right0, Left-Right) :-
     queue_head_(Right1, _, Right0), % Steal from middle elf.
@@ -25,6 +18,13 @@ elves_state0_state(N0, Left0-Right0, Left-Right) :-
 
     N #= N0 - 1,
     elves_state0_state(N, LeftE-RightE, Left-Right).
+
+% Josephus problem (https://en.wikipedia.org/wiki/Josephus_problem)
+p1(S) :-
+    phrase_from_file(integer(N), 'input/d19.txt'),
+    2^A + L #= N, [L, A] ins 0..N,
+    once(labeling([max(A)], [A, L])),
+    S #= 2 * L + 1.
 
 p2(S) :-
     phrase_from_file(integer(N), 'input/d19.txt'),

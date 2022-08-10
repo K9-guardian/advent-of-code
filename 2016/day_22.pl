@@ -20,8 +20,6 @@ p1(S) :-
     findall(P, nodes_viable_pair(Nodes, P), L),
     length(L, S).
 
-#>=(X, Y, T) :- X #>= Y #<==> B, =(B, 1, T).
-
 node_pretty(0-_, '_').
 node_pretty(U-A, P) :-
     T #= U + A,
@@ -40,9 +38,7 @@ node_pretty(U-A, P) :-
 % This gives us 63 + (5 * 37) + 1 = 249 moves.
 p2(S) :-
     phrase_from_file(sequence(line, "\n", [_, _|Nodes]), 'input/d22.txt'),
-    maplist({G0}/[node_stats(X-Y, U-A)]>>(nth0(Y, G0, L), nth0(X, L, U-A)), Nodes),
-    maplist([L]>>append(L, [], L), G0),
-    maplist(maplist(node_pretty), G0, G),
-    phrase(sequence(string, "\n", G), Ls),
-    format('~s', [Ls]),
-    S = G0.
+    maplist({G}/[node_stats(X-Y, U-A)]>>(nth0(Y, G, L), nth0(X, L, U-A)), Nodes),
+    maplist([L]>>append(L, [], L), G),
+    maplist([L0]>>(maplist(node_pretty, L0, L), format('~s~n', [L])), G),
+    S = G.
