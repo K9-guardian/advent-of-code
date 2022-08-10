@@ -37,35 +37,55 @@ instrs_optimized_([I|Is]) --> [I], instrs_optimized_(Is).
 atom_regs_val(i(X), _, X).
 atom_regs_val(r(R), Regs, V) :- memberd(R-V, Regs).
 
-mov_state0_state(cpy(X, Y), N0-Regs0, N-Regs) :-
-    N #= N0 + 1, atom_regs_val(X, Regs0, V), selectd(Y-_, Regs0, Y-V, Regs).
-mov_state0_state(inc(X), N0-Regs0, N-Regs) :-
-    N #= N0 + 1, V #= V0 + 1, selectd(X-V0, Regs0, X-V, Regs).
-mov_state0_state(dec(X), N0-Regs0, N-Regs) :-
-    N #= N0 + 1, V #= V0 - 1, selectd(X-V0, Regs0, X-V, Regs).
-mov_state0_state(jnz(X, Y), N0-Regs, N-Regs) :-
-    atom_regs_val(X, Regs, V), if_(V = 0, N #= N0 + 1, N #= N0 + Y).
-mov_state0_state(aac(X, Y), N0-Regs0, N-Regs) :-
-    N #= N0 + 1,
-    memberd(X-V0, Regs0),
-    memberd(Y-V1, Regs0),
-    V #= V0 + V1,
-    selectd(X-_, Regs0, X-V, Regs1),
-    selectd(Y-_, Regs1, Y-0, Regs).
+mov_state_(cpy(X, Y)) -->
+    state(N0-Regs0, N-Regs),
+    { N #= N0 + 1,
+      atom_regs_val(X, Regs0, V),
+      selectd(Y-_, Regs0, Y-V, Regs)
+    }.
+mov_state_(inc(X)) -->
+    state(N0-Regs0, N-Regs),
+    { N #= N0 + 1,
+      V #= V0 + 1,
+      selectd(X-V0, Regs0, X-V, Regs)
+    }.
+mov_state_(dec(X)) -->
+    state(N0-Regs0, N-Regs),
+    { N #= N0 + 1,
+      V #= V0 - 1,
+      selectd(X-V0, Regs0, X-V, Regs)
+    }.
+mov_state_(jnz(X, Y)) -->
+    state(N0-Regs, N-Regs),
+    { atom_regs_val(X, Regs, V),
+      if_(V = 0, N #= N0 + 1, N #= N0 + Y)
+    }.
+mov_state_(aac(X, Y)) -->
+    state(N0-Regs0, N-Regs),
+    { N #= N0 + 1,
+      memberd(X-V0, Regs0),
+      memberd(Y-V1, Regs0),
+      V #= V0 + V1,
+      selectd(X-_, Regs0, X-V, Regs1),
+      selectd(Y-_, Regs1, Y-0, Regs)
+    }.
 
-instrs_state0_state(Instrs, N-Regs, S) :-
-    length(Instrs, L),
-    (   N > L -> S = N-Regs
-    ;   mov_state0_state(nth1(N, Instrs, ~), N-Regs, S1),
-        instrs_state0_state(Instrs, S1, S)
+instrs_state(Instrs) -->
+    state(N-_),
+    { length(Instrs, L)
+    },
+    (   { N > L }
+    ->  []
+    ;   mov_state_(nth1(N, Instrs, ~)),
+        instrs_state(Instrs)
     ).
 
 p1(S) :-
     phrase_from_file(sequence(instr, "\n", Instrs0), 'input/d12.txt'),
     phrase(instrs_optimized_(Instrs0), Instrs),
-    instrs_state0_state(Instrs, 1-[a-0, b-0, c-0, d-0], _-[a-S|_]).
+    phrase(instrs_state(Instrs), [1-[a-0, b-0, c-0, d-0]], [_-[a-S|_]]).
 
 p2(S) :-
     phrase_from_file(sequence(instr, "\n", Instrs0), 'input/d12.txt'),
     phrase(instrs_optimized_(Instrs0), Instrs),
-    instrs_state0_state(Instrs, 1-[a-0, b-0, c-1, d-0], _-[a-S|_]).
+    phrase(instrs_state(Instrs), [1-[a-0, b-0, c-1, d-0]], [_-[a-S|_]]).
