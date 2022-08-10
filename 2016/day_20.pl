@@ -6,13 +6,13 @@ range(X..Y) --> integer(X), ['-'], integer(Y).
 
 p1(S) :-
     phrase_from_file(sequence(range, "\n", Rs), 'input/d20.txt'),
-    IP in 0..4294967295,
+    IP in 0..4_294_967_295,
     maplist({IP}/[R]>>(#\ IP in R), Rs),
     once(labeling([min(IP)], [IP])),
     S = IP.
 
 p2(S) :-
     phrase_from_file(sequence(range, "\n", Rs), 'input/d20.txt'),
-    IP in 0..4294967295,
+    IP in 0..4_294_967_295,
     maplist({IP}/[R]>>(#\ IP in R), Rs),
     fd_size(IP, S).
