@@ -15,7 +15,7 @@ moves_edges([]) --> [].
 moves_edges([value_bot(V, B)|Ms]) --> [V-B], moves_edges(Ms).
 moves_edges([bot_low_high(B, L, H)|Ms]) --> [B-L, B-H], moves_edges(Ms).
 
-moves_instrs([]) --> state(S, S).
+moves_instrs([]) --> [].
 moves_instrs([value_bot(V, B)|Ms]) -->
     state(S0, S),
     { put_assoc(V, S0, B, S)
@@ -27,7 +27,7 @@ moves_instrs([bot_low_high(B, L, H)|Ms]) -->
     },
     moves_instrs(Ms).
 
-vertices_assoc_botcomps_([], _) --> state(S, S).
+vertices_assoc_botcomps_([], _) --> [].
 vertices_assoc_botcomps_([output(_)|Verts], A) --> vertices_assoc_botcomps_(Verts, A).
 vertices_assoc_botcomps_([value(V)|Verts], A) -->
     state(S0, S),
