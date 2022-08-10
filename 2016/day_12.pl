@@ -20,16 +20,17 @@ instr(jnz(X, Y)) --> "jnz ", (reg(X) | int(X)), " ", int(i(Y)).
 % inc a
 % dec b
 % jnz b -2
-% To optimize this pattern, we replace it with an add instruction.
-% To make sure that other jumps are the same, we pad the instructions.
+% To optimize this pattern, we replace it with an aac (add and clear) instruction.
+% aac a b will add the value from register b to register a and clear register b.
+% To make sure that other jumps are the same, we pad the instructions with jnz 0 0.
 instrs_optimized_([]) --> [].
 instrs_optimized_([inc(A), dec(B), jnz(r(B), -2)|Is]) -->
     !,
-    [jnz(i(0), 0), jnz(i(0), 0), add(A, B)],
+    [jnz(i(0), 0), jnz(i(0), 0), aac(A, B)],
     instrs_optimized_(Is).
 instrs_optimized_([dec(B), inc(A), jnz(r(B), -2)|Is]) -->
     !,
-    [jnz(i(0), 0), jnz(i(0), 0), add(A, B)],
+    [jnz(i(0), 0), jnz(i(0), 0), aac(A, B)],
     instrs_optimized_(Is).
 instrs_optimized_([I|Is]) --> [I], instrs_optimized_(Is).
 
@@ -44,7 +45,7 @@ mov_state0_state(dec(X), N0-Regs0, N-Regs) :-
     N #= N0 + 1, V #= V0 - 1, selectd(X-V0, Regs0, X-V, Regs).
 mov_state0_state(jnz(X, Y), N0-Regs, N-Regs) :-
     atom_regs_val(X, Regs, V), if_(V = 0, N #= N0 + 1, N #= N0 + Y).
-mov_state0_state(add(X, Y), N0-Regs0, N-Regs) :-
+mov_state0_state(aac(X, Y), N0-Regs0, N-Regs) :-
     N #= N0 + 1,
     memberd(X-V0, Regs0),
     memberd(Y-V1, Regs0),
