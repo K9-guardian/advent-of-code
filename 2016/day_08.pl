@@ -24,7 +24,6 @@ grid_list(G, Ls) :-
 move_grid0_grid(rect(M, N), G0, G) :-
     findall(X-Y, (between(1, M, X), between(1, N, Y)), Cs),
     foldl([C, A0, A]>>put_assoc(C, A0, 1, A), Cs, G0, G).
-
 move_grid0_grid(rotate(row, Y0, D), G0, G) :-
     Y #= Y0 + 1, numlist(1, width(~), Xs),
     phrase((maplist({G0}/[X, V]>>get_assoc(X-Y, G0, V)),
@@ -33,7 +32,6 @@ move_grid0_grid(rotate(row, Y0, D), G0, G) :-
            Xs,
            Vs),
     foldl([K-V, A0, A]>>put_assoc(K, A0, V, A), Vs, G0, G).
-
 move_grid0_grid(rotate(col, X0, D), G0, G) :-
     X #= X0 + 1, numlist(1, height(~), Ys),
     phrase((maplist({G0}/[Y, V]>>get_assoc(X-Y, G0, V)),
