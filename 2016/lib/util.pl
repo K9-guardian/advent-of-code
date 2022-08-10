@@ -16,6 +16,7 @@
            n_list_rotated_left/3,
            n_list_rotated_right/3,
            n_list_split/4,
+           nth0/5,
            selectd/3,
            selectd/4,
            state//1,
@@ -102,6 +103,11 @@ n_list_partitioned_([], _,  []).
 n_list_partitioned_([L|Ls0], N, [P|R]) :-
     n_list_split(N, [L|Ls0], P, S),
     n_list_partitioned_(S, N, R).
+
+% get_assoc/5 for lists
+nth0(N, Es0, E0, Es, E) :-
+   nth0(N, Es0, E0, Es1),
+   nth0(N, Es, E, Es1).
 
 get_assoc(K, A, D, V) :-
     (   get_assoc(K, A, V), !

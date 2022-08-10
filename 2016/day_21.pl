@@ -12,11 +12,6 @@ instr(rotate_based_on(X)) --> "rotate based on position of letter ", [X].
 instr(reverse(X, Y)) --> "reverse positions ", integer(X), " through ", integer(Y).
 instr(move(X, Y)) --> "move position ", integer(X), " to position ", integer(Y).
 
-% get_assoc/5 for lists
-nth0(N, Es0, E0, Es, E) :-
-   nth0(N, Es0, E0, Es1),
-   nth0(N, Es, E, Es1).
-
 instr_state0_state(swap_pos(X, Y), S0, S) :-
     nth0(Y, S0, V),
     nth0(X, S0, T, S1, V),
