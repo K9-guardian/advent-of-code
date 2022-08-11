@@ -1,6 +1,7 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(lib/util).
+:- use_module(library(edcg)).
 :- use_module(library(lazy_lists)).
 
 :- set_prolog_flag(optimise, true).
@@ -13,6 +14,9 @@ input(S) :- phrase_from_file(string(S), 'input/d16.txt').
 
 :- table input_length/1.
 input_length(L) :- input(S), length(S, L).
+
+:- table abdb_length/1.
+abdb_length(L) :- input_length(L0), L #= L0 * 2 + 2.
 
 :- table input_inverted/1.
 input_inverted(I) :- input(S), phrase(inverted_(S), I).
@@ -31,7 +35,7 @@ dragon(Ds) :-
     dragon(Ds0),
     phrase((Ds0, "0", inverted_(Ds0)), Ds).
 
-dragon_segment(D0, D1) --> { input(S), input_inverted(I) }, S, [D0], I, [D1].
+dragon_segment_(D0, D1) --> { input(S), input_inverted(I) }, S, [D0], I, [D1].
 
 bitstring_ones([], 0).
 bitstring_ones(['0'|Bs], N) :- bitstring_ones(Bs, N).
@@ -52,48 +56,91 @@ dragon_total(Ds, T) :-
     lazy_list(cycle, input(~)-input_inverted(~), Is),
     lazy_list(join, Is-Ds, T).
 
-segments_partition_total_checksum(0, _, _) --> !, [].
-segments_partition_total_checksum(N0, P, T0) -->
-    { n_list_split(P, T0, F, T),
-      foldl(xnor, F, '1', V),
-      N #= N0 - 1 },
+edcg:pass_info(chunk_size).
+
+edcg:acc_info(total_curve, N, _-Ds0, F-Ds, n_list_split(N, Ds0, F, Ds)).
+
+edcg:acc_info(chunk_size_remaining, N, _, N, true). % This design pattern is so weird
+edcg:acc_info(joiner_curve, N, _-Js0, F-Js, n_list_split(N, Js0, F, Js)).
+edcg:acc_info(leftover_parity, P, _, P, true).
+
+edcg:pred_info(p1_segments_checksum_, 1, [chunk_size, total_curve, dcg]).
+
+edcg:pred_info(joiner_parity_, 2, [joiner_curve]).
+edcg:pred_info(leftover_parity_, 3, [joiner_curve]).
+edcg:pred_info(p2_segments_checksum_,
+               1,
+               [chunk_size,
+                chunk_size_remaining,
+                joiner_curve,
+                leftover_parity,
+                dcg]).
+
+p1_segments_checksum_(0) -->> [].
+p1_segments_checksum_(s(N)) -->>
+    Cs/chunk_size,
+    [Cs]:total_curve,
+    (T-_)/total_curve,
+    { foldl(xnor, T, '1', V)
+    },
     [V],
-    segments_partition_total_checksum(N, P, T).
+    p1_segments_checksum_(N).
 
-segments_total_partition_joiners_leftover_checksum(0, _, _, _, _) --> !, [].
-segments_total_partition_joiners_leftover_checksum(N0, P, P0, Js0, L0) -->
-    { divmod(P0, 36, Q, R),
-      Q2 #= Q * 2,
+joiner_parity_(N0, P) -->>
+    { N #= N0 * 2
+    },
+    [N]:joiner_curve,
+    (Js-_)/joiner_curve,
+    { foldl(xnor, Js, '1', P)
+    }.
 
-      n_list_split(Q2, Js0, Js1, [J0, J1|Js]), % Joiner stream
-      foldl(xnor, Js1, '1', JsP),
+input_parity(N, P) :-
+    input_parity(Par), % Parity from folding over our input and inverted input.
+    n_list_repeated(N, [Par], Is),
+    foldl(xnor, Is, '1', P).
 
-      input_parity(Par), % Inputs
-      n_list_repeated(Q, [Par], Is),
-      foldl(xnor, Is, '1', IsP),
+leftover_parity_(R, P0, P1) -->>
+    [2]:joiner_curve,
+    ([J0, J1]-_)/joiner_curve,
+    { phrase(dragon_segment_(J0, J1), S),
+      n_list_split(R, S, H, T),
+      foldl(xnor, H, '1', P0),
+      foldl(xnor, T, '1', P1)
+    }.
 
-      phrase(dragon_segment(J0, J1), Ds), % Leftover
-      n_list_split(R, Ds, Fs, Ss),
-      foldl(xnor, Fs, '1', FsP),
-
-      foldl(xnor, [L0, JsP, IsP, FsP], '1', V), % Combine everything
-      foldl(xnor, Ss, '1', L),
-      N #= N0 - 1,
-      P1 #= P - (36 - R) },
+p2_segments_checksum_(0) -->> [].
+p2_segments_checksum_(s(N)) -->>
+    Cs/chunk_size,
+    Csr0/chunk_size_remaining,
+    Lp0/leftover_parity,
+    { abdb_length(L),
+      divmod(Csr0, L, Quot, Rem),
+      Csr #= Cs - (36 - Rem)
+    },
+    [Csr]:chunk_size_remaining,
+    joiner_parity_(Quot, Jp),
+    { input_parity(Quot, Ip)
+    },
+    leftover_parity_(Rem, Fp, Lp),
+    { foldl(xnor, [Lp0, Jp, Ip, Fp], '1', V)
+    },
+    [Lp]:leftover_parity,
     [V],
-    segments_total_partition_joiners_leftover_checksum(N, P, P1, Js, L).
+    p2_segments_checksum_(N).
 
 p1(S) :-
     L is ceiling(272 / 18),
     length(Cs, L), append(Cs, _, Ds),
     once(dragon(Ds)),
     dragon_total(Ds, T),
-    2^N * R #= 272, P #= 2^N, N in 0..272, once(labeling([max(N)], [N, R])),
-    phrase(segments_partition_total_checksum(R, P, T), S).
+    2^N * R #= 272, P #= 2^N, N in 0..272,
+    once(labeling([max(N)], [N, R])), peano_natural(Rp, R),
+    phrase(p1_segments_checksum_(Rp, P, []-T, _), S).
 
 p2(S) :-
-    L is ceiling(35651584 / 18),
+    L is ceiling(35_651_584 / 18),
     length(Cs, L), append(Cs, _, Ds),
     once(dragon(Ds)),
-    2^N * R #= 35651584, P #= 2^N, N in 0..35651584, once(labeling([max(N)], [N, R])),
-    phrase(segments_total_partition_joiners_leftover_checksum(R, P, P, Ds, '1'), S).
+    2^N * R #= 35_651_584, P #= 2^N, N in 0..35_651_584,
+    once(labeling([max(N)], [N, R])), peano_natural(Rp, R),
+    phrase(p2_segments_checksum_(Rp, P, P, _, []-Ds, _, '1', _), S).

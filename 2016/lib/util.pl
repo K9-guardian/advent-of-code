@@ -18,6 +18,7 @@
            n_list_split/4,
            nth0/5,
            nth1/5,
+           peano_natural/2,
            selectd/3,
            selectd/4,
            state//1,
@@ -52,6 +53,12 @@ list_clumped_([J|Ps0], K-N, Ps) :-
 frequencies(Es, Freqs) :- phrase((msort, list_clumped), Es, Freqs).
 
 memberd(X, [E|Es]) :- if_(X = E, true, memberd(X, Es)).
+
+peano_natural(0, 0).
+peano_natural(s(N), M) :-
+    M #> 0,
+    M #= M1 + 1,
+    peano_natural(N, M1).
 
 % Like selectchk but general.
 selectd(X, [E|Es0], Es) :- if_(X = E, Es = Es0, (Es = [E|Es1], selectd(X, Es0, Es1))).
