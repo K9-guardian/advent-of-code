@@ -22,8 +22,7 @@ coord_type(X-Y, T) :-
     S #= S0 + num(~),
     decimal_binary(S, Bs),
     L = length of tfilter(=(1)) $ Bs,
-    L mod 2 #= 0 #<==> B,
-    if_(B = 1, T = open, T = wall).
+    if_(L mod 2 #= 0, T = open, T = wall).
 
 coord0_coord(X0-Y, X-Y) :- X #= X0 + 1, X #>= 0, coord_type(X-Y, open).
 coord0_coord(X0-Y, X-Y) :- X #= X0 - 1, X #>= 0, coord_type(X-Y, open).
