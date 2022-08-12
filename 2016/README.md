@@ -19,3 +19,7 @@ To get `library(func)` and `library(reif)`, execute the following in `swipl` and
 pack_install(reif).
 pack_install(func).
 ```
+Some days also use `library(edcg)`.
+```prolog
+pack_install(edcg).
+```
