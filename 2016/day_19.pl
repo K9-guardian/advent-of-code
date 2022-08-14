@@ -5,14 +5,14 @@
 
 elves_state0_state(1, Left-Right, Left-Right).
 elves_state0_state(N0, Left0-Right0, Left-Right) :-
-    queue_head_(Right1, _, Right0), % Steal from middle elf.
+    head_queue_(_, Right1, Right0), % Steal from middle elf.
 
-    queue_head_(Left1, H, Left0), % Move thief to the end.
-    queue_tail_(Right1, H, Right2),
+    head_queue_(H, Left1, Left0), % Move thief to the end.
+    tail_queue_(H, Right1, Right2),
 
     (   N0 mod 2 #= 1 % Adjust midpoint.
-    ->  queue_head_(RightE, M, Right2),
-        queue_tail_(Left1, M, LeftE)
+    ->  head_queue_(M, RightE, Right2),
+        tail_queue_(M, Left1, LeftE)
     ;   LeftE-RightE = Left1-Right2
     ),
 

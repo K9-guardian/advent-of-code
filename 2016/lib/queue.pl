@@ -6,21 +6,21 @@
 % This allows for fast appends by filling the hole from T.
 
 :- module(queue,
-       [empty_queue/1,
-        singleton_queue/2,
-        queue_head_/3,
-        queue_tail_/3,
-        list_queue/2]).
+          [empty_queue/1,
+           singleton_queue/2,
+           head_queue_/3,
+           tail_queue_/3,
+           list_queue/2]).
 
 empty_queue(q(0, H-H)).
 
 singleton_queue(X, q(s(0), [X|T]-T)).
 
-% queue_head_(Q0, X, Q) where Q has X as its head.
-queue_head_(q(N, H-T), X, q(s(N), [X|H]-T)).
+% head_queue_(X, Q0, Q) where Q has X as its head.
+head_queue_(X, q(N, H-T), q(s(N), [X|H]-T)).
 
-% queue_tail_(Q0, X, Q) where Q has X as its tail.
-queue_tail_(q(N, H-[X|T]), X, q(s(N), H-T)).
+% tail_queue_(X, Q0, Q) where Q has X as its tail.
+tail_queue_(X, q(N, H-[X|T]), q(s(N), H-T)).
 
 % Bidirectional conversion between a list and queue.
 list_queue([], q(0, T-T)).
