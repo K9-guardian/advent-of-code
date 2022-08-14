@@ -53,7 +53,7 @@ list_partitioned([X, Y|Ps]) --> [[X, Y]], list_partitioned([Y|Ps]).
 
 adj_permutation_sum(Adj, P0, S) :-
     phrase(list_partitioned(P0), P),
-    foldl({Adj}/[[X, Y], S0, S]>>(nth0(X, Adj, Vs), nth0(Y, Vs, N), S #= S0 + N), P, 0, S).
+    foldl({Adj}/[[X, Y], S0, S]>>(get_assoc(X-Y, Adj, N), S #= S0 + N), P, 0, S).
 
 p1(S) :-
     phrase_from_file(sequence(string, "\n", Grid), 'input/d24.txt'),
@@ -62,13 +62,15 @@ p1(S) :-
     maplist({Assoc}/[M, V]>>gen_assoc(V, Assoc, M), Marks, Vals),
     pairs_keys_values(Pairs0, Marks, Vals),
     maplist([K0-V, K-V]>>atom_number(K0, K), Pairs0, Pairs),
-    length(Adj, 8), maplist(same_length(Adj), Adj),
     findall(X-Y, (between(0, 7, X), between(0, 7, Y)), Ps),
-    maplist({Adj, Assoc, Pairs}/[X-Y]>>
-            (nth0(X, Adj, Ls), nth0(Y, Ls, D),
-             memberd(X-C0, Pairs), memberd(Y-C1, Pairs),
-             bfs(Assoc, C0, C1, D)),
-            Ps),
+    foldl({Assoc, Pairs}/[X-Y, A0, A]>>
+          (memberd(X-C0, Pairs),
+           memberd(Y-C1, Pairs),
+           bfs(Assoc, C0, C1, D),
+           put_assoc(X-Y, A0, D, A)),
+          Ps,
+          empty_assoc(~),
+          Adj),
     findall(Sum,
             (permutation([1, 2, 3, 4, 5, 6, 7], Ns),
              adj_permutation_sum(Adj, [0|Ns], Sum)),
@@ -82,13 +84,15 @@ p2(S) :-
     maplist({Assoc}/[M, V]>>gen_assoc(V, Assoc, M), Marks, Vals),
     pairs_keys_values(Pairs0, Marks, Vals),
     maplist([K0-V, K-V]>>atom_number(K0, K), Pairs0, Pairs),
-    length(Adj, 8), maplist(same_length(Adj), Adj),
     findall(X-Y, (between(0, 7, X), between(0, 7, Y)), Ps),
-    maplist({Adj, Assoc, Pairs}/[X-Y]>>
-            (nth0(X, Adj, Ls), nth0(Y, Ls, D),
-             memberd(X-C0, Pairs), memberd(Y-C1, Pairs),
-             bfs(Assoc, C0, C1, D)),
-            Ps),
+    foldl({Assoc, Pairs}/[X-Y, A0, A]>>
+          (memberd(X-C0, Pairs),
+           memberd(Y-C1, Pairs),
+           bfs(Assoc, C0, C1, D),
+           put_assoc(X-Y, A0, D, A)),
+          Ps,
+          empty_assoc(~),
+          Adj),
     findall(Sum,
             (permutation([1, 2, 3, 4, 5, 6, 7], Ns0),
              append([[0], Ns0, [0]], Ns),
