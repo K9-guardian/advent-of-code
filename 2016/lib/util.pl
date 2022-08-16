@@ -26,9 +26,6 @@
            update_assoc/4,
            update_assoc/5]).
 
-:- set_prolog_flag(back_quotes, codes).
-:- set_prolog_flag(double_quotes, chars).
-
 :- use_module(library(apply)).
 :- use_module(library(clpfd)).
 :- use_module(library(dcg/basics)).
