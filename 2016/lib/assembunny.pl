@@ -23,14 +23,14 @@ instr(out(X)) --> "out ", reg(r(X)).
 
 instrs_optimized_([]) --> [].
 
-% Our input has the patten to to multiply 2 numbers.
+% Our input has the pattern to to multiply 2 numbers.
 % cpy b c
 % inc a
 % dec c
 % jnz c -2
 % dec d
 % jnz d -5
-% To optimize this patten, we replace it with an mac (multiply and clear) instruction.
+% To optimize this pattern, we replace it with an mac (multiply and clear) instruction.
 instrs_optimized_([cpy(B, r(C)),
                    inc(A),
                    dec(C),
