@@ -101,13 +101,11 @@ mov_state_(cpy(X, r(Y))) -->>
     [Y-(_-V)]:registers.
 mov_state_(inc(X)) -->>
     [1]:line,
-    { V #= V0 + 1
-    },
+    { V #= V0 + 1 },
     [X-(V0-V)]:registers.
 mov_state_(dec(X)) -->>
     [1]:line,
-    { V #= V0 - 1
-    },
+    { V #= V0 - 1 },
     [X-(V0-V)]:registers.
 mov_state_(jnz(X, Y)) -->>
     lookup(X, V),
@@ -125,8 +123,7 @@ mov_state_(tgl(X)) -->>
       length(Instrs, L)
     },
     (   M in 1..L
-    ->  { mov_tgld(I0, I)
-        },
+    ->  { mov_tgld(I0, I) },
         [M-(I0-I)]:instructions
     ;   []
     ).
@@ -163,8 +160,7 @@ instrs_state_ -->>
     N/line,
     I/iteration,
     (_-Optd)/instructions,
-    { length(Optd, L)
-    },
+    { length(Optd, L) },
     (   ( N > L ; I > 100_000 )
     ->  []
     ;   [1]:iteration,

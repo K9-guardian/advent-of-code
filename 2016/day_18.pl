@@ -3,7 +3,6 @@
 :- use_module(lib/util).
 :- use_module(library(lazy_lists)).
 
-% TODO: Simplify rules if slow?
 % We can simplify the computation by analyzing
 % all possible combinations of left, center, and right.
 left_center_right_trap('.', '.', '.') --> ".".

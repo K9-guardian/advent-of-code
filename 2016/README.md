@@ -9,3 +9,10 @@ Usage: Install the following packages.
 :- pack_install(func).
 :- pack_install(reif).
 ```
+
+Set the following flags in your `init.pl`.
+
+```prolog
+:- set_prolog_flag(back_quotes, codes).
+:- set_prolog_flag(double_quotes, chars).
+```

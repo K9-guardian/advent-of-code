@@ -10,8 +10,7 @@ grid_to_assoc(M, A) :- phrase(grid_to_assoc_(M), [s(0-0, empty_assoc(~))], [s(_-
 grid_to_assoc_([]) --> [].
 grid_to_assoc_([[]|Rows]) -->
     state(s(X0-_, A), s(X-0, A)),
-    { X #= X0 + 1
-    },
+    { X #= X0 + 1 },
     grid_to_assoc_(Rows).
 grid_to_assoc_([[R|Rs]|Rows]) -->
     state(s(X-Y0, A0), s(X-Y, A)),
@@ -33,8 +32,7 @@ bfs(Assoc, Xo-Yo, Xd-Yd, D) :-
 
 bfs_(_, X-Y) -->
     state(s(Q, _)),
-    { head_queue_(X-Y, _, Q)
-    }.
+    { head_queue_(X-Y, _, Q) }.
 bfs_(Assoc, Xd-Yd) -->
     state(s(Q0, S0), s(Q, S)),
     { head_queue_(Xo-Yo, Q1, Q0),

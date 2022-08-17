@@ -12,18 +12,18 @@ line(node_stats(X-Y, U-A)) -->
     whites, nonblanks(_).
 
 nodes_viable_pair(Nodes, node_stats(P0, U-_)-node_stats(P1, _-A)) :-
-    U #> 0, U #=< A,
+    chain([1, U, A], #=<),
     foldl(select, [node_stats(P0, U-_), node_stats(P1, _-A)], Nodes, _).
-
-p1(S) :-
-    phrase_from_file(sequence(line, "\n", [_, _|Nodes]), 'input/d22.txt'),
-    findall(P, nodes_viable_pair(Nodes, P), L),
-    length(L, S).
 
 node_pretty(0-_, '_').
 node_pretty(U-A, P) :-
     T #= U + A,
     if_(T #>= 500, P = '#', P = '.').
+
+p1(S) :-
+    phrase_from_file(sequence(line, "\n", [_, _|Nodes]), 'input/d22.txt'),
+    findall(P, nodes_viable_pair(Nodes, P), L),
+    length(L, S).
 
 % Near impossible to write a code solution to this problem.
 % Instead, we look at patterns in the input.

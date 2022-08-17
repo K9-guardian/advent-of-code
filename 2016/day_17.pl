@@ -5,6 +5,7 @@
 :- use_module(library(pairs)).
 
 :- table input/1.
+
 input(I) :- phrase_from_file(string(I), 'input/d17.txt').
 
 move_coord0_coord('U', X-1, X-0).

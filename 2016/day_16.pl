@@ -7,21 +7,17 @@
 :- set_prolog_flag(optimise, true).
 
 % Precompute input and inverted input.
-% Prolog has variable declarations lmao
 
-:- table input/1.
+:- table input/1, input_length/1, abdb_length/1, input_inverted/1, input_parity/1.
+
 input(S) :- phrase_from_file(string(S), 'input/d16.txt').
 
-:- table input_length/1.
 input_length(L) :- input(S), length(S, L).
 
-:- table abdb_length/1.
 abdb_length(L) :- input_length(L0), L #= L0 * 2 + 2.
 
-:- table input_inverted/1.
 input_inverted(I) :- input(S), phrase(inverted_(S), I).
 
-:- table input_parity/1.
 input_parity(P) :- input(S), input_inverted(I), append(S, I, SI), foldl(xnor, SI, '1', P).
 
 bit_inverse('0') --> "1".
@@ -81,23 +77,22 @@ p1_segments_checksum_(s(N)) -->>
     Cs/chunk_size,
     [Cs]:total_curve,
     (T-_)/total_curve,
-    { foldl(xnor, T, '1', V)
-    },
+    { foldl(xnor, T, '1', V) },
     [V],
     p1_segments_checksum_(N).
 
 joiner_parity_(N0, P) -->>
-    { N #= N0 * 2
-    },
+    { N #= N0 * 2 },
     [N]:joiner_curve,
     (Js-_)/joiner_curve,
-    { foldl(xnor, Js, '1', P)
-    }.
+    { foldl(xnor, Js, '1', P) }.
 
-input_parity(N, P) :-
-    input_parity(Par), % Parity from folding over our input and inverted input.
-    n_list_repeated(N, [Par], Is),
-    foldl(xnor, Is, '1', P).
+% This predicate doesn't have to be in the edcg but it makes it clean.
+input_parity_(N, P) -->>
+    { input_parity(Par), % Parity from folding over our input and inverted input.
+      n_list_repeated(N, [Par], Is),
+      foldl(xnor, Is, '1', P)
+    }.
 
 leftover_parity_(R, P0, P1) -->>
     [2]:joiner_curve,
@@ -119,11 +114,9 @@ p2_segments_checksum_(s(N)) -->>
     },
     [Csr]:chunk_size_remaining,
     joiner_parity_(Quot, Jp),
-    { input_parity(Quot, Ip)
-    },
+    input_parity_(Quot, Ip),
     leftover_parity_(Rem, Fp, Lp),
-    { foldl(xnor, [Lp0, Jp, Ip, Fp], '1', V)
-    },
+    { foldl(xnor, [Lp0, Jp, Ip, Fp], '1', V) },
     [Lp]:leftover_parity,
     [V],
     p2_segments_checksum_(N).

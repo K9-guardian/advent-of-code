@@ -10,13 +10,8 @@ triangle_t([X, Y, Z], T) :-
 
 p1(S) :-
     phrase_from_file(sequence(line, "\n", Ls), 'input/d3.txt'),
-    S = length of tfilter(triangle_t) $ Ls.
+    S = length $ tfilter(triangle_t) $ Ls.
 
 p2(S) :-
     phrase_from_file(sequence(line, "\n", Ls), 'input/d3.txt'),
-    S = length
-        of tfilter(triangle_t)
-        of append
-        of maplist(n_list_partitioned(3))
-        of transpose
-        $ Ls.
+    S = length $ tfilter(triangle_t) $ append $ maplist(n_list_partitioned(3)) $ transpose $ Ls.
