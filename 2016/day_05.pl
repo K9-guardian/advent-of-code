@@ -5,35 +5,32 @@
 :- use_module(library(md5)).
 :- use_module(library(pairs)).
 
-input_key(A, C) :-
-    md5_hash(A, H, []),
-    atom_concat('00000', S, H),
-    atom_chars(S, [C|_]).
-
-input_keys(A, C0-C1) :-
+data_chars(A, C0-C1) :-
     md5_hash(A, H, []),
     atom_concat('00000', S, H),
     atom_chars(S, [C0, C1|_]).
 
-% I can't improve this.
-room_tail_found_(ID, X, Found, Out) :-
-    (   dict_size(Found, 8)
-    ->  pairs_values(dict_pairs(Found, _, ~), Out)
-    ;   (   input_keys(atom_concat(ID, X, ~), N-C),
-            call_dcg((atom_number, in), N, 0..8),
-            \+ get_dict(N, Found, _)
-        ->  room_tail_found_(ID, succ $ X, Found.put(N, C), Out)
-        ;   room_tail_found_(ID, succ $ X, Found, Out)
-        )
-    ).
+n_data_passwd(_, _, Passwd) :- ground(Passwd), !.
+n_data_passwd(N0, Data0-Salt0, Passwd) :-
+    copy_term([Salt0], Data0, [Salt], Data),
+    number_chars(N0, Salt0),
+    (   data_chars(Data0, Pos0-Char),
+        Pos = succ $ atom_number $ Pos0,
+        var(arg(Pos, Passwd, ~))
+    ->  setarg(Pos, Passwd, Char)
+    ;   true
+    ),
+    n_data_passwd(succ $ N0, Data-Salt, Passwd).
 
 p1(S) :-
-    phrase_from_file(string(ID0), 'input/d5.txt'),
-    atom_chars(ID, ID0),
-    findnsols(8, C, (length(_, X), call_dcg((atom_concat(ID), input_key), X, C)), Cs),
+    phrase_from_file(string(ID), 'input/d5.txt'),
+    append(ID, Salt, Data),
+    findnsols(8, C, (between(1, inf, X), number_chars(X, Salt), data_chars(Data, C-_)), Cs),
     S = Cs.
 
 p2(S) :-
-    phrase_from_file(string(ID0), 'input/d5.txt'),
-    atom_chars(ID, ID0),
-    room_tail_found_(ID, 0, found{}, S).
+    phrase_from_file(string(ID), 'input/d5.txt'),
+    append(ID, Salt, Data),
+    functor(Passwd, p, 8),
+    n_data_passwd(0, Data-Salt, Passwd),
+    Passwd =.. [_|S].
