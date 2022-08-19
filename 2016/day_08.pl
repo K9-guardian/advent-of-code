@@ -1,6 +1,7 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(lib/util).
+:- use_module(library(pairs)).
 
 move(rect(M, N)) --> "rect ", integer(M), "x", integer(N).
 move(rotate(row, Y, D)) --> "rotate row y=", integer(Y), " by ", integer(D).
@@ -13,13 +14,8 @@ grid(G) :-
     findall(X-Y-0, (between(1, height(~), Y), between(1, width(~), X)), Ls),
     list_to_assoc(Ls, G).
 
-grid_list(G, Ls) :-
-    call_dcg((assoc_to_list,
-              maplist([_-_-V, V]>>true),
-              n_list_partitioned(height(~)),
-              transpose),
-             G,
-             Ls).
+grid_to_list(G, Ls) :-
+    Ls = transpose $ n_list_partitioned(height(~)) $ assoc_to_values $ G.
 
 move_grid0_grid(rect(M, N), G0, G) :-
     findall(X-Y, (between(1, M, X), between(1, N, Y)), Cs),
@@ -41,22 +37,21 @@ move_grid0_grid(rotate(col, X0, D), G0, G) :-
            Vs),
     foldl([K-V, A0, A]>>put_assoc(K, A0, V, A), Vs, G0, G).
 
-char_value(' ', 0).
-char_value('#', 1).
+bit_char(0, ' ').
+bit_char(1, '#').
 
 p1(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
     foldl(move_grid0_grid, Moves, grid(~), G),
-    call_dcg((assoc_to_values, sum_list), G, S).
+    S = sum_list $ assoc_to_values $ G.
 
 p2(S) :-
     phrase_from_file(sequence(move, "\n", Moves), 'input/d8.txt'),
     foldl(move_grid0_grid, Moves, grid(~), G),
-    grid_list(G, Ls),
+    grid_to_list(G, Ls),
     maplist([L, Cs]>>
-            (maplist(char_value, Cs0, L),
-             n_list_partitioned(5, Cs0, Cs1),
-             phrase(sequence(string, " ", Cs1), Cs)),
+            (phrase((maplist(bit_char), n_list_partitioned(5)), L, Cs0),
+             phrase(sequence(string, " ", Cs0), Cs)),
             Ls,
             S),
     maplist([L]>>format('~s~n', [L]), S).
