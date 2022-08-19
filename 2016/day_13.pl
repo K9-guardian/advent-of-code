@@ -1,5 +1,6 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
+:- use_module(lib/queue).
 :- use_module(lib/util).
 
 :- table input/1.
@@ -11,43 +12,44 @@ coord_type(X-Y, T) :-
     S #= S0 + input(~),
     if_(popcount(S) mod 2 #= 0, T = open, T = wall).
 
-coord0_coord(X0-Y, X-Y) :- X #= X0 + 1, X #>= 0, coord_type(X-Y, open).
-coord0_coord(X0-Y, X-Y) :- X #= X0 - 1, X #>= 0, coord_type(X-Y, open).
-coord0_coord(X-Y0, X-Y) :- Y #= Y0 + 1, Y #>= 0, coord_type(X-Y, open).
-coord0_coord(X-Y0, X-Y) :- Y #= Y0 - 1, Y #>= 0, coord_type(X-Y, open).
+surrounding(X0-Y, X-Y) :- X #= X0 + 1, X #>= 0, coord_type(X-Y, open).
+surrounding(X0-Y, X-Y) :- X #= X0 - 1, X #>= 0, coord_type(X-Y, open).
+surrounding(X-Y0, X-Y) :- Y #= Y0 + 1, Y #>= 0, coord_type(X-Y, open).
+surrounding(X-Y0, X-Y) :- Y #= Y0 - 1, Y #>= 0, coord_type(X-Y, open).
 
-queue_dists_([31-39|_]) --> !, [].
-queue_dists_([X-Y|Ps0]) -->
-    state(S0, S),
-    { findall(I-J, coord0_coord(X-Y, I-J), Ps1),
-      exclude({S0}/[X]>>get_assoc(X, S0, _), Ps1, Ps2),
-      append(Ps0, Ps2, Ps),
-      get_assoc(X-Y, S0, D0), succ(D0, D),
-      foldl({D}/[X-Y, A0, A]>>put_assoc(X-Y, A0, D, A), Ps2, S0, S)
+bfs_ -->
+    state(s(Q, _)),
+    { head_queue_(31-39, _, Q) },
+    !,
+    [].
+bfs_ -->
+    state(s(Q0, Ds0), s(Q, Ds)),
+    { head_queue_(X-Y, Q1, Q0),
+      findall(I-J, (surrounding(X-Y, I-J), \+ get_assoc(I-J, Ds0, _)), Ns),
+      foldl(tail_queue_, Ns, Q1, Q),
+      get_assoc(X-Y, Ds0, D0), D #= D0 + 1,
+      foldl({D}/[X-Y, A0, A]>>put_assoc(X-Y, A0, D, A), Ns, Ds0, Ds)
     },
-    queue_dists_(Ps).
+    bfs_.
 
-p2_queue_dists_([_|_]) -->
-    state(S),
-    { max_list $ assoc_to_values $ S = 51
-    },
+p2_bfs_ -->
+    state(s(_, Ds)),
+    { max_list $ assoc_to_values $ Ds = 51 },
     !.
-p2_queue_dists_([X-Y|Ps0]) -->
-    state(S0, S),
-    { findall(I-J, coord0_coord(X-Y, I-J), Ps1),
-      exclude({S0}/[X]>>get_assoc(X, S0, _), Ps1, Ps2),
-      append(Ps0, Ps2, Ps),
-      get_assoc(X-Y, S0, D0), succ(D0, D),
-      foldl({D}/[X-Y, A0, A]>>put_assoc(X-Y, A0, D, A), Ps2, S0, S)
+p2_bfs_ -->
+    state(s(Q0, Ds0), s(Q, Ds)),
+    { head_queue_(X-Y, Q1, Q0),
+      findall(I-J, (surrounding(X-Y, I-J), \+ get_assoc(I-J, Ds0, _)), Ns),
+      foldl(tail_queue_, Ns, Q1, Q),
+      get_assoc(X-Y, Ds0, D0), D #= D0 + 1,
+      foldl({D}/[X-Y, A0, A]>>put_assoc(X-Y, A0, D, A), Ns, Ds0, Ds)
     },
-    p2_queue_dists_(Ps).
+    p2_bfs_.
 
 p1(S) :-
-    phrase(queue_dists_([1-1]), [list_to_assoc $ [1-1-0]], [Ds]),
+    phrase(bfs_, [s(singleton_queue $ 1-1, list_to_assoc $ [1-1-0])], [s(_, Ds)]),
     get_assoc(31-39, Ds, S).
 
 p2(S) :-
-    phrase(p2_queue_dists_([1-1]), [list_to_assoc $ [1-1-0]], [Ds]),
-    assoc_to_list(Ds, Ls0),
-    tfilter([_-_-D]>>(D #=< 50), Ls0, Ls),
-    length(Ls, S).
+    phrase(p2_bfs_, [s(singleton_queue $ 1-1, list_to_assoc $ [1-1-0])], [s(_, Ds)]),
+    S = length $ tfilter(#>=(50)) $ assoc_to_values $ Ds.
