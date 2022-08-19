@@ -24,8 +24,8 @@ surrounding(X0-Y, X-Y) :- X #= X0 - 1.
 surrounding(X-Y0, X-Y) :- Y #= Y0 + 1.
 surrounding(X-Y0, X-Y) :- Y #= Y0 - 1.
 
-bfs(Assoc, Xo-Yo, Xd-Yd, D) :-
-    once(phrase(bfs_(Assoc, Xd-Yd),
+bfs(Map, Xo-Yo, Xd-Yd, D) :-
+    once(phrase(bfs_(Map, Xd-Yd),
                 [s(singleton_queue $ Xo-Yo, list_to_assoc $ [Xo-Yo-0])],
                 [s(_, Dists)])),
     get_assoc(Xd-Yd, Dists, D).
@@ -33,18 +33,18 @@ bfs(Assoc, Xo-Yo, Xd-Yd, D) :-
 bfs_(_, X-Y) -->
     state(s(Q, _)),
     { head_queue_(X-Y, _, Q) }.
-bfs_(Assoc, Xd-Yd) -->
+bfs_(Map, Xd-Yd) -->
     state(s(Q0, S0), s(Q, S)),
     { head_queue_(Xo-Yo, Q1, Q0),
       get_assoc(Xo-Yo, S0, D0),
       D #= D0 + 1,
       findall(I-J, surrounding(Xo-Yo, I-J), Ns0),
       exclude({S0}/[N]>>get_assoc(N, S0, _), Ns0, Ns1),
-      include({Assoc}/[N]>>(get_assoc(N, Assoc, V), memberd(V, ".01234567")), Ns1, Ns),
+      include({Map}/[N]>>(get_assoc(N, Map, V), memberd(V, ".01234567")), Ns1, Ns),
       foldl(tail_queue_, Ns, Q1, Q),
       foldl({D}/[N, S0, S]>>put_assoc(N, S0, D, S), Ns, S0, S)
     },
-    bfs_(Assoc, Xd-Yd).
+    bfs_(Map, Xd-Yd).
 
 list_partitioned([X, Y]) --> [[X, Y]].
 list_partitioned([X, Y|Ps]) --> [[X, Y]], list_partitioned([Y|Ps]).
@@ -55,16 +55,16 @@ adj_permutation_sum(Adj, P0, S) :-
 
 p1(S) :-
     phrase_from_file(sequence(string, "\n", Grid), 'input/d24.txt'),
-    grid_to_assoc(Grid, Assoc),
+    grid_to_assoc(Grid, Map),
     Marks = "01234567",
-    maplist({Assoc}/[M, V]>>gen_assoc(V, Assoc, M), Marks, Vals),
+    maplist({Map}/[M, V]>>gen_assoc(V, Map, M), Marks, Vals),
     pairs_keys_values(Pairs0, Marks, Vals),
     maplist([K0-V, K-V]>>atom_number(K0, K), Pairs0, Pairs),
     findall(X-Y, (between(0, 7, X), between(0, 7, Y)), Ps),
-    foldl({Assoc, Pairs}/[X-Y, A0, A]>>
+    foldl({Map, Pairs}/[X-Y, A0, A]>>
           (memberd(X-C0, Pairs),
            memberd(Y-C1, Pairs),
-           bfs(Assoc, C0, C1, D),
+           bfs(Map, C0, C1, D),
            put_assoc(X-Y, A0, D, A)),
           Ps,
           empty_assoc(~),
@@ -77,16 +77,16 @@ p1(S) :-
 
 p2(S) :-
     phrase_from_file(sequence(string, "\n", Grid), 'input/d24.txt'),
-    grid_to_assoc(Grid, Assoc),
+    grid_to_assoc(Grid, Map),
     Marks = "01234567",
-    maplist({Assoc}/[M, V]>>gen_assoc(V, Assoc, M), Marks, Vals),
+    maplist({Map}/[M, V]>>gen_assoc(V, Map, M), Marks, Vals),
     pairs_keys_values(Pairs0, Marks, Vals),
     maplist([K0-V, K-V]>>atom_number(K0, K), Pairs0, Pairs),
     findall(X-Y, (between(0, 7, X), between(0, 7, Y)), Ps),
-    foldl({Assoc, Pairs}/[X-Y, A0, A]>>
+    foldl({Map, Pairs}/[X-Y, A0, A]>>
           (memberd(X-C0, Pairs),
            memberd(Y-C1, Pairs),
-           bfs(Assoc, C0, C1, D),
+           bfs(Map, C0, C1, D),
            put_assoc(X-Y, A0, D, A)),
           Ps,
           empty_assoc(~),
