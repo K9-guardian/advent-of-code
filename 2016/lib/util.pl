@@ -26,14 +26,6 @@
            update_assoc/4,
            update_assoc/5]).
 
-:- use_module(library(apply)).
-:- use_module(library(clpfd)).
-:- use_module(library(dcg/basics)).
-:- use_module(library(dcg/high_order)).
-:- use_module(library(func)).
-:- use_module(library(reif)).
-:- use_module(library(yall)).
-
 #<(X, Y, T) :- X #< Y #<==> B, =(B, 1, T).
 #=(X, Y, T) :- X #= Y #<==> B, =(B, 1, T).
 #=<(X, Y, T) :- X #=< Y #<==> B, =(B, 1, T).

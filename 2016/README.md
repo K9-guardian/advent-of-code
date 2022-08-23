@@ -10,9 +10,16 @@ Usage: Install the following packages.
 :- pack_install(reif).
 ```
 
-Set the following flags in your `init.pl`.
+Use the following `init.pl`.
 
 ```prolog
 :- set_prolog_flag(back_quotes, codes).
 :- set_prolog_flag(double_quotes, chars).
+:- use_module(library(apply)).
+:- use_module(library(clpfd)).
+:- use_module(library(dcg/basics)).
+:- use_module(library(dcg/high_order)).
+:- use_module(library(func)).
+:- use_module(library(reif)).
+:- use_module(library(yall)).
 ```
