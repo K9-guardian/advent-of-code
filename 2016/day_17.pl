@@ -60,3 +60,4 @@ stack_maxpath_([X0-Y0-P0|XYPs0], M0, M) :-
 p1(S) :- queue_path([0-0-""], S).
 
 p2(S) :- stack_maxpath_([0-0-""], 0, S).
+
