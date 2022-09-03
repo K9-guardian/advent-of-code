@@ -25,7 +25,7 @@ n_data_passwd(N0, Data0-Nonce0, Passwd) :-
 p1(S) :-
     phrase_from_file(string(ID), 'input/d5.txt'),
     append(ID, Nonce, Data),
-    findnsols(8, C, (between(1, inf, X), number_chars(X, Nonce), data_chars(Data, C-_)), Cs),
+    once(findnsols(8, C, (between(1, inf, X), number_chars(X, Nonce), data_chars(Data, C-_)), Cs)),
     S = Cs.
 
 p2(S) :-
