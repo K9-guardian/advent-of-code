@@ -1,5 +1,6 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
+:- use_module(lib/queue).
 :- use_module(lib/util).
 :- use_module(library(md5)).
 :- use_module(library(pairs)).
