@@ -1,5 +1,5 @@
 [package]
-default-run = "aoc2017"
+default-run = "main"
 edition = "2021"
 name = "aoc2017"
 version = "0.1.0"
