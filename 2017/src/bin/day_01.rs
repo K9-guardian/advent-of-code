@@ -10,29 +10,29 @@ fn main() {
     println!("{}", p2(&digits));
 }
 
-fn p1(digits: &Vec<u32>) -> usize {
-    let mut cnt: usize = 0;
+fn p1(digits: &[u32]) -> u32 {
+    let mut cnt = 0;
 
-    for i in 1..digits.len() {
-        if digits.get(i - 1) == digits.get(i) {
-            cnt += *digits.get(i).unwrap() as usize;
+    for p in digits.windows(2) {
+        if p[0] == p[1] {
+            cnt += p[0];
         }
     }
 
     if digits.first() == digits.last() {
-        cnt += *digits.last().unwrap() as usize;
+        cnt += digits[0];
     }
 
     cnt
 }
 
-fn p2(digits: &Vec<u32>) -> usize {
-    let mut cnt: usize = 0;
+fn p2(digits: &[u32]) -> u32 {
+    let mut cnt = 0;
 
     for i in 0..digits.len() {
         let j = (i + digits.len() / 2) % digits.len();
-        if digits.get(i) == digits.get(j) {
-            cnt += *digits.get(i).unwrap() as usize;
+        if digits[i] == digits[j] {
+            cnt += digits[i];
         }
     }
 
