@@ -35,6 +35,6 @@ pub fn main() {
         .iter()
         .map(|&b| char::to_digit(b as char, 10).unwrap())
         .collect();
-    println!("{}", p1(&digits));
-    println!("{}", p2(&digits));
+    dbg!(p1(&digits));
+    dbg!(p2(&digits));
 }

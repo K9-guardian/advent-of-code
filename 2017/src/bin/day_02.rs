@@ -35,6 +35,6 @@ pub fn p2(input: &str) -> usize {
 
 pub fn main() {
     let input = fs::read_to_string("input/d2.txt").unwrap();
-    println!("{}", p1(&input));
-    println!("{}", p2(&input));
+    dbg!(p1(&input));
+    dbg!(p2(&input));
 }
