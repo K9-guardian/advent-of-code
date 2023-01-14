@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs};
+use std::fs;
 
 fn p1(input: &str) -> usize {
     input
@@ -17,10 +17,10 @@ fn p2(input: &str) -> usize {
         .lines()
         .map(|s| {
             s.split_whitespace().map(|w| {
-                let mut map: HashMap<char, usize> = HashMap::new();
+                let mut map = [0; 26];
 
                 for c in w.chars() {
-                    map.entry(c).and_modify(|n| *n += 1).or_insert(1);
+                    map[c as usize - 'a' as usize] += 1;
                 }
 
                 map

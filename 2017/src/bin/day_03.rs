@@ -15,7 +15,8 @@ fn p1(input: usize) -> usize {
 }
 
 fn p2(input: usize) -> usize {
-    let mut grid = [[0; 100]; 100];
+    let mut grid = vec![vec![0; 100]; 100];
+
     let (mut x, mut y) = (50, 50);
     let mut shift = 2;
 
@@ -45,17 +46,16 @@ fn p2(input: usize) -> usize {
     grid[x][y]
 }
 
-fn sum_neighbors(grid: &[[usize; 100]; 100], x: usize, y: usize) -> usize {
+fn sum_neighbors(grid: &[Vec<usize>], x: usize, y: usize) -> usize {
     let mut cnt = 0;
 
     for i in (x - 1)..=(x + 1) {
         for j in (y - 1)..=(y + 1) {
-            if i != x || j != y {
-                cnt += grid[i][j];
-            }
+            cnt += grid.get(i).and_then(|row| row.get(j)).unwrap_or(&0);
         }
     }
 
+    cnt -= grid[x][y];
     cnt
 }
 
