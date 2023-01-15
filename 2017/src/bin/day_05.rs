@@ -31,7 +31,7 @@ fn p2(input: &mut [i32]) -> usize {
 }
 
 fn main() {
-    let mut input: Vec<i32> = fs::read_to_string("input/d5.txt")
+    let mut input: Vec<_> = fs::read_to_string("input/d5.txt")
         .unwrap()
         .lines()
         .flat_map(|s| s.parse())

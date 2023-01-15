@@ -30,7 +30,7 @@ fn p2(digits: &[u32]) -> u32 {
 }
 
 pub fn main() {
-    let digits: Vec<u32> = fs::read("input/d1.txt")
+    let digits: Vec<_> = fs::read("input/d1.txt")
         .unwrap()
         .iter()
         .flat_map(|&b| char::to_digit(b as char, 10))

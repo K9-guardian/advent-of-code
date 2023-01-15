@@ -33,7 +33,7 @@ fn p2(input: &[usize]) -> usize {
     let mut rc = Rc::new(current_state.clone());
 
     while states.insert(rc.clone()) {
-        history.push(rc.clone());
+        history.push(rc);
 
         let (mut index, mut blocks) = current_state
             .iter()
@@ -58,7 +58,7 @@ fn p2(input: &[usize]) -> usize {
 }
 
 fn main() {
-    let input: Vec<usize> = fs::read_to_string("input/d6.txt")
+    let input: Vec<_> = fs::read_to_string("input/d6.txt")
         .unwrap()
         .split_whitespace()
         .flat_map(|s| s.parse())
