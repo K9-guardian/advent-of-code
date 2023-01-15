@@ -34,7 +34,7 @@ fn main() {
     let mut input: Vec<i32> = fs::read_to_string("input/d5.txt")
         .unwrap()
         .lines()
-        .map(|s| s.parse().unwrap())
+        .flat_map(|s| s.parse())
         .collect();
     dbg!(p1(&mut input.clone()));
     dbg!(p2(&mut input));

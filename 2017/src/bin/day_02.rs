@@ -4,7 +4,7 @@ pub fn p1(input: &str) -> usize {
     input
         .lines()
         .map(|row| {
-            let nums = row.split_whitespace().map(|s| s.parse::<usize>().unwrap());
+            let nums = row.split_whitespace().flat_map(|s| s.parse::<usize>());
             nums.clone().max().unwrap() - nums.min().unwrap()
         })
         .sum()
@@ -16,7 +16,7 @@ pub fn p2(input: &str) -> usize {
         .map(|row| {
             let nums: Vec<_> = row
                 .split_whitespace()
-                .map(|s| s.parse::<usize>().unwrap())
+                .flat_map(|s| s.parse::<usize>())
                 .collect();
             for i in 0..nums.len() {
                 for j in (i + 1)..nums.len() {
