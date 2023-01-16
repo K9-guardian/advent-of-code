@@ -32,7 +32,7 @@ fn p2(input: &[usize]) -> usize {
 
     let mut rc = Rc::new(current_state.clone());
 
-    while states.insert(rc.clone()) {
+    while states.insert(Rc::clone(&rc)) {
         history.push(rc);
 
         let (mut index, mut blocks) = current_state
@@ -54,14 +54,14 @@ fn p2(input: &[usize]) -> usize {
         rc = Rc::new(current_state.clone());
     }
 
-    history.iter().rev().take_while(|v| **v != rc).count() + 1
+    history.into_iter().rev().take_while(|v| *v != rc).count() + 1
 }
 
 fn main() {
     let input: Vec<_> = fs::read_to_string("input/d6.txt")
         .unwrap()
         .split_whitespace()
-        .flat_map(|s| s.parse())
+        .map(|s| s.parse().unwrap())
         .collect();
     dbg!(p1(&input));
     dbg!(p2(&input));

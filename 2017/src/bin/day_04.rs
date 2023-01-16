@@ -17,19 +17,19 @@ fn p2(input: &str) -> usize {
         .lines()
         .map(|s| {
             s.split_whitespace().map(|w| {
-                let mut map = [0; 26];
+                let mut chars = [0; 26];
 
                 for c in w.chars() {
-                    map[c as usize - 'a' as usize] += 1;
+                    chars[c as usize - 'a' as usize] += 1;
                 }
 
-                map
+                chars
             })
         })
-        .filter(|ms| {
-            ms.clone()
+        .filter(|ws| {
+            ws.clone()
                 .enumerate()
-                .all(|(i, x)| !ms.clone().skip(i + 1).any(|y| x == y))
+                .all(|(i, x)| !ws.clone().skip(i + 1).any(|y| x == y))
         })
         .count()
 }

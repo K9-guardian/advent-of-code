@@ -33,7 +33,7 @@ pub fn main() {
     let digits: Vec<_> = fs::read("input/d1.txt")
         .unwrap()
         .iter()
-        .flat_map(|&b| char::to_digit(b as char, 10))
+        .map(|&b| char::to_digit(b as char, 10).unwrap())
         .collect();
     dbg!(p1(&digits));
     dbg!(p2(&digits));

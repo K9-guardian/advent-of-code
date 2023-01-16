@@ -15,9 +15,11 @@ fn p1(input: usize) -> usize {
 }
 
 fn p2(input: usize) -> usize {
-    let mut grid = vec![vec![0; 100]; 100];
+    const SIZE: usize = 10;
 
-    let (mut x, mut y) = (50, 50);
+    let mut grid = vec![vec![0; SIZE]; SIZE];
+
+    let (mut x, mut y) = (SIZE / 2, SIZE / 2);
     let mut shift = 2;
 
     let directions = [(0, -1), (-1, 0), (0, 1), (1, 0)];
