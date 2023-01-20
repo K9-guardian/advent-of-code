@@ -22,14 +22,14 @@ impl std::str::FromStr for Data {
                     caps = re.captures(left).unwrap();
 
                     graph.insert(
-                        String::from(&caps[1]),
+                        caps[1].to_string(),
                         right.split(", ").map(String::from).collect(),
                     );
                 }
                 None => caps = re.captures(l).unwrap(),
             };
 
-            weights.insert(String::from(&caps[1]), caps[2].parse().unwrap());
+            weights.insert(caps[1].to_string(), caps[2].parse().unwrap());
         }
 
         Ok(Data(graph, weights))
@@ -59,7 +59,7 @@ fn p2(input: &Data) -> String {
             Some(neighbors) => {
                 for nbr in neighbors {
                     let n = solve(graph, weights, sums, &nbr)?;
-                    sums.insert(String::from(nbr), n);
+                    sums.insert(nbr.to_string(), n);
                 }
 
                 if !neighbors.iter().map(|nbr| sums[nbr]).all_equal() {
@@ -70,7 +70,7 @@ fn p2(input: &Data) -> String {
                         .collect())
                 } else {
                     let w = neighbors.iter().map(|nbr| sums[nbr]).sum::<usize>() + weights[node];
-                    sums.insert(String::from(node), w);
+                    sums.insert(node.to_string(), w);
                     Ok(w)
                 }
             }
