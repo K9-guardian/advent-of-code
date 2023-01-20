@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fs, rc::Rc};
+use std::{collections::HashSet, rc::Rc};
 
 fn p1(input: &[usize]) -> usize {
     let mut states = HashSet::new();
@@ -58,7 +58,7 @@ fn p2(input: &[usize]) -> usize {
 }
 
 fn main() {
-    let input: Vec<_> = fs::read_to_string("input/d6.txt")
+    let input: Vec<_> = std::fs::read_to_string("input/d6.txt")
         .unwrap()
         .split_whitespace()
         .map(|s| s.parse().unwrap())

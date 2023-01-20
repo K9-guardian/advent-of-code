@@ -1,5 +1,3 @@
-use std::fs;
-
 fn p1(input: &mut [i32]) -> usize {
     let mut ptr: i32 = 0;
     let mut steps = 0;
@@ -31,7 +29,7 @@ fn p2(input: &mut [i32]) -> usize {
 }
 
 fn main() {
-    let mut input: Vec<_> = fs::read_to_string("input/d5.txt")
+    let mut input: Vec<_> = std::fs::read_to_string("input/d5.txt")
         .unwrap()
         .lines()
         .map(|s| s.parse().unwrap())

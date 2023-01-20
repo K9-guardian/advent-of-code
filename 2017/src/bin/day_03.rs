@@ -1,5 +1,3 @@
-use std::fs;
-
 fn p1(input: usize) -> usize {
     let (mut level, mut index) = (0, 1);
 
@@ -62,7 +60,10 @@ fn sum_neighbors(grid: &[Vec<usize>], x: usize, y: usize) -> usize {
 }
 
 fn main() {
-    let input: usize = fs::read_to_string("input/d3.txt").unwrap().parse().unwrap();
+    let input: usize = std::fs::read_to_string("input/d3.txt")
+        .unwrap()
+        .parse()
+        .unwrap();
     dbg!(p1(input));
     dbg!(p2(input));
 }

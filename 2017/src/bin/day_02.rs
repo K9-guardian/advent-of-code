@@ -1,5 +1,3 @@
-use std::fs;
-
 pub fn p1(input: &str) -> usize {
     input
         .lines()
@@ -31,7 +29,7 @@ pub fn p2(input: &str) -> usize {
 }
 
 pub fn main() {
-    let input = fs::read_to_string("input/d2.txt").unwrap();
+    let input = std::fs::read_to_string("input/d2.txt").unwrap();
     dbg!(p1(&input));
     dbg!(p2(&input));
 }

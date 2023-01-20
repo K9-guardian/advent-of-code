@@ -1,5 +1,3 @@
-use std::fs;
-
 fn p1(digits: &[u32]) -> u32 {
     let mut cnt = 0;
 
@@ -30,7 +28,7 @@ fn p2(digits: &[u32]) -> u32 {
 }
 
 pub fn main() {
-    let digits: Vec<_> = fs::read("input/d1.txt")
+    let digits: Vec<_> = std::fs::read("input/d1.txt")
         .unwrap()
         .iter()
         .map(|&b| char::to_digit(b as char, 10).unwrap())
