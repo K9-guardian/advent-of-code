@@ -133,7 +133,7 @@
 (defn- single-parse [forest label]
   (letfn [(walk [label]
             (loop [label label lst ()]
-              (if-let [[{{[lhs _] :rule pos :pos} :label :as left} right] (first (forest label))]
+              (when-let [[{{[lhs _] :rule pos :pos} :label :as left} right] (first (forest label))]
                 (if (zero? pos)
                   [lhs (cons right lst)]
                   (recur left (cons right lst))))))
