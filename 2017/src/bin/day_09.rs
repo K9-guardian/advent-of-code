@@ -5,7 +5,7 @@ fn p1(input: &str) -> usize {
     let garbage = Regex::new(r"<.*?>").unwrap();
 
     let clean0 = cancel.replace_all(input, "");
-    let clean = garbage.replace_all(&clean0, "").replace(",", "");
+    let clean = garbage.replace_all(&clean0, "").replace(',', "");
 
     let mut score = 0;
     let mut level = 0;
