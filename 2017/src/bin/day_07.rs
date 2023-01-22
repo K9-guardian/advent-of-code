@@ -1,9 +1,12 @@
 use itertools::Itertools;
 use regex::Regex;
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
-type Graph = HashMap<String, HashSet<String>>;
-type Weights = HashMap<String, usize>;
+type Graph = HashMap<Rc<String>, HashSet<Rc<String>>>;
+type Weights = HashMap<Rc<String>, usize>;
 
 struct Data(Graph, Weights);
 
@@ -15,70 +18,71 @@ impl std::str::FromStr for Data {
         let re = Regex::new(r"(\w+) \((\d+)\)").unwrap();
 
         for l in s.lines() {
-            let caps;
+            let (caps, rc);
 
             match l.split_once(" -> ") {
                 Some((left, right)) => {
                     caps = re.captures(left).unwrap();
+                    rc = Rc::new(caps[1].to_string());
 
                     graph.insert(
-                        caps[1].to_string(),
-                        right.split(", ").map(String::from).collect(),
+                        Rc::clone(&rc),
+                        right.split(", ").map(|s| Rc::new(s.to_string())).collect(),
                     );
                 }
-                None => caps = re.captures(l).unwrap(),
+                None => {
+                    caps = re.captures(l).unwrap();
+                    rc = Rc::new(caps[1].to_string());
+                }
             };
 
-            weights.insert(caps[1].to_string(), caps[2].parse().unwrap());
+            weights.insert(Rc::clone(&rc), caps[2].parse().unwrap());
         }
 
         Ok(Data(graph, weights))
     }
 }
 
-fn p1(Data(graph, weights): &Data) -> &str {
+fn p1(Data(graph, weights): &Data) -> Rc<String> {
     for prog in weights.keys() {
         if graph.values().all(|progs| !progs.contains(prog)) {
-            return prog;
+            return Rc::clone(prog);
         }
     }
     unreachable!()
 }
 
-fn p2(input: &Data) -> String {
-    let Data(graph, weights) = input;
-    let mut sums: Weights = HashMap::new();
-
-    fn solve(
-        graph: &Graph,
-        weights: &Weights,
-        sums: &mut Weights,
-        node: &str,
-    ) -> Result<usize, String> {
-        match graph.get(node) {
-            Some(neighbors) => {
-                for nbr in neighbors {
-                    let n = solve(graph, weights, sums, &nbr)?;
-                    sums.insert(nbr.to_string(), n);
-                }
-
-                if !neighbors.iter().map(|nbr| sums[nbr]).all_equal() {
-                    // Imagine a programatic solve couldn't be me
-                    Err(neighbors
-                        .iter()
-                        .map(|nbr| format!("{:<7} {:^5} {:>5}\n", nbr, weights[nbr], sums[nbr]))
-                        .collect())
-                } else {
-                    let w = neighbors.iter().map(|nbr| sums[nbr]).sum::<usize>() + weights[node];
-                    sums.insert(node.to_string(), w);
-                    Ok(w)
-                }
+fn solve(
+    data @ Data(graph, weights): &Data,
+    sums: &mut Weights,
+    node: Rc<String>,
+) -> Result<usize, String> {
+    match graph.get(&node) {
+        Some(neighbors) => {
+            for nbr in neighbors {
+                let n = solve(data, sums, Rc::clone(nbr))?;
+                sums.insert(Rc::clone(nbr), n);
             }
-            None => Ok(weights[node]),
-        }
-    }
 
-    solve(&graph, &weights, &mut sums, &p1(input)).unwrap_err()
+            let ns = neighbors.iter().map(|nbr| sums[nbr]);
+            if !ns.clone().all_equal() {
+                // Imagine a programatic solve couldn't be me
+                Err(neighbors
+                    .iter()
+                    .map(|nbr| format!("{:<7} {:^5} {:>5}\n", nbr, weights[nbr], sums[nbr]))
+                    .collect())
+            } else {
+                let w = ns.sum::<usize>() + weights[&node];
+                sums.insert(Rc::clone(&node), w);
+                Ok(w)
+            }
+        }
+        None => Ok(weights[&node]),
+    }
+}
+
+fn p2(input: &Data) -> String {
+    solve(input, &mut HashMap::new(), Rc::clone(&p1(input))).unwrap_err()
 }
 
 fn main() {
