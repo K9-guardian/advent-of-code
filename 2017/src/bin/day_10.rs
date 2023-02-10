@@ -22,18 +22,14 @@ fn p1(input: &str) -> usize {
 }
 
 fn p2(input: &str) -> String {
-    let lengths: Vec<usize> = input
-        .bytes()
-        .chain(vec![17, 31, 73, 47, 23])
-        .map(|n| n as usize)
-        .collect();
+    let lengths: Vec<_> = input.bytes().chain(vec![17, 31, 73, 47, 23]).collect();
 
     let mut circle: Vec<_> = (0..SIZE).collect();
     let (mut pos, mut skip) = (0, 0);
 
     for _ in 0..64 {
         for &n in &lengths {
-            knot_hash(&mut circle, n, &mut pos, &mut skip);
+            knot_hash(&mut circle, n as usize, &mut pos, &mut skip);
         }
     }
 
