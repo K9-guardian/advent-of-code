@@ -1,25 +1,24 @@
-:- use_foreign_library(shared/hash_helper).
+:- use_foreign_library(share/hash_helper).
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(lib/util).
-:- use_module(library(md5)).
 
-data_char(D, C) :-
-    md5_hash(D, H, []),
-    atom_concat('00000', S, H),
-    atom_chars(S, [C|_]).
+% data_char(D, C) :-
+%     md5_hash(D, H, []),
+%     atom_concat('00000', S, H),
+%     atom_chars(S, [C|_]).
 
-p1(S) :-
-    phrase_from_file(string(ID), 'input/d5.txt'),
-    once(findnsols(8, Nonce, prefix_data_nonce("00000", ID, Nonce), Nonces)),
-    maplist(data_char of append(ID), Nonces, S).
+% p1(S) :-
+%     phrase_from_file(string(ID), 'input/d5.txt'),
+%     once(findnsols(8, Nonce, prefix_data_nonce("00000", ID, Nonce), Nonces)),
+%     maplist(data_char of append(ID), Nonces, S).
 
-p2(S) :-
-    phrase_from_file(string(ID), 'input/d5.txt'),
-    append(ID, Nonce, Data),
-    functor(Passwd, p, 8),
-    n_data_passwd(0, Data-Nonce, Passwd),
-    Passwd =.. [_|S].
+% p2(S) :-
+%     phrase_from_file(string(ID), 'input/d5.txt'),
+%     append(ID, Nonce, Data),
+%     functor(Passwd, p, 8),
+%     n_data_passwd(0, Data-Nonce, Passwd),
+%     Passwd =.. [_|S].
 
 % :- use_module(lib/double_quotes).
 % :- use_module(lib/pio).
