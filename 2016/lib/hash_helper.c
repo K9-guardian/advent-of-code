@@ -3,92 +3,63 @@
 #include <stdio.h>
 #include <string.h>
 
-// check that first n characters of digest are 0s
-int prefix_match(int n, char *digest) {
-    for (int i = 0; i < n; ++i) {
-        if (digest[i] != 0)
-            return 0;
+// md5(data + nonce) = prefix + suffix
+foreign_t
+pl_data_prefix_suffix(term_t data_t, term_t prefix_t, term_t suffix_t, control_t handle) {
+    size_t *nonce;
+
+    switch (PL_foreign_control(handle)) {
+        case PL_FIRST_CALL:
+            nonce = malloc(sizeof(*nonce));
+            *nonce = 0;
+            break;
+        case PL_REDO:
+            nonce = PL_foreign_context_address(handle);
+            break;
+        case PL_PRUNED:
+            nonce = PL_foreign_context_address(handle);
+            free(nonce);
+            PL_succeed;
     }
 
-    return 1;
-}
+    char *copy;
 
-// md5(data + nonce) = (n 0s) + suffix
-// foreign_t
-// pl_data_n_suffix(term_t data_t, term_t n_t, term_t suffix_t, control_t handle) {
-//     int *nonce;
-// 
-//     switch (PL_foreign_control(handle)) {
-//         case PL_FIRST_CALL:
-//             nonce = malloc(sizeof(*nonce));
-//             *nonce = 0;
-//             break;
-//         case PL_REDO:
-//             nonce = PL_foreign_context_address(handle);
-//             break;
-//         case PL_PRUNED:
-//             nonce = PL_foreign_context_address(handle);
-//             free(nonce);
-//             PL_succeed;
-//     }
-// 
-//     char *data; PL_get_list_chars(data_t, &data, 0);
-// 
-//     int n; PL_get_integer(n_t, &n);
-// 
-//     unsigned char digest[16];
-//     struct MD5Context ctx;
-// 
-//     do {
-//         char *str = malloc(strlen(data) + 10 + 1);
-//         sprintf(str, "%s%d", data, *nonce);
-// 
-//         MD5Init(&ctx);
-//         MD5Update(&ctx, str, strlen(str));
-//         MD5Final(digest, &ctx);
-// 
-//         (*nonce)++;
-//     } while (!prefix_match(n, digest));
-// 
-//     char suffix[16 - n];
-//     for (int i = n; i < 16; ++i) {
-//         suffix[i - n] = digest[i];
-//     }
-//     PL_unify_list_chars(suffix_t, suffix);
-// 
-//     PL_retry_address(nonce);
-// }
+    PL_get_list_chars(data_t, &copy, 0);
+    char* data = malloc(strlen(copy) + 1);
+    strcpy(data, copy);
 
-foreign_t pl_data_n_suffix(term_t data_t, term_t n_t, term_t suffix_t) {
-    int nonce = 0;
+    PL_get_list_chars(prefix_t, &copy, 0);
+    char *prefix = malloc(strlen(copy) + 1);
+    strcpy(prefix, copy);
 
-    char *data; PL_get_list_chars(data_t, &data, 0);
-
-    int n; PL_get_integer(n_t, &n);
-
-    MD5_CTX ctx; unsigned char digest[16];
-    char *str = malloc(strlen(data) + 10 + 1);
+    MD5_CTX ctx; uint8_t digest[16]; char md5string[33];
+    char *str = malloc(strlen(data) + 20 + 1);
 
     do {
-        sprintf(str, "%s%d", data, nonce);
+        sprintf(str, "%s%ld", data, *nonce);
 
         MD5Init(&ctx);
         MD5Update(&ctx, str, strlen(str));
         MD5Final(digest, &ctx);
 
-        nonce++;
-    } while (!prefix_match(n, digest));
+        for(int i = 0; i < 16; ++i)
+            sprintf(&md5string[i*2], "%02x", digest[i]);
 
-    char suffix[16 - n];
-    for (int i = n; i < 16; ++i) {
-        suffix[i - n] = digest[i];
+        (*nonce)++;
+    } while (strncmp(prefix, md5string, strlen(prefix)) != 0);
+
+    size_t n = strlen(prefix);
+    char suffix[33 - n];
+    for (size_t i = n; i < 33; ++i) {
+        suffix[i - n] = md5string[i];
     }
     PL_unify_list_chars(suffix_t, suffix);
 
-    PL_succeed;
+    free(str); free(data); free(prefix);
+
+    PL_retry_address(nonce);
 }
 
 install_t install_hash_helper() {
-    // PL_register_foreign("data_n_suffix", 3, pl_data_n_suffix, 0b00100);
-    PL_register_foreign("data_n_suffix", 3, pl_data_n_suffix, 0);
+    PL_register_foreign("data_prefix_suffix", 3, pl_data_prefix_suffix, 0b00100);
 }
