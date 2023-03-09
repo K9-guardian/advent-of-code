@@ -2,7 +2,9 @@
 
 Solutions in SWI-Prolog.
 
-Usage: Install the following packages.
+Usage: `make`
+
+Install the following packages.
 
 ```prolog
 :- pack_install(edcg).
