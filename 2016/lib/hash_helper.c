@@ -140,6 +140,13 @@ foreign_t pl_salt_stretch_key(term_t salt_t, term_t stretch_t, term_t key_t, con
             break;
         case PL_REDO:
             st = PL_foreign_context_address(handle);
+
+            sprintf(str, "%s%ld", salt, st->nonce + 1001);
+            md5(&ctx, stretch, str, digest, md5str);
+            strcpy(st->buf[st->idx], md5str);
+            st->idx = (st->idx + 1) % 1001;
+            st->nonce++;
+
             break;
         case PL_PRUNED:
             st = PL_foreign_context_address(handle);
@@ -157,12 +164,6 @@ foreign_t pl_salt_stretch_key(term_t salt_t, term_t stretch_t, term_t key_t, con
     }
 
     PL_unify_uint64(key_t, st->nonce);
-
-    sprintf(str, "%s%ld", salt, st->nonce + 1001);
-    md5(&ctx, stretch, str, digest, md5str);
-    strcpy(st->buf[st->idx], md5str);
-    st->idx = (st->idx + 1) % 1001;
-    st->nonce++;
 
     PL_free(salt);
     PL_free(str);
