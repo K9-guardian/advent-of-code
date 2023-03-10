@@ -2,7 +2,6 @@
 :- use_module(lib/double_quotes).
 :- use_module(lib/pio).
 :- use_module(lib/util).
-:- use_module(library(md5)).
 
 p1(S) :-
     phrase_from_file(string(Salt), 'input/d14.txt'),
