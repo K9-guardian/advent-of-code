@@ -98,8 +98,6 @@ int valid_key(STATE *st) {
             if (hash[j] == repeat &&
                 hash[j - 4] == hash[j - 3] && hash[j - 3] == hash[j - 2] &&
                 hash[j - 2] == hash[j - 1] && hash[j - 1] == hash[j]) {
-                /* printf("%ld %ld %s %ld %s\n", st->idx, st->nonce, st->buf[st->idx], st->nonce + shift, hash); */
-                /* fflush(stdout); */
                 return 1;
             }
         }
