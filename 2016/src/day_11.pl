@@ -5,8 +5,6 @@
 :- use_module(library(pairs)).
 :- use_module(library(ordsets)).
 
-:- set_prolog_flag(optimise, true).
-
 % I'd rather not parse this.
 
 sample([[chip-hydrogen, chip-lithium],
