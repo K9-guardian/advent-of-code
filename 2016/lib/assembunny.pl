@@ -73,8 +73,7 @@ edcg:acc_info(instructions,
               K-(V0-V),
               Instrs0-_,
               Instrs-Optd,
-              (nth1(K, Instrs0, V0, Instrs, V),
-               phrase(instrs_optimized_(Instrs), Optd))).
+              (nth1(K, Instrs0, V0, Instrs, V), phrase(instrs_optimized_(Instrs), Optd))).
 edcg:acc_info(registers, K-(V0-V), Regs0, Regs, selectd(K-V0, Regs0, K-V, Regs)).
 edcg:acc_info(output, X, _, X, true, 1, _).
 
