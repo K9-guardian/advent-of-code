@@ -69,40 +69,50 @@ foreign_t pl_data_prefix_suffix(term_t data_t, term_t prefix_t, term_t suffix_t,
 }
 
 typedef struct {
-    char buf[1001][33];
-    size_t idx;
     size_t nonce;
+    char hash[33];
+    size_t valid_nonces[16];
 } STATE;
 
-int valid_key(STATE *st) {
-    char *hash = st->buf[st->idx];
-    char repeat;
+size_t hex_to_idx(char hex) {
+    switch (hex) {
+        case '0': return 0;
+        case '1': return 1;
+        case '2': return 2;
+        case '3': return 3;
+        case '4': return 4;
+        case '5': return 5;
+        case '6': return 6;
+        case '7': return 7;
+        case '8': return 8;
+        case '9': return 9;
+        case 'a': return 10;
+        case 'b': return 11;
+        case 'c': return 12;
+        case 'd': return 13;
+        case 'e': return 14;
+        case 'f': return 15;
+    }
+}
 
-    // ...AAA...
-    for (size_t i = 2; i < 33; ++i) {
-        if (hash[i - 2] == hash[i - 1] && hash[i - 1] == hash[i]) {
-            repeat = hash[i];
-            break;
+void five_in_row(size_t *valid_nonces, char *hash, size_t nonce) {
+    for (size_t i = 4; i < 33; ++i) {
+        if (hash[i - 4] == hash[i - 3] && hash[i - 3] == hash[i - 2] &&
+            hash[i - 2] == hash[i - 1] && hash[i - 1] == hash[i]) {
+            size_t idx = hex_to_idx(hash[i]);
+            valid_nonces[idx] = nonce;
         }
     }
+}
 
-    if (repeat == 0) return 0;
+int valid_key(STATE *st) {
+    char *hash = st->hash;
 
-    // iterate over buf
-    size_t shift = 1;
-    for (size_t i = (st->idx + 1) % 1001; i != st->idx; i = (i + 1) % 1001) {
-        hash = st->buf[i];
-
-        // ...AAAAA...
-        for (size_t j = 4; j < 33; ++j) {
-            if (hash[j] == repeat &&
-                hash[j - 4] == hash[j - 3] && hash[j - 3] == hash[j - 2] &&
-                hash[j - 2] == hash[j - 1] && hash[j - 1] == hash[j]) {
-                return 1;
-            }
+    for (size_t i = 2; i < 33; ++i) {
+        if (hash[i - 2] == hash[i - 1] && hash[i - 1] == hash[i]) {
+            size_t idx = hex_to_idx(hash[i]);
+            return st->valid_nonces[idx] > st->nonce;
         }
-
-        shift++;
     }
 
     return 0;
@@ -127,13 +137,15 @@ foreign_t pl_salt_stretch_key(term_t salt_t, term_t stretch_t, term_t key_t, con
         case PL_FIRST_CALL:
             st = PL_malloc(sizeof(*st));
 
-            for (size_t i = 0; i < 1001; ++i) {
+            for (size_t i = 1; i < 1001; ++i) {
                 sprintf(str, "%s%ld", salt, i);
                 md5(&ctx, stretch, str, digest, md5str);
-                strcpy(st->buf[i], md5str);
+                five_in_row(st->valid_nonces, md5str, i);
             }
-            st->idx = 0;
+
             st->nonce = 0;
+            sprintf(str, "%s%ld", salt, st->nonce);
+            md5(&ctx, stretch, str, digest, st->hash);
 
             break;
         case PL_REDO:
@@ -141,9 +153,10 @@ foreign_t pl_salt_stretch_key(term_t salt_t, term_t stretch_t, term_t key_t, con
 
             sprintf(str, "%s%ld", salt, st->nonce + 1001);
             md5(&ctx, stretch, str, digest, md5str);
-            strcpy(st->buf[st->idx], md5str);
-            st->idx = (st->idx + 1) % 1001;
+            five_in_row(st->valid_nonces, md5str, st->nonce + 1001);
             st->nonce++;
+            sprintf(str, "%s%ld", salt, st->nonce);
+            md5(&ctx, stretch, str, digest, st->hash);
 
             break;
         case PL_PRUNED:
@@ -155,10 +168,10 @@ foreign_t pl_salt_stretch_key(term_t salt_t, term_t stretch_t, term_t key_t, con
     while (!valid_key(st)) {
         sprintf(str, "%s%ld", salt, st->nonce + 1001);
         md5(&ctx, stretch, str, digest, md5str);
-        strcpy(st->buf[st->idx], md5str);
-
-        st->idx = (st->idx + 1) % 1001;
+        five_in_row(st->valid_nonces, md5str, st->nonce + 1001);
         st->nonce++;
+        sprintf(str, "%s%ld", salt, st->nonce);
+        md5(&ctx, stretch, str, digest, st->hash);
     }
 
     PL_unify_uint64(key_t, st->nonce);
