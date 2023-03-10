@@ -4,8 +4,6 @@
 :- use_module(library(edcg)).
 :- use_module(library(lazy_lists)).
 
-:- set_prolog_flag(optimise, true).
-
 % Precompute input and inverted input.
 
 :- table input/1, input_length/1, abdb_length/1, input_inverted/1, input_parity/1.
