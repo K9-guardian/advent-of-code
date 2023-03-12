@@ -11,16 +11,17 @@ fn p1(step: usize) -> usize {
 }
 
 fn p2(step: usize) -> usize {
-    let mut idx = 0;
-    let mut buf = Vec::with_capacity(50_000_001);
-    buf.push(0);
+    let (mut idx, mut size, mut ret) = (0, 1, 0);
 
     for i in 1..=50_000_000 {
-        idx = (idx + step + 1) % buf.len();
-        buf.insert(idx, i);
+        idx = (idx + step + 1) % size;
+        if idx == 0 {
+            ret = i;
+        }
+        size += 1;
     }
 
-    buf[(idx + 1) % buf.len()]
+    ret
 }
 
 fn main() {
