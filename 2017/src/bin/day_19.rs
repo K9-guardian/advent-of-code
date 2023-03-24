@@ -1,4 +1,4 @@
-fn p1(grid: &Vec<Vec<char>>) -> String {
+fn p1(grid: &[Vec<char>]) -> String {
     let mut pos: (i32, i32) = (0, grid[0].iter().position(|&c| c == '|').unwrap() as i32);
     let mut letters = String::new();
 
@@ -46,7 +46,7 @@ fn p1(grid: &Vec<Vec<char>>) -> String {
     letters
 }
 
-fn p2(grid: &Vec<Vec<char>>) -> usize {
+fn p2(grid: &[Vec<char>]) -> usize {
     let mut pos: (i32, i32) = (0, grid[0].iter().position(|&c| c == '|').unwrap() as i32);
     let mut steps = 0;
 

@@ -82,16 +82,16 @@ fn p2(instructions: &[&str]) -> usize {
                     *snd_cnt += 1;
                 }
                 "set" => {
-                    regs.insert(v[1].to_string(), lookup(&regs, v[2]));
+                    regs.insert(v[1].to_string(), lookup(regs, v[2]));
                 }
                 "add" => {
-                    regs.insert(v[1].to_string(), lookup(&regs, v[1]) + lookup(&regs, v[2]));
+                    regs.insert(v[1].to_string(), lookup(regs, v[1]) + lookup(regs, v[2]));
                 }
                 "mul" => {
-                    regs.insert(v[1].to_string(), lookup(&regs, v[1]) * lookup(&regs, v[2]));
+                    regs.insert(v[1].to_string(), lookup(regs, v[1]) * lookup(regs, v[2]));
                 }
                 "mod" => {
-                    regs.insert(v[1].to_string(), lookup(&regs, v[1]) % lookup(&regs, v[2]));
+                    regs.insert(v[1].to_string(), lookup(regs, v[1]) % lookup(regs, v[2]));
                 }
                 "rcv" => match qr.pop_front() {
                     Some(val) => {
@@ -102,8 +102,8 @@ fn p2(instructions: &[&str]) -> usize {
                     }
                 },
                 "jgz" => {
-                    if lookup(&regs, v[1]) > 0 {
-                        *idx += lookup(&regs, v[2]) - 1;
+                    if lookup(regs, v[1]) > 0 {
+                        *idx += lookup(regs, v[2]) - 1;
                     }
                 }
                 _ => unreachable!(),
@@ -118,7 +118,7 @@ fn p2(instructions: &[&str]) -> usize {
 
     while !(q0.is_empty() && instructions[idx0 as usize].starts_with("rcv")) {
         run_prog(
-            &instructions,
+            instructions,
             &mut idx0,
             &mut regs0,
             &mut q0,
@@ -126,7 +126,7 @@ fn p2(instructions: &[&str]) -> usize {
             &mut 0,
         );
         run_prog(
-            &instructions,
+            instructions,
             &mut idx1,
             &mut regs1,
             &mut q1,

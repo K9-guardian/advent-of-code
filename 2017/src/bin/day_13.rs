@@ -65,7 +65,7 @@ fn state_loop(
 }
 
 fn p1(st: &mut State) -> i32 {
-    let end = st.firewall.0.keys().max().unwrap().clone();
+    let end = *st.firewall.0.keys().max().unwrap();
     let mut ret = 0;
 
     for _ in 0..=end {
@@ -78,7 +78,7 @@ fn p1(st: &mut State) -> i32 {
 }
 
 fn p2(st: &mut State) -> i32 {
-    let end = st.firewall.0.keys().max().unwrap().clone();
+    let end = *st.firewall.0.keys().max().unwrap();
     let mut delay = 0;
 
     'outer: loop {

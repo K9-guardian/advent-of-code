@@ -62,11 +62,11 @@ fn collision_simulate(
             positions
                 .entry(p.pos)
                 .and_modify(|v| v.push(i))
-                .or_insert(vec![i]);
+                .or_insert_with(|| vec![i]);
         }
     }
 
-    for (_, ps) in positions {
+    for ps in positions.values_mut() {
         if ps.len() > 1 {
             ps.iter().for_each(|&p| state[p] = None);
         }

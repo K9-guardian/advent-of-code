@@ -23,7 +23,7 @@ impl std::str::FromStr for Move {
                 Ok(Exchange(nums[0], nums[1]))
             }
             "p" => {
-                let parts: Vec<_> = rest.split('/').map(|s| s.bytes().nth(0).unwrap()).collect();
+                let parts: Vec<_> = rest.split('/').map(|s| s.as_bytes()[0]).collect();
                 Ok(Partner(parts[0], parts[1]))
             }
             _ => unreachable!(),
@@ -31,7 +31,7 @@ impl std::str::FromStr for Move {
     }
 }
 
-fn dance(progs: &mut Vec<u8>, moves: &Vec<Move>) {
+fn dance(progs: &mut [u8], moves: &[Move]) {
     use Move::*;
 
     for mov in moves {
@@ -47,34 +47,34 @@ fn dance(progs: &mut Vec<u8>, moves: &Vec<Move>) {
     }
 }
 
-fn p1(moves: &Vec<Move>) -> String {
+fn p1(moves: &[Move]) -> String {
     let mut progs: Vec<_> = (0..16).map(|n| n as u8 + b'a').collect();
 
-    dance(&mut progs, &moves);
+    dance(&mut progs, moves);
 
     String::from_utf8(progs).unwrap()
 }
 
-fn p2(moves: &Vec<Move>) -> String {
+fn p2(moves: &[Move]) -> String {
     let mut progs: Vec<_> = (0..16).map(|n| n as u8 + b'a').collect();
 
-    dance(&mut progs, &moves);
+    dance(&mut progs, moves);
 
     let mut order = 1;
 
     while !progs.iter().copied().eq((0..16).map(|n| n as u8 + b'a')) {
-        dance(&mut progs, &moves);
+        dance(&mut progs, moves);
         order += 1;
     }
 
     for _ in 0..order {
-        dance(&mut progs, &moves);
+        dance(&mut progs, moves);
     }
 
     let rem = 1000000000 % order;
 
     for _ in 0..rem {
-        dance(&mut progs, &moves);
+        dance(&mut progs, moves);
     }
 
     String::from_utf8(progs).unwrap()
