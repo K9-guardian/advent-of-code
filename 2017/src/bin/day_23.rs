@@ -2,14 +2,14 @@ use std::collections::HashMap;
 
 enum Atom {
     Reg(String),
-    Val(i32),
+    Val(i64),
 }
 
 impl std::str::FromStr for Atom {
     type Err = std::convert::Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s.parse::<i32>() {
+        Ok(match s.parse::<i64>() {
             Ok(val) => Atom::Val(val),
             Err(_) => Atom::Reg(s.to_string()),
         })
@@ -45,11 +45,11 @@ fn p1(instrs: &[Instr]) -> usize {
     use Atom::*;
     use Instr::*;
 
-    let mut idx: i32 = 0;
+    let mut idx: i64 = 0;
     let mut cnt = 0;
-    let mut st: HashMap<String, i32> = HashMap::new();
+    let mut st = HashMap::new();
 
-    fn lookup(st: &HashMap<String, i32>, a: &Atom) -> i32 {
+    fn lookup(st: &HashMap<String, i64>, a: &Atom) -> i64 {
         match a {
             Reg(r) => *st.get(r).unwrap_or(&0),
             Val(v) => *v,
@@ -84,19 +84,23 @@ fn p1(instrs: &[Instr]) -> usize {
     cnt
 }
 
-fn p2(instrs: &[Instr]) -> usize {
-    // Strongly hinted we can solve this analytically
-    // We see the offending line is "jnz a 2"
-    // When we have a = 0, we skip the next 6 lines and start on 9
-    // We see that we set b = 65 * 100 + 100000 and c = b + 17000
-    // TODO: Analyze the code :p
+fn p2(_instrs: &[Instr]) -> usize {
+    // From analyzing the code, we see that we want to find the numbers from 106500 and 123500 with
+    // a step of 17 that are composite.
 
-    // We can see that the only mul instruction that gets executed is on
-    // line 12 for part one.
-    // The only instruction that modifies h is "sub h -1"
-    // Thus, we want to find the number of times this instruction is run
-    // Working backwards, we see that we want g to be 0
-    0
+    let mut cnt = 0;
+
+    'outer: for i in 0..=1000 {
+        let n = 106_500 + i * 17;
+        for d in 2..n {
+            if n % d == 0 {
+                cnt += 1;
+                continue 'outer;
+            }
+        }
+    }
+
+    cnt
 }
 
 fn main() {
