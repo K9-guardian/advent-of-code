@@ -1,10 +1,18 @@
-fn p1(cmps: &mut [(usize, usize)]) -> usize {
+fn p1(cmps: &[(usize, usize)]) -> usize {
+    let bridge = Vec::new(); // should be a cons list i think
+
+    // TODO: Choose a component
+    // find another that can bridge (precompute num->bridge)
+    // wait... is this just a dfs
+    // max distance path in a graph
+    // i think we just
+
     cmps.sort();
     0
 }
 
 fn main() {
-    let mut cmps: Vec<_> = std::fs::read_to_string("input/d24.txt")
+    let cmps: Vec<_> = std::fs::read_to_string("input/d24.txt")
         .unwrap()
         .lines()
         .map(|s| {
@@ -15,5 +23,5 @@ fn main() {
             )
         })
         .collect();
-    dbg!(p1(&mut cmps.clone()));
+    dbg!(p1(&cmps));
 }
