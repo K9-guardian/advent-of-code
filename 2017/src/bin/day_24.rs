@@ -5,21 +5,26 @@ type Graph = HashMap<usize, HashSet<(usize, usize)>>;
 fn p1(grp: &Graph) -> usize {
     let mut max_strength = 0;
 
-    // TODO: stop the randomness
     fn dfs(
         grp: &Graph,
-        seen: &mut HashSet<(usize, usize)>,
+        seen: HashSet<(usize, usize)>,
         (n, m): (usize, usize),
         strength: usize,
         max_strength: &mut usize,
     ) {
         *max_strength = strength.max(*max_strength);
-        println!("{n}/{m} {strength} {max_strength}");
-        seen.insert((n, m));
+        let mut new_seen = seen;
+        new_seen.extend([(n, m), (m, n)]);
 
         for &(x, y) in &grp[&m] {
-            if !seen.contains(&(x, y)) && !seen.contains(&(y, x)) {
-                dfs(grp, seen, (x, y), strength + x + y, max_strength);
+            if !new_seen.contains(&(x, y)) {
+                dfs(
+                    grp,
+                    new_seen.clone(),
+                    (x, y),
+                    strength + x + y,
+                    max_strength,
+                );
             }
         }
     }
@@ -27,15 +32,58 @@ fn p1(grp: &Graph) -> usize {
     for &start in grp[&0].iter() {
         dfs(
             grp,
-            &mut HashSet::new(),
+            HashSet::new(),
             start,
             start.0 + start.1,
             &mut max_strength,
         );
-        println!();
     }
 
     max_strength
+}
+
+fn p2(grp: &Graph) -> usize {
+    let mut longest_bridge = Vec::new();
+
+    fn dfs(
+        grp: &Graph,
+        seen: HashSet<(usize, usize)>,
+        (n, m): (usize, usize),
+        bridge: Vec<(usize, usize)>,
+        longest_bridge: &mut Vec<(usize, usize)>,
+    ) {
+        let mut new_seen = seen;
+        new_seen.extend([(n, m), (m, n)]);
+
+        let mut new_bridge = bridge;
+        new_bridge.push((n, m));
+
+        if (new_bridge.len() > longest_bridge.len())
+            || (new_bridge.len() == longest_bridge.len()
+                && new_bridge.iter().map(|(x, y)| x + y).sum::<usize>()
+                    > longest_bridge.iter().map(|(x, y)| x + y).sum())
+        {
+            *longest_bridge = new_bridge.clone();
+        }
+
+        for &(x, y) in &grp[&m] {
+            if !new_seen.contains(&(x, y)) {
+                dfs(
+                    grp,
+                    new_seen.clone(),
+                    (x, y),
+                    new_bridge.clone(),
+                    longest_bridge,
+                );
+            }
+        }
+    }
+
+    for &start in grp[&0].iter() {
+        dfs(grp, HashSet::new(), start, Vec::new(), &mut longest_bridge);
+    }
+
+    longest_bridge.iter().map(|(x, y)| x + y).sum()
 }
 
 fn components_to_graph(cmps: &[(usize, usize)]) -> Graph {
@@ -58,7 +106,6 @@ fn components_to_graph(cmps: &[(usize, usize)]) -> Graph {
 }
 
 fn main() {
-    // let cmps: Vec<_> = std::fs::read_to_string("example.txt")
     let cmps: Vec<_> = std::fs::read_to_string("input/d24.txt")
         .unwrap()
         .lines()
@@ -72,4 +119,5 @@ fn main() {
         .collect();
     let grp = components_to_graph(&cmps);
     dbg!(p1(&grp));
+    dbg!(p2(&grp));
 }
