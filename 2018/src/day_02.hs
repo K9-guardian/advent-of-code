@@ -16,10 +16,20 @@ exactly3Letters xs = 3 `elem` vals
 
 p1 xs = length (filter exactly2Letters xs) * length (filter exactly3Letters xs)
 
--- can we use p1 here?
-p2 = undefined
+diffBy1 = diffBy1' 0
+
+diffBy1' n [] []
+  | n == 1 = True
+  | otherwise = False
+diffBy1' n (x : xs) (y : ys)
+  | x == y = diffBy1' n xs ys
+  | otherwise = diffBy1' (succ n) xs ys
+
+-- can we do better than brute force?
+p2 xs = find (uncurry diffBy1) pairs
+  where
+    pairs = [(x, y) | x <- xs, y <- xs]
 
 main = do
   input >>= print . p1
-
--- input >>= print . p2
+  input >>= print . p2
