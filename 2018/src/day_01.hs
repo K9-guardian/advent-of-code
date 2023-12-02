@@ -1,7 +1,7 @@
 module Day_01 where
 
 import Data.List
-import Data.Set qualified as Set
+import qualified Data.Set as Set
 import Text.Read
 
 input :: IO [Int]

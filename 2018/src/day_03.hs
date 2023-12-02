@@ -1,10 +1,12 @@
 module Day_03 where
 
-import Data.IntMap qualified as IntMap
+import qualified Data.IntMap as IntMap
 import Data.List
 import Data.Maybe
 import GHC.Real (infinity)
 import Text.Parsec
+import qualified Text.Parsec.Token as P
+import Text.Parsec.Language (haskellDef)
 
 size = 1000
 
@@ -17,13 +19,30 @@ data Rect = Rect
   }
   deriving (Show)
 
+lexer = P.makeTokenParser haskellDef
+natural = fromIntegral <$> P.natural lexer
+
+parseIndex = char '#' >> natural
+
+parsePosition = do
+  c <- natural
+  char ','
+  r <- natural
+  return (r, c)
+
+parseSize = do
+  w <- natural
+  char 'x'
+  h <- natural
+  return (h, w)
+
 parseRect = do
-  i <- char '#' >> many digit
-  c <- string " @ " >> many digit
-  r <- char ',' >> many digit
-  w <- string ": " >> many digit
-  h <- char 'x' >> many digit
-  return Rect {i = read i, r = read r, c = read c, h = read h, w = read w}
+  i <- parseIndex
+  string " @ "
+  (r, c) <- parsePosition
+  string ": "
+  (h, w) <- parseSize
+  return Rect {i, r, c, h, w}
 
 input :: IO (Either ParseError [Rect])
 input = mapM (parse parseRect "") . lines <$> readFile "input/d3.txt"
