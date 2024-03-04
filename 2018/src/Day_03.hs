@@ -1,12 +1,15 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# OPTIONS_GHC -Wno-missing-signatures #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+
 module Day_03 where
 
-import qualified Data.IntMap as IntMap
-import Data.List
+import Data.List (foldl', find)
 import Data.Maybe
-import GHC.Real (infinity)
 import Text.Parsec
-import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (haskellDef)
+import qualified Data.IntMap as IntMap
+import qualified Text.Parsec.Token as P
 
 size = 1000
 
@@ -26,21 +29,21 @@ parseIndex = char '#' >> natural
 
 parsePosition = do
   c <- natural
-  char ','
+  _ <- char ','
   r <- natural
   return (r, c)
 
 parseSize = do
   w <- natural
-  char 'x'
+  _ <- char 'x'
   h <- natural
   return (h, w)
 
 parseRect = do
   i <- parseIndex
-  string " @ "
+  _ <- string " @ "
   (r, c) <- parsePosition
-  string ": "
+  _ <- string ": "
   (h, w) <- parseSize
   return Rect {i, r, c, h, w}
 

@@ -1,3 +1,7 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wno-missing-signatures #-}
+{-# OPTIONS_GHC -Wno-type-defaults #-}
+
 module Day_02 where
 
 import Data.List
@@ -6,15 +10,11 @@ import qualified Data.Map as Map
 input :: IO [String]
 input = lines <$> readFile "input/d2.txt"
 
-exactly2Letters xs = 2 `elem` vals
+exactlyNLetters n xs = n `elem` vals
   where
     vals = map snd $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- xs]
 
-exactly3Letters xs = 3 `elem` vals
-  where
-    vals = map snd $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- xs]
-
-p1 xs = length (filter exactly2Letters xs) * length (filter exactly3Letters xs)
+p1 xs = length (filter (exactlyNLetters 2) xs) * length (filter (exactlyNLetters 3) xs)
 
 diffBy1 = diffBy1' 0
 
