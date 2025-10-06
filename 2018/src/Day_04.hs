@@ -1,17 +1,22 @@
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module Day_04 where
 
 import Data.Time (UTCTime)
-import Data.Time.Format.ISO8601 (FormatExtension (ExtendedFormat), ISO8601, calendarFormat, hourMinuteFormat, iso8601ParseM, utcTimeFormat, parseFormatExtension, Format (formatReadP))
+import Data.Time.Format.ISO8601 (iso8601ParseM)
 import Text.Parsec
+import Text.Parsec.String (Parser)
 
+natural :: Parser Int
+natural = read <$> many1 digit
+
+parseTimestamp :: Parser UTCTime
 parseTimestamp = do
-  calendar <- formatReadP Day
-  return calendar 
-
-test :: Maybe UTCTime
-test = iso8601ParseM "1518-09-19T00:42:00Z"
+  timestamp <- between (char '[') (char ']') (many1 (noneOf "]"))
+  maybe (fail $ "Invalid timestamp: " ++ timestamp) return $
+    let [date, hourMinute] = words timestamp
+    in iso8601ParseM $ concat [date, "T", hourMinute, ":00Z"]
 
 data Action = WakeUp | FallAsleep | BeginShift Int
 

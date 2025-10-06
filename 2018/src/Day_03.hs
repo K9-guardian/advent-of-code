@@ -7,9 +7,8 @@ module Day_03 where
 import Data.List (foldl', find)
 import Data.Maybe
 import Text.Parsec
-import Text.Parsec.Language (haskellDef)
+import Text.Parsec.String (Parser)
 import qualified Data.IntMap as IntMap
-import qualified Text.Parsec.Token as P
 
 size = 1000
 
@@ -22,8 +21,8 @@ data Rect = Rect
   }
   deriving (Show)
 
-lexer = P.makeTokenParser haskellDef
-natural = fromIntegral <$> P.natural lexer
+natural :: Parser Int
+natural = read <$> many1 digit
 
 parseIndex = char '#' >> natural
 
