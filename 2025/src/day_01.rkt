@@ -2,7 +2,7 @@
 
 (require racket/list/iteration)
 
-(define input (file->lines "../input/d1.txt"))
+(define input (file->lines "input/d1.txt"))
 
 (define (turn-dial instruction position)
   (match (regexp-match #px"([LR])(\\d+)" instruction)

@@ -10,7 +10,7 @@
     (curry map char-integer->integer)
     (curry map char->integer)
     string->list)
-   (file->lines "../input/d3.txt")
+   (file->lines "input/d3.txt")
    ;; (file->lines "../input/d3_test.txt")
    ))
 

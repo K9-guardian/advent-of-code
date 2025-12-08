@@ -2,7 +2,7 @@
 
 (require racket/list/grouping)
 
-(define input (string-split (car (file->lines "../input/d2.txt")) ","))
+(define input (string-split (car (file->lines "input/d2.txt")) ","))
 
 (define (invalid-id-p1? id)
   (and (even? (string-length id))
