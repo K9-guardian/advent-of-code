@@ -1,20 +1,20 @@
 #lang racket
 
 (require (rename-in data/integer-set
-                    (count integer-set:count)))
+                    (count integer-set-count)))
 
-(define input-file "input/d5.txt")
+(define input-string "input/d5.txt")
 
-(define input (file->lines input-file))
+(define input (file->lines input-string))
 
 (define (string->range s)
   (match (string-split s "-")
     [(list (app string->number start) (app string->number end))
      (make-range start end)]))
 
-(match-define (list ranges* ... "" ingredients* ...) input)
-(define ranges (map string->range ranges*))
-(define ingredients (map string->number ingredients*))
+(match-define (list ranges-string ... "" ingredients-string ...) input)
+(define ranges (map string->range ranges-string))
+(define ingredients (map string->number ingredients-string))
 
 (define (fresh? ingredient)
   (for/or ([r (in-list ranges)])
@@ -22,5 +22,8 @@
 
 (count fresh? ingredients)
 
-(define ingredient-set (foldl union (make-integer-set '()) ranges))
-(integer-set:count ingredient-set)
+(define ingredient-set
+  (for/fold ([fresh-ingredients (make-integer-set '())])
+            ([r (in-list ranges)])
+    (union fresh-ingredients r)))
+(integer-set-count ingredient-set)

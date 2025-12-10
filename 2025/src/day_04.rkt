@@ -1,11 +1,11 @@
 #lang racket
 
-(define input-file "input/d4.txt")
+(define input-string "input/d4.txt")
 
-(define grid (list->vector (string->list (apply string-append (file->lines input-file)))))
+(define grid (list->vector (string->list (apply string-append (file->lines input-string)))))
 
-(define width (string-length (car (file->lines input-file))))
-(define height (length (file->lines input-file)))
+(define width (string-length (car (file->lines input-string))))
+(define height (length (file->lines input-string)))
 
 (define (grid-ref grid row col)
   (vector-ref grid (+ (* row width) col)))
@@ -30,7 +30,7 @@
                        (forklift-accessible? grid i j)))
   1)
 
-(define grid* (vector-copy grid))
+(define grid-copied (vector-copy grid))
 
 (define (forklift-accessible-loop sum)
   (define forklift-accessible-rolls
@@ -38,9 +38,9 @@
                [j (in-range width)]
                #:when (and (char=? #\@ (grid-ref grid i j))
                            (forklift-accessible? grid i j)))
-      (grid-set! grid* i j #\.)
+      (grid-set! grid-copied i j #\.)
       1))
-  (vector-copy! grid 0 grid*)
+  (vector-copy! grid 0 grid-copied)
   (if (zero? forklift-accessible-rolls)
       sum
       (forklift-accessible-loop (+ forklift-accessible-rolls sum))))

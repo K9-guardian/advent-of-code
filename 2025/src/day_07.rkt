@@ -1,11 +1,11 @@
 #lang racket
 
-(define input-file "input/d7.txt")
+(define input-string "input/d7.txt")
 
-(define grid (list->vector (string->list (apply string-append (file->lines input-file)))))
+(define grid (list->vector (string->list (apply string-append (file->lines input-string)))))
 
-(define width (string-length (car (file->lines input-file))))
-(define height (length (file->lines input-file)))
+(define width (string-length (car (file->lines input-string))))
+(define height (length (file->lines input-string)))
 
 (define (grid-ref grid row col)
   (vector-ref grid (+ (* row width) col)))

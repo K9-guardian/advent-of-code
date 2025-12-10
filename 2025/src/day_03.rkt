@@ -3,7 +3,7 @@
 (define (char-integer->integer chr)
   (- chr (char->integer #\0)))
 
-(define input-file "input/d3.txt")
+(define input-string "input/d3.txt")
 
 (define input
   (map
@@ -12,7 +12,7 @@
     (curry map char-integer->integer)
     (curry map char->integer)
     string->list)
-   (file->lines input-file)))
+   (file->lines input-string)))
 
 (define (largest-voltage-p1 bank)
   (define second-voltage (sub1 (vector-length bank)))

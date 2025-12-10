@@ -3,24 +3,27 @@
 (define (transpose lst)
   (apply map list lst))
 
-(define input-file "input/d6.txt")
+(define input-string "input/d6.txt")
 
-(define input (map string-split (file->lines input-file)))
+(define input (map string-split (file->lines input-string)))
 
 (for/sum ([problem (transpose input)])
   (match problem
-    [(list nums* ... "+") (apply + (map string->number nums*))]
-    [(list nums* ... "*") (apply * (map string->number nums*))]))
+    [(list nums-string ... "+")
+     (apply + (map string->number nums-string))]
+    [(list nums-string ... "*")
+     (apply * (map string->number nums-string))]))
 
-(define (spaces->commas lst)
+(define (all-spaces->commas lst)
   (if (andmap (curry char=? #\space) lst)
-      (for/list ([_ (in-list lst)]) #\,)
+      (for/list ([_ (in-list lst)])
+        #\,)
       lst))
 
 (define problems (map (curryr string-split ",")
                       (map list->string
                            (transpose
-                            (map spaces->commas
+                            (map all-spaces->commas
                                  (transpose
                                   (map string->list (file->lines "input/d6.txt"))))))))
 
