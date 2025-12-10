@@ -3,6 +3,8 @@
 (define (char-integer->integer chr)
   (- chr (char->integer #\0)))
 
+(define input-file "input/d3.txt")
+
 (define input
   (map
    (compose1
@@ -10,9 +12,7 @@
     (curry map char-integer->integer)
     (curry map char->integer)
     string->list)
-   (file->lines "input/d3.txt")
-   ;; (file->lines "../input/d3_test.txt")
-   ))
+   (file->lines input-file)))
 
 (define (largest-voltage-p1 bank)
   (define second-voltage (sub1 (vector-length bank)))
@@ -39,5 +39,5 @@
                (vector->list
                 (vector-map (curry vector-ref bank) voltages))))))
 
-(println (apply + (map largest-voltage-p1 input)))
-(println (apply + (map largest-voltage-p2 input)))
+(apply + (map largest-voltage-p1 input))
+(apply + (map largest-voltage-p2 input))

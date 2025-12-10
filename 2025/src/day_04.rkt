@@ -1,15 +1,17 @@
 #lang racket
 
-(define grid (list->vector (string->list (apply string-append (file->lines "input/d4.txt")))))
+(define input-file "input/d4.txt")
 
-(define width (string-length (car (file->lines "input/d4.txt"))))
-(define height (length (file->lines "input/d4.txt")))
+(define grid (list->vector (string->list (apply string-append (file->lines input-file)))))
+
+(define width (string-length (car (file->lines input-file))))
+(define height (length (file->lines input-file)))
 
 (define (grid-ref grid row col)
-  (vector-ref grid (+ (* row height) col)))
+  (vector-ref grid (+ (* row width) col)))
 
 (define (grid-set! grid row col v)
-  (vector-set! grid (+ (* row height) col) v))
+  (vector-set! grid (+ (* row width) col) v))
 
 (define (forklift-accessible? grid row col)
   (define adjacent-rolls
@@ -22,12 +24,11 @@
       1))
   (< adjacent-rolls 4))
 
-(println
- (for*/sum ([i (in-range height)]
-            [j (in-range width)]
-            #:when (and (char=? #\@ (grid-ref grid i j))
-                        (forklift-accessible? grid i j)))
-   1))
+(for*/sum ([i (in-range height)]
+           [j (in-range width)]
+           #:when (and (char=? #\@ (grid-ref grid i j))
+                       (forklift-accessible? grid i j)))
+  1)
 
 (define grid* (vector-copy grid))
 
@@ -44,4 +45,4 @@
       sum
       (forklift-accessible-loop (+ forklift-accessible-rolls sum))))
 
-(println (forklift-accessible-loop 0))
+(forklift-accessible-loop 0)

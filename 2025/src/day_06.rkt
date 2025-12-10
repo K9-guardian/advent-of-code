@@ -3,7 +3,9 @@
 (define (transpose lst)
   (apply map list lst))
 
-(define input (map string-split (file->lines "input/d6.txt")))
+(define input-file "input/d6.txt")
+
+(define input (map string-split (file->lines input-file)))
 
 (for/sum ([problem (transpose input)])
   (match problem
@@ -12,7 +14,7 @@
 
 (define (spaces->commas lst)
   (if (andmap (curry char=? #\space) lst)
-      (build-list (length lst) (const #\,))
+      (for/list ([_ (in-list lst)]) #\,)
       lst))
 
 (define problems (map (curryr string-split ",")
