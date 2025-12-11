@@ -52,3 +52,7 @@
        (filter valid?)
        second
        (apply str)))
+
+(comment
+  (p1 input)
+  (p2 input))

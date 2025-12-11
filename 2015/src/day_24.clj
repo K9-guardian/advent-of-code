@@ -30,3 +30,7 @@
     (->> min-length-subsets
          (map (partial apply *))
          (apply min))))
+
+(comment
+  (p1 input)
+  (p2 input))

@@ -73,3 +73,7 @@
          (filter (partial (complement win?) boss))
          (map (juxt identity cost))
          (apply max-key second))))
+
+(comment
+  (p1 input)
+  (p2 input))

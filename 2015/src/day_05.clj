@@ -47,3 +47,7 @@
        str/split-lines
        (filter nice-p2?)
        count))
+
+(comment
+  (p1 input)
+  (p2 input))

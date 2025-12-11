@@ -35,3 +35,7 @@
     (->> paths
          (map (partial path->distance m))
          (apply max))))
+
+(comment
+  (p1 input)
+  (p2 input))

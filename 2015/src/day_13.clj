@@ -46,3 +46,7 @@
     (->> arrangements
          (map (partial arrangement->happiness m))
          (apply max))))
+
+(comment
+  (p1 input)
+  (p2 input))

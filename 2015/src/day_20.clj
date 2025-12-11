@@ -25,3 +25,7 @@
                       (m n))))
           (int-map/int-map 1 [1])
           (iterate inc 1)))
+
+(comment
+  (p1 input)
+  (p2 input))

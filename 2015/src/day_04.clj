@@ -29,3 +29,7 @@
                (pmap (comp budget-md5-6-zeros-prefix?
                            (partial str input))))]
     (inc (.indexOf l true))))
+
+(comment
+  (p1 input)
+  (p2 input))

@@ -17,3 +17,7 @@
 (defn p2 [input]
   (let [s (->> input parse-input (iterate next-turn))]
     (count (nth s 50))))
+
+(comment
+  (p1 input)
+  (p2 input))

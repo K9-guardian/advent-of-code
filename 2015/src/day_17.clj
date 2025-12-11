@@ -29,3 +29,7 @@
        (partition-by count)
        first
        count))
+
+(comment
+  (p1 input)
+  (p2 input))

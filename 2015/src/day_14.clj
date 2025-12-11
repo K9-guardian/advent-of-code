@@ -48,3 +48,7 @@
     (->> deer
          (map (juxt :name :points))
          (apply max-key second))))
+
+(comment
+  (p1 input)
+  (p2 input))

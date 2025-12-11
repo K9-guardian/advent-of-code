@@ -54,3 +54,7 @@
     (doseq [{act :action [x1 y1] :from-range [x2 y2] :to-range} parsed]
       (update!-grid init x1 x2 y1 y2 act))
     (areduce init i ret 0 (+ ret (aget init i)))))
+
+(comment
+  (p1 input)
+  (p2 input))

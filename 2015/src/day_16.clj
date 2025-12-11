@@ -49,3 +49,7 @@
         (->> (map (maybe-aunt-p2? scan)))
         (.indexOf true)
         inc)))
+
+(comment
+  (p1 input)
+  (p2 input))

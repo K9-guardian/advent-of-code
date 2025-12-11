@@ -43,3 +43,7 @@
        str/split-lines
        (mapv parse-line)
        (solve {"a" 1 "b" 0})))
+
+(comment
+  (p1 input)
+  (p2 input))

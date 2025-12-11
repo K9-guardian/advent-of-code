@@ -17,3 +17,7 @@
                  identity)
        (filter number?)
        (apply +)))
+
+(comment
+  (p1 input)
+  (p2 input))

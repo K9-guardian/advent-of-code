@@ -24,3 +24,7 @@
        str/split-lines
        (map #(- (string->num-chars-for-encoding %) (count %)))
        (reduce +)))
+
+(comment
+  (p1 input)
+  (p2 input))

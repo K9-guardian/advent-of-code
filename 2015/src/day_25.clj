@@ -17,3 +17,7 @@
   (let [init 20151125
         n (-> input parse-input coord->diagonal)]
     (nth (iterate next-code init) (dec n))))
+
+(comment
+  (p1 input)
+  (p2 input))

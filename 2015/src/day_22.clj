@@ -95,3 +95,7 @@
     (->> (dijkstra (priority-queue init 0) {init 0})
          (filter (comp #(<= (-> % :boss :hp) 0) key))
          (apply min-key val))))
+
+(comment
+  (p1 input)
+  (p2 input))

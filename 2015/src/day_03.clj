@@ -21,7 +21,7 @@
   (->> input
        (partition 2)
        (reduce (fn [{:keys [santa-loc robo-loc visited]} [santa-mov robo-mov]]
-                 (let [santa-loc (mapv + santa-loc (move->vec santa-mov)) 
+                 (let [santa-loc (mapv + santa-loc (move->vec santa-mov))
                        robo-loc (mapv + robo-loc (move->vec robo-mov))]
                    {:santa-loc santa-loc
                     :robo-loc robo-loc
@@ -29,3 +29,7 @@
                {:santa-loc [0 0] :robo-loc [0 0] :visited #{[0 0]}})
        :visited
        count))
+
+(comment
+  (p1 input)
+  (p2 input))

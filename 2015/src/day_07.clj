@@ -28,9 +28,9 @@
 (defn prog->graph [prog]
   (->> prog
        (mapcat (fn [[v {x :x y :y}]]
-                  (->> [x y]
-                       (remove nil?)
-                       (map #(hash-map % #{v}))))) ; Ensures that every node is a key
+                 (->> [x y]
+                      (remove nil?)
+                      (map #(hash-map % #{v}))))) ; Ensures that every node is a key
        (apply merge-with into)))
 
 ;; https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search
@@ -85,3 +85,7 @@
                (into {}))
         m (assoc m "b" {:x (evaluate "a" m)})]
     (evaluate "a" m)))
+
+(comment
+  (p1 input)
+  (p2 input))

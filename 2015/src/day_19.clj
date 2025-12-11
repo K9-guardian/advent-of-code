@@ -54,3 +54,7 @@
          (remove seq?)
          count
          (+ (- (* 2 (count m))))))) ; Removes the extra rules we added for terminals
+
+(comment
+  (p1 input)
+  (p2 input))

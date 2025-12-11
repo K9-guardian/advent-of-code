@@ -46,3 +46,7 @@
          (map (juxt (partial zipmap (map :name ingredients))
                     (partial ratio->score ingredients)))
          (apply max-key second))))
+
+(comment
+  (p1 input)
+  (p2 input))

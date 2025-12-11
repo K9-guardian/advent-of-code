@@ -12,3 +12,7 @@
                (map {\( 1 \) -1})
                (reductions +))]
     (inc (.indexOf s -1))))
+
+(comment
+  (p1 input)
+  (p2 input))
