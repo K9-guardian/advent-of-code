@@ -4,11 +4,11 @@
 
 module Day_03 where
 
-import Data.List (foldl', find)
+import qualified Data.IntMap as IntMap
+import Data.List (find, foldl')
 import Data.Maybe
 import Text.Parsec
 import Text.Parsec.String (Parser)
-import qualified Data.IntMap as IntMap
 
 size = 1000
 

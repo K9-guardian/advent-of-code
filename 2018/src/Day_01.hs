@@ -11,7 +11,7 @@ parseInt :: String -> Int
 parseInt ('+' : xs) = read xs
 parseInt xs = read xs
 
-firstDup :: Ord a => [a] -> Maybe a
+firstDup :: (Ord a) => [a] -> Maybe a
 firstDup = firstDup' Set.empty
 
 firstDup' s (x : xs)
