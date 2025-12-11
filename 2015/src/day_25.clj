@@ -19,5 +19,4 @@
     (nth (iterate next-code init) (dec n))))
 
 (comment
-  (p1 input)
-  (p2 input))
+  (p1 input))
