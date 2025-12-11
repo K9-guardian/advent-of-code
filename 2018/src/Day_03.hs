@@ -24,20 +24,24 @@ data Rect = Rect
 natural :: Parser Int
 natural = read <$> many1 digit
 
+parseIndex :: Parser Int
 parseIndex = char '#' >> natural
 
+parsePosition :: Parser (Int, Int)
 parsePosition = do
   c <- natural
   _ <- char ','
   r <- natural
   return (r, c)
 
+parseSize :: Parser (Int, Int)
 parseSize = do
   w <- natural
   _ <- char 'x'
   h <- natural
   return (h, w)
 
+parseRect :: Parser Rect
 parseRect = do
   i <- parseIndex
   _ <- string " @ "
@@ -66,5 +70,5 @@ p2 rects = maybe (-1) i $ find (noOverlap grid') rects
 
 main :: IO ()
 main = do
-  input >>= either print (print . p1)
-  input >>= either print (print . p2)
+  either (error . show) (print . p1) =<< input
+  either (error . show) (print . p2) =<< input

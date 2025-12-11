@@ -31,5 +31,5 @@ p2 xs = find (uncurry diffBy1) pairs
     pairs = [(x, y) | x <- xs, y <- xs]
 
 main = do
-  input >>= print . p1
-  input >>= print . p2
+  print . p1 =<< input
+  print . p2 =<< input

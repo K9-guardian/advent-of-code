@@ -24,5 +24,5 @@ p1 = sum
 p2 = firstDup . scanl (+) 0 . cycle
 
 main = do
-  input >>= print . p1
-  input >>= print . p2
+  print . p1 =<< input
+  print . p2 =<< input
