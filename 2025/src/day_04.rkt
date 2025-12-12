@@ -32,7 +32,7 @@
 
 (define grid-copied (vector-copy grid))
 
-(define (forklift-accessible-loop sum)
+(let loop ([sum 0])
   (define forklift-accessible-rolls
     (for*/sum ([i (in-range height)]
                [j (in-range width)]
@@ -43,6 +43,4 @@
   (vector-copy! grid 0 grid-copied)
   (if (zero? forklift-accessible-rolls)
       sum
-      (forklift-accessible-loop (+ forklift-accessible-rolls sum))))
-
-(forklift-accessible-loop 0)
+      (loop (+ forklift-accessible-rolls sum))))

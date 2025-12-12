@@ -19,7 +19,7 @@
      (define new-position (modulo (- position amount) 100))
      (+ (quotient amount 100)
         (if (zero? new-position) 1 0)
-        (if (and (not (zero? position))
+        (if (and (positive? position)
                  (< position new-position))
             1
             0))]

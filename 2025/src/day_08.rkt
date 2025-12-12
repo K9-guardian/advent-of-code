@@ -44,9 +44,7 @@
 (define counter (make-hash))
 
 (for ([v (in-list (map uf-find (vector->list ufs)))])
-  (if (hash-has-key? counter v)
-      (hash-update! counter v add1)
-      (hash-set! counter v 1)))
+  (hash-update! counter v add1 0))
 
 (apply * (take (sort (hash-values counter) >) 3))
 
