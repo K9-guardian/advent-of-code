@@ -15,10 +15,10 @@
 (defn arrangement->happiness [m a]
   (->> a
        (partition 3 1)
-       (transduce (map (fn [[p1 p2 p3]]
-                         (+ (get-in m [p2 p1])
-                            (get-in m [p2 p3]))))
-                  +)))
+       (map (fn [[p1 p2 p3]]
+              (+ (get-in m [p2 p1])
+                 (get-in m [p2 p3]))))
+       (apply +)))
 
 (defn p1 [input]
   (let [m (->> input

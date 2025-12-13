@@ -19,11 +19,11 @@
 (defn next-frame-p1 [lights]
   (->> (for [i (range board-size) j (range board-size)
              :let [l (get-in lights [i j])
-                   n (transduce (comp (map (partial map + [i j]))
-                                      (filter in-bounds?)
-                                      (map (partial get-in lights)))
-                                +
-                                ranges)]]
+                   n (->> ranges
+                          (map (partial map + [i j]))
+                          (filter in-bounds?)
+                          (map (partial get-in lights))
+                          (apply +))]]
          (cond
            (and (= 1 l) (<= 2 n 3)) 1
            (and (zero? l) (= 3 n)) 1
@@ -40,11 +40,11 @@
 (defn next-frame-p2 [lights]
   (->> (for [i (range board-size) j (range board-size)
              :let [l (get-in lights [i j])
-                   n (transduce (comp (map (partial map + [i j]))
-                                      (filter in-bounds?)
-                                      (map (partial get-in lights)))
-                                +
-                                ranges)]]
+                   n (->> ranges
+                          (map (partial map + [i j]))
+                          (filter in-bounds?)
+                          (map (partial get-in lights))
+                          (apply +))]]
          (cond
            (corner? [i j]) 1
            (and (= 1 l) (<= 2 n 3)) 1
