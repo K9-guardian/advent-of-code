@@ -28,6 +28,7 @@
      (+ (quotient amount 100) (if (> position new-position) 1 0))]))
 
 (count zero? (running-foldl turn-dial 50 input))
+
 (define-values (zeros _)
   (for/fold ([zeros 0]
              [position 50])

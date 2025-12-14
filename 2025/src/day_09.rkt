@@ -14,11 +14,8 @@
   (cons (first lst) (second lst)))
 
 (define input
-  (list->vector
-   (map (compose list->coordinate
-                 (λ (str) (map string->number str))
-                 (λ (str) (string-split str ",")))
-        (file->lines input-string))))
+  (for/vector ([str (in-list (file->lines input-string))])
+    (list->coordinate (map string->number (string-split str ",")))))
 
 ;; Rectangles are a pair of ranges representing the x and y travel.
 (define (rectangle p q)

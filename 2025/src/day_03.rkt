@@ -6,12 +6,8 @@
 (define input-string "input/d3.txt")
 
 (define input
-  (map
-   (compose1
-    list->vector
-    (λ (char) (map numeric-char->integer char))
-    string->list)
-   (file->lines input-string)))
+  (for/list ([str (in-list (file->lines input-string))])
+    (list->vector (map numeric-char->integer (string->list str)))))
 
 (define (largest-voltage-p1 bank)
   (define second-voltage (sub1 (vector-length bank)))
@@ -25,10 +21,8 @@
   (+ (* 10 (vector-ref bank first-voltage)) (vector-ref bank second-voltage)))
 
 (define (largest-voltage-p2 bank)
-  (define voltages (list->vector
-                    (map
-                     (λ (i) (+ i (- (vector-length bank) 12)))
-                     (range 12))))
+  (define voltages (for/vector ([i (in-range 12)])
+                     (+ i (- (vector-length bank) 12))))
   (define lower-bound -1)
   (for ([i (in-range (vector-length voltages))])
     (for ([j (in-range (vector-ref voltages i) lower-bound -1)])
@@ -42,4 +36,5 @@
                 (vector-map (λ (i) (vector-ref bank i)) voltages))))))
 
 (apply + (map largest-voltage-p1 input))
+
 (apply + (map largest-voltage-p2 input))

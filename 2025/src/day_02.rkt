@@ -18,24 +18,16 @@
                        (andmap (λ (v) (equal? (car partitions) v)) (cdr partitions))))
     id))
 
-(define (invalid-ids-p1 start end)
-  (filter invalid-id-p1? (map number->string (inclusive-range start end))))
+(for/sum ([interval (in-list input)])
+  (match (string-split interval "-")
+    [(list (app string->number start) (app string->number end))
+     (for/sum ([i (in-inclusive-range start end)]
+               #:when (invalid-id-p1? (number->string i)))
+       i) ]))
 
-(define (invalid-ids-p2 start end)
-  (filter invalid-id-p2? (map number->string (inclusive-range start end))))
-
-(apply +
-       (map string->number
-            (flatten
-             (for/list ([interval (in-list input)])
-               (match (string-split interval "-")
-                 [(list (app string->number start) (app string->number end))
-                  (invalid-ids-p1 start end)])))))
-
-(apply +
-       (map string->number
-            (flatten
-             (for/list ([interval (in-list input)])
-               (match (string-split interval "-")
-                 [(list (app string->number start) (app string->number end))
-                  (invalid-ids-p2 start end)])))))
+(for/sum ([interval (in-list input)])
+  (match (string-split interval "-")
+    [(list (app string->number start) (app string->number end))
+     (for/sum ([i (in-inclusive-range start end)]
+               #:when (invalid-id-p2? (number->string i)))
+       i) ]))
