@@ -1,7 +1,7 @@
 #lang racket
 
-(define (char-integer->integer chr)
-  (- chr (char->integer #\0)))
+(define (numeric-char->integer char)
+  (- (char->integer char) (char->integer #\0)))
 
 (define input-string "input/d3.txt")
 
@@ -9,8 +9,7 @@
   (map
    (compose1
     list->vector
-    (curry map char-integer->integer)
-    (curry map char->integer)
+    (λ (char) (map numeric-char->integer char))
     string->list)
    (file->lines input-string)))
 
@@ -26,7 +25,10 @@
   (+ (* 10 (vector-ref bank first-voltage)) (vector-ref bank second-voltage)))
 
 (define (largest-voltage-p2 bank)
-  (define voltages (list->vector (map (curry + (- (vector-length bank) 12)) (range 12))))
+  (define voltages (list->vector
+                    (map
+                     (λ (i) (+ i (- (vector-length bank) 12)))
+                     (range 12))))
   (define lower-bound -1)
   (for ([i (in-range (vector-length voltages))])
     (for ([j (in-range (vector-ref voltages i) lower-bound -1)])
@@ -37,7 +39,7 @@
    (apply string-append
           (map number->string
                (vector->list
-                (vector-map (curry vector-ref bank) voltages))))))
+                (vector-map (λ (i) (vector-ref bank i)) voltages))))))
 
 (apply + (map largest-voltage-p1 input))
 (apply + (map largest-voltage-p2 input))

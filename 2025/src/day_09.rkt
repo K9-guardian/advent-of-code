@@ -16,8 +16,8 @@
 (define input
   (list->vector
    (map (compose list->coordinate
-                 (curry map string->number)
-                 (curryr string-split ","))
+                 (λ (str) (map string->number str))
+                 (λ (str) (string-split str ",")))
         (file->lines input-string))))
 
 ;; Rectangles are a pair of ranges representing the x and y travel.
@@ -44,7 +44,7 @@
 ;; we need to shrink our rectangles by 1 in all directions before applying the check.
 
 ;; First, we construct all boundary lines as a list of 1 width rectangles.
-(define boundary
+(define boundary-lines
   (for/list ([i (in-range (vector-length input))]
              [j (in-range 1 (add1 (vector-length input)))])
     (define p (vector-ref input i))
@@ -74,6 +74,6 @@
   (define p (vector-ref input i))
   (define q (vector-ref input j))
   (define rect (rectangle p q))
-  (if (ormap (curry overlaps? (inset rect)) boundary)
+  (if (ormap (λ (line) (overlaps? (inset rect) line)) boundary-lines)
       max-area
       (max (area rect) max-area)))

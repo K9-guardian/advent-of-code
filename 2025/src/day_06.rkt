@@ -15,12 +15,12 @@
      (apply * (map string->number nums-string))]))
 
 (define (all-spaces->commas lst)
-  (if (andmap (curry char=? #\space) lst)
+  (if (andmap (λ (char) (char=? #\space char)) lst)
       (for/list ([_ (in-list lst)])
         #\,)
       lst))
 
-(define problems (map (curryr string-split ",")
+(define problems (map (λ (str) (string-split str ","))
                       (map list->string
                            (transpose
                             (map all-spaces->commas
@@ -31,6 +31,6 @@
   (match-define (list nums* ... op*) problem)
   (define op (match (string-trim op*) ["+" +] ["*" *]))
   (define nums (map
-                (compose string->number (curryr string-replace " " "") list->string)
+                (compose string->number (λ (str) (string-replace str " " "")) list->string)
                 (apply map list (map string->list nums*))))
   (apply op nums))

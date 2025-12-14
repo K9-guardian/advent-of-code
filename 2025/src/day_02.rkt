@@ -15,7 +15,7 @@
   (for/first ([i (in-inclusive-range 1 (quotient (string-length id) 2))]
               #:when (zero? (modulo (string-length id) i))
               #:when (let ([partitions (windows i i (string->list id))])
-                       (andmap (curry equal? (car partitions)) (cdr partitions))))
+                       (andmap (λ (v) (equal? (car partitions) v)) (cdr partitions))))
     id))
 
 (define (invalid-ids-p1 start end)

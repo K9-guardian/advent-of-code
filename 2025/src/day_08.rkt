@@ -5,8 +5,8 @@
 
 (define input-string "input/d8.txt")
 
-(define (string->coordinate s)
-  (map string->number (string-split s ",")))
+(define (string->coordinate str)
+  (map string->number (string-split str ",")))
 
 (define input (list->vector (map string->coordinate (file->lines input-string))))
 

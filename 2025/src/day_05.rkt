@@ -7,8 +7,8 @@
 
 (define input (file->lines input-string))
 
-(define (string->range s)
-  (match (string-split s "-")
+(define (string->range str)
+  (match (string-split str "-")
     [(list (app string->number start) (app string->number end))
      (make-range start end)]))
 
