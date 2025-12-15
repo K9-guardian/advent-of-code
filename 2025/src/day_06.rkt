@@ -16,8 +16,7 @@
 
 (define (all-spaces->commas lst)
   (if (andmap (λ (char) (char=? #\space char)) lst)
-      (for/list ([_ (in-list lst)])
-        #\,)
+      (make-list (length lst) #\,)
       lst))
 
 (define problems (map (λ (str) (string-split str ","))
