@@ -12,8 +12,8 @@
     [(list (app string->number start) (app string->number end))
      (make-range start end)]))
 
-(match-define (list ranges-string ... "" ingredients-string ...) input)
-(define ranges (map string->range ranges-string))
+(match-define (list ranges-strings ... "" ingredients-string ...) input)
+(define ranges (map string->range ranges-strings))
 (define ingredients (map string->number ingredients-string))
 
 (define (fresh? ingredient)

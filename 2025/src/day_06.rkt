@@ -9,10 +9,10 @@
 
 (for/sum ([problem (transpose input)])
   (match problem
-    [(list nums-string ... "+")
-     (apply + (map string->number nums-string))]
-    [(list nums-string ... "*")
-     (apply * (map string->number nums-string))]))
+    [(list nums-strings ... "+")
+     (apply + (map string->number nums-strings))]
+    [(list nums-strings ... "*")
+     (apply * (map string->number nums-strings))]))
 
 (define (all-spaces->commas lst)
   (if (andmap (λ (char) (char=? #\space char)) lst)
