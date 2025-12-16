@@ -15,7 +15,8 @@
      (apply * (map string->number nums-strings))]))
 
 (define (all-spaces->commas lst)
-  (if (andmap (λ (char) (char=? #\space char)) lst)
+  (if (for/and ([char (in-list lst)])
+        (char=? #\space char))
       (make-list (length lst) #\,)
       lst))
 
