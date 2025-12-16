@@ -1,7 +1,6 @@
 #lang racket
 
-(require (rename-in data/integer-set
-                    (count integer-set-count)))
+(require (prefix-in ist: data/integer-set))
 
 (define input-string "input/d5.txt")
 
@@ -10,7 +9,7 @@
 (define (string->range str)
   (match (string-split str "-")
     [(list (app string->number start) (app string->number end))
-     (make-range start end)]))
+     (ist:make-range start end)]))
 
 (match-define (list ranges-strings ... "" ingredients-string ...) input)
 (define ranges (map string->range ranges-strings))
@@ -18,12 +17,12 @@
 
 (define (fresh? ingredient)
   (for/or ([r (in-list ranges)])
-    (member? ingredient r)))
+    (ist:member? ingredient r)))
 
 (count fresh? ingredients)
 
 (define ingredient-set
-  (for/fold ([fresh-ingredients (make-integer-set '())])
+  (for/fold ([fresh-ingredients (ist:make-integer-set '())])
             ([r (in-list ranges)])
-    (union fresh-ingredients r)))
-(integer-set-count ingredient-set)
+    (ist:union fresh-ingredients r)))
+(ist:count ingredient-set)
