@@ -145,6 +145,7 @@
     (parse label)))
 
 ;; Returns a lazy sequence of all possible parse trees.
+#_:clj-kondo/ignore
 (defn- all-parses [forest label]
   (let [mapo (fn mapo [rel lst out]
                (matche [lst out]
