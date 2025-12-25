@@ -8,8 +8,7 @@ input :: IO [Int]
 input = map parseInt . lines <$> readFile "input/d1.txt"
 
 parseInt :: String -> Int
-parseInt ('+' : xs) = read xs
-parseInt xs = read xs
+parseInt = read . dropWhile (== '+')
 
 firstDup :: (Ord a) => [a] -> Maybe a
 firstDup = firstDup' Set.empty
