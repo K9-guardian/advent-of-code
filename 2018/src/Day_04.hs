@@ -83,16 +83,14 @@ counts xs = groupWith (+) [(x, 1) | x <- xs]
 p1 records = sleepiestGuard * sleepiestMinute
   where
     (sleepiestMinute, _) =
-      maximumBy
-        (compare `on` snd)
-        $ counts
-        $ concat
-        $ Map.fromListWith (++) guardSleepRanges ! sleepiestGuard
+      maximumBy (compare `on` snd) $
+        counts $
+          concat $
+            Map.fromListWith (++) guardSleepRanges ! sleepiestGuard
     (sleepiestGuard, _) =
-      maximumBy
-        (compare `on` snd)
-        $ groupWith (+)
-        $ map (second (sum . map length)) guardSleepRanges
+      maximumBy (compare `on` snd) $
+        groupWith (+) $
+          map (second (sum . map length)) guardSleepRanges
     guardSleepRanges = [(guard, sleepRanges timeline) | ((_, guard), timeline) <- guardData]
     (guardData, _) = first Map.toList $ foldl' updateGuardData (Map.empty, firstGuard) sortedRecords
     firstGuard = case head sortedRecords of (_, BeginShift guard) -> guard
@@ -101,16 +99,9 @@ p1 records = sleepiestGuard * sleepiestMinute
 p2 records = sleepiestGuard * sleepiestMinute
   where
     (sleepiestGuard, (sleepiestMinute, _)) =
-      maximumBy
-        (compare `on` snd . snd)
-        $ map
-          ( second $
-              maximumBy
-                (compare `on` snd)
-                . counts
-                . concat
-          )
-        $ groupWith (++) guardSleepRanges
+      maximumBy (compare `on` snd . snd) $
+        map (second $ maximumBy (compare `on` snd) . counts . concat) $
+          groupWith (++) guardSleepRanges
     guardSleepRanges = [(guard, sleepRanges timeline) | ((_, guard), timeline) <- guardData]
     (guardData, _) = first Map.toList $ foldl' updateGuardData (Map.empty, firstGuard) sortedRecords
     firstGuard = case head sortedRecords of (_, BeginShift guard) -> guard
