@@ -10,9 +10,11 @@ import qualified Data.Map as Map
 input :: IO [String]
 input = lines <$> readFile "input/d2.txt"
 
-exactlyNLetters n xs = n `elem` vals
-  where
-    vals = map snd $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- xs]
+groupWith f = Map.toList . Map.fromListWith f
+
+counts xs = groupWith (+) [(x, 1) | x <- xs]
+
+exactlyNLetters n xs = n `elem` map snd (counts xs)
 
 p1 xs = length (filter (exactlyNLetters 2) xs) * length (filter (exactlyNLetters 3) xs)
 

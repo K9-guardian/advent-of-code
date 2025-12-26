@@ -7,7 +7,7 @@
 
 module Day_04 where
 
-import Data.Bifunctor (first)
+import Data.Bifunctor (first, second)
 import Data.Function (on)
 import Data.Ix (range)
 import Data.List (foldl', maximumBy, sortBy)
@@ -76,28 +76,24 @@ updateGuardData (guardData, currentGuard) (Timestamp {date, minute}, FallAsleep)
 
 sleepRanges timeline = [range (i, j - 1) | [(FallAsleep, i), (WakeUp, j)] <- chunksOf 2 timeline]
 
+groupWith f = Map.toList . Map.fromListWith f
+
+counts xs = groupWith (+) [(x, 1) | x <- xs]
+
 p1 records = sleepiestGuard * sleepiestMinute
   where
     (sleepiestMinute, _) =
-      maximumBy (compare `on` snd) $
-        Map.toList $
-          Map.fromListWith
-            (+)
-            [ (x, 1)
-              | x <-
-                  concat $
-                    Map.fromListWith
-                      (++)
-                      [(guard, sleepRanges timeline) | ((_, guard), timeline) <- guardData]
-                      ! sleepiestGuard
-            ]
+      maximumBy
+        (compare `on` snd)
+        $ counts
+        $ concat
+        $ Map.fromListWith (++) guardSleepRanges ! sleepiestGuard
     (sleepiestGuard, _) =
       maximumBy
         (compare `on` snd)
-        $ Map.toList
-        $ Map.fromListWith
-          (+)
-          [(guard, sum $ map length $ sleepRanges timeline) | ((_, guard), timeline) <- guardData]
+        $ groupWith (+)
+        $ map (second (sum . map length)) guardSleepRanges
+    guardSleepRanges = [(guard, sleepRanges timeline) | ((_, guard), timeline) <- guardData]
     (guardData, _) = first Map.toList $ foldl' updateGuardData (Map.empty, firstGuard) sortedRecords
     firstGuard = case head sortedRecords of (_, BeginShift guard) -> guard
     sortedRecords = sortBy (compare `on` fst) records
@@ -105,17 +101,17 @@ p1 records = sleepiestGuard * sleepiestMinute
 p2 records = sleepiestGuard * sleepiestMinute
   where
     (sleepiestGuard, (sleepiestMinute, _)) =
-      maximumBy (compare `on` snd . snd)
-        $ Map.toList
-        $ Map.map
-          ( \ranges ->
-              maximumBy (compare `on` snd) $
-                Map.toList $
-                  Map.fromListWith (+) [(x, 1) | x <- concat ranges]
+      maximumBy
+        (compare `on` snd . snd)
+        $ map
+          ( second $
+              maximumBy
+                (compare `on` snd)
+                . counts
+                . concat
           )
-        $ Map.fromListWith
-          (++)
-          [(guard, sleepRanges timeline) | ((_, guard), timeline) <- guardData]
+        $ groupWith (++) guardSleepRanges
+    guardSleepRanges = [(guard, sleepRanges timeline) | ((_, guard), timeline) <- guardData]
     (guardData, _) = first Map.toList $ foldl' updateGuardData (Map.empty, firstGuard) sortedRecords
     firstGuard = case head sortedRecords of (_, BeginShift guard) -> guard
     sortedRecords = sortBy (compare `on` fst) records
