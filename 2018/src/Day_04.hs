@@ -12,7 +12,7 @@ import Data.Function (on)
 import Data.Ix (range)
 import Data.List (foldl', maximumBy, sortBy)
 import Data.List.Split (chunksOf)
-import Data.Map (Map, (!))
+import Data.Map ((!))
 import qualified Data.Map as Map
 import Text.Parsec
 import Text.Parsec.String (Parser)
@@ -68,21 +68,14 @@ parseRecord = do
 input :: IO (Either ParseError [Record])
 input = mapM (parse parseRecord "") . lines <$> readFile "input/d4.txt"
 
-type SleepTimeline = [(Action, Minute)]
-
-type GuardSleepPatterns = Map (Date, Guard) SleepTimeline
-
-updateGuardData :: (GuardSleepPatterns, Guard) -> Record -> (GuardSleepPatterns, Guard)
 updateGuardData (guardData, _) (Timestamp {date}, BeginShift guard) = (guardData, guard)
 updateGuardData (guardData, currentGuard) (Timestamp {date, minute}, WakeUp) =
   (Map.insertWith (flip (++)) (date, currentGuard) [(WakeUp, minute)] guardData, currentGuard)
 updateGuardData (guardData, currentGuard) (Timestamp {date, minute}, FallAsleep) =
   (Map.insertWith (flip (++)) (date, currentGuard) [(FallAsleep, minute)] guardData, currentGuard)
 
-sleepRanges :: SleepTimeline -> [[Int]]
 sleepRanges timeline = [range (i, j - 1) | [(FallAsleep, i), (WakeUp, j)] <- chunksOf 2 timeline]
 
-p1 :: [Record] -> Int
 p1 records = sleepiestGuard * sleepiestMinute
   where
     (sleepiestMinute, _) =
@@ -109,7 +102,6 @@ p1 records = sleepiestGuard * sleepiestMinute
     firstGuard = case head sortedRecords of (_, BeginShift guard) -> guard
     sortedRecords = sortBy (compare `on` fst) records
 
-p2 :: [Record] -> Int
 p2 records = sleepiestGuard * sleepiestMinute
   where
     (sleepiestGuard, (sleepiestMinute, _)) =
