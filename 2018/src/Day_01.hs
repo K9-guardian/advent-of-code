@@ -1,12 +1,18 @@
 module Day_01 where
 
 import qualified Data.Set as Set
+import Text.Parsec
+import Text.Parsec.String
+import Util
 
-input :: IO [Int]
-input = map parseInt . lines <$> readFile "input/d1.txt"
+parseChange :: Parser Int
+parseChange = do
+  sign <- (1 <$ char '+') <|> (-1 <$ char '-')
+  change <- natural
+  return $ sign * change
 
-parseInt :: String -> Int
-parseInt = read . dropWhile (== '+')
+input :: IO (Either ParseError [Int])
+input = mapM (parse parseChange "") . lines <$> readFile "input/d1.txt"
 
 firstDup :: (Ord a) => [a] -> Maybe a
 firstDup = firstDup' Set.empty
@@ -25,5 +31,5 @@ p2 = firstDup . scanl (+) 0 . cycle
 
 main :: IO ()
 main = do
-  print . p1 =<< input
-  print . p2 =<< input
+  either (error . show) (print . p1) =<< input
+  either (error . show) (print . p2) =<< input

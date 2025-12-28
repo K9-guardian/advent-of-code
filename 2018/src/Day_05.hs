@@ -1,6 +1,6 @@
 module Day_05 where
 
-import Data.Char (toLower)
+import Data.Char
 
 input :: IO String
 input = head . lines <$> readFile "input/d5.txt"

@@ -2,18 +2,16 @@
 
 module Day_04 where
 
-import Data.Bifunctor (first, second)
-import Data.Function (on)
-import Data.Ix (range)
-import Data.List (foldl', maximumBy, sortBy)
-import Data.List.Split (chunksOf)
-import Data.Map ((!))
+import Data.Bifunctor
+import Data.Function
+import Data.Ix
+import Data.List
+import Data.List.Split
+import Data.Map (Map, (!))
 import qualified Data.Map as Map
 import Text.Parsec
-import Text.Parsec.String (Parser)
-
-natural :: Parser Int
-natural = read <$> many1 digit
+import Text.Parsec.String
+import Util
 
 type Date = String
 
@@ -65,7 +63,7 @@ input = mapM (parse parseRecord "") . lines <$> readFile "input/d4.txt"
 
 type Timeline = [(Action, Int)]
 
-type GuardData = Map.Map (String, Guard) Timeline
+type GuardData = Map (String, Guard) Timeline
 
 updateGuardData :: (GuardData, Guard) -> Record -> (GuardData, Guard)
 updateGuardData (guardData, _) (Timestamp {}, BeginShift guard) = (guardData, guard)
@@ -76,12 +74,6 @@ updateGuardData (guardData, currentGuard) (Timestamp {date, minute}, FallAsleep)
 
 sleepRanges :: Timeline -> [[Int]]
 sleepRanges timeline = [range (i, j - 1) | [(FallAsleep, i), (WakeUp, j)] <- chunksOf 2 timeline]
-
-groupWith :: (Ord k) => (a -> a -> a) -> [(k, a)] -> [(k, a)]
-groupWith f = Map.toList . Map.fromListWith f
-
-counts :: (Ord k) => [k] -> [(k, Int)]
-counts xs = groupWith (+) [(x, 1) | x <- xs]
 
 p1 :: [Record] -> Int
 p1 records = sleepiestGuard * sleepiestMinute

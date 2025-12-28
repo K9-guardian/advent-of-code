@@ -3,10 +3,11 @@
 module Day_03 where
 
 import qualified Data.IntMap as IntMap
-import Data.List (find, foldl')
+import Data.List
 import Data.Maybe
 import Text.Parsec
-import Text.Parsec.String (Parser)
+import Text.Parsec.String
+import Util
 
 size :: Int
 size = 1000
@@ -19,9 +20,6 @@ data Rect = Rect
     w :: Int
   }
   deriving (Show)
-
-natural :: Parser Int
-natural = read <$> many1 digit
 
 parseIndex :: Parser Int
 parseIndex = char '#' >> natural

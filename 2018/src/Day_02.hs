@@ -1,16 +1,10 @@
 module Day_02 where
 
 import Data.List
-import qualified Data.Map as Map
+import Util
 
 input :: IO [String]
 input = lines <$> readFile "input/d2.txt"
-
-groupWith :: (Ord k) => (a -> a -> a) -> [(k, a)] -> [(k, a)]
-groupWith f = Map.toList . Map.fromListWith f
-
-counts :: (Ord k, Num a) => [k] -> [(k, a)]
-counts xs = groupWith (+) [(x, 1) | x <- xs]
 
 exactlyNLetters :: (Ord a) => Int -> [a] -> Bool
 exactlyNLetters n xs = n `elem` map snd (counts xs)

@@ -83,10 +83,12 @@ executable aoc2018
         -- Day_22,
         -- Day_23,
         -- Day_24,
-        -- Day_25
+        -- Day_25,
+        Util
 
     -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
+    other-extensions:
+        NamedFieldPuns
 
     -- Other library packages from which modules are imported.
     build-depends:
@@ -96,7 +98,7 @@ executable aoc2018
         split ^>= 0.2.5
 
     -- Directories containing source files.
-    hs-source-dirs:   src, input
+    hs-source-dirs:   src, lib, input
 
     -- Base language which the package is written in.
     default-language: Haskell2010
