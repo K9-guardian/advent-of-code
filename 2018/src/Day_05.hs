@@ -19,7 +19,7 @@ p1 = length . react
 p2 :: String -> Int
 p2 polymer = minimum [length $ react $ removeUnit c $ react polymer | c <- ['a' .. 'z']]
   where
-    removeUnit c s = filter (\c' -> c /= toLower c') s
+    removeUnit c = filter (\c' -> c /= toLower c')
 
 main :: IO ()
 main = do
