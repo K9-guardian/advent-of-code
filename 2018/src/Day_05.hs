@@ -1,9 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
-{-# OPTIONS_GHC -Wno-missing-signatures #-}
-{-# OPTIONS_GHC -Wno-type-defaults #-}
-{-# OPTIONS_GHC -Wno-unused-matches #-}
-
 module Day_05 where
 
 import Data.Char (toLower)
@@ -11,6 +5,7 @@ import Data.Char (toLower)
 input :: IO String
 input = head . lines <$> readFile "input/d5.txt"
 
+react :: String -> String
 react = foldr react' []
   where
     react' x [] = [x]
@@ -18,17 +13,13 @@ react = foldr react' []
       | x /= y && toLower x == toLower y = ys
       | otherwise = x : y : ys
 
+p1 :: String -> Int
 p1 = length . react
 
-p2 polymer =
-  minimum
-    [ length $
-        react $
-          filter
-            (\c' -> c /= toLower c')
-            (react polymer)
-      | c <- ['a' .. 'z']
-    ]
+p2 :: String -> Int
+p2 polymer = minimum [length $ react $ removeUnit c $ react polymer | c <- ['a' .. 'z']]
+  where
+    removeUnit c s = filter (\c' -> c /= toLower c') s
 
 main :: IO ()
 main = do

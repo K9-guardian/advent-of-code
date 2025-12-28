@@ -1,6 +1,4 @@
 {-# LANGUAGE NamedFieldPuns #-}
-{-# OPTIONS_GHC -Wno-missing-signatures #-}
-{-# OPTIONS_GHC -Wno-name-shadowing #-}
 
 module Day_03 where
 
@@ -10,6 +8,7 @@ import Data.Maybe
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
+size :: Int
 size = 1000
 
 data Rect = Rect
@@ -53,17 +52,23 @@ parseRect = do
 input :: IO (Either ParseError [Rect])
 input = mapM (parse parseRect "") . lines <$> readFile "input/d3.txt"
 
+grid :: IntMap.IntMap Int
 grid = IntMap.fromAscList [(i, 0 :: Int) | i <- [0 .. (size * size - 1)]]
 
+coords :: Rect -> [Int]
 coords Rect {r, c, h, w} = [i * 1000 + j | i <- [r .. (r + h - 1)], j <- [c .. (c + w - 1)]]
 
 -- increment each square corresponding to a claim
-claim grid rect = foldl' (flip (IntMap.update (Just . succ))) grid (coords rect)
+claim :: IntMap.IntMap Int -> Rect -> IntMap.IntMap Int
+claim g r = foldl' (flip (IntMap.update (Just . succ))) g (coords r)
 
+p1 :: [Rect] -> Int
 p1 = length . IntMap.filter (> 1) . foldl' claim grid
 
-noOverlap grid rect = all ((== 1) . fromMaybe (-1) . (`IntMap.lookup` grid)) (coords rect)
+noOverlap :: IntMap.IntMap Int -> Rect -> Bool
+noOverlap g r = all ((== 1) . fromMaybe (-1) . (`IntMap.lookup` g)) (coords r)
 
+p2 :: [Rect] -> Int
 p2 rects = maybe (-1) i $ find (noOverlap grid') rects
   where
     grid' = foldl' claim grid rects
