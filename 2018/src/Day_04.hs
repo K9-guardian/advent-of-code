@@ -4,7 +4,6 @@ module Day_04 where
 
 import Data.Bifunctor
 import Data.Function
-import Data.Ix
 import Data.List
 import Data.List.Split
 import Data.Map (Map, (!))
@@ -73,7 +72,7 @@ updateGuardData (guardData, currentGuard) (Timestamp {date, minute}, FallAsleep)
   (Map.insertWith (flip (++)) (date, currentGuard) [(FallAsleep, minute)] guardData, currentGuard)
 
 sleepRanges :: Timeline -> [[Int]]
-sleepRanges timeline = [range (i, j - 1) | [(FallAsleep, i), (WakeUp, j)] <- chunksOf 2 timeline]
+sleepRanges timeline = [[i .. j - 1] | [(FallAsleep, i), (WakeUp, j)] <- chunksOf 2 timeline]
 
 p1 :: [Record] -> Int
 p1 records = sleepiestGuard * sleepiestMinute

@@ -53,18 +53,18 @@ input = mapM (parse parseRect "") . lines <$> readFile "input/d3.txt"
 grid :: IntMap.IntMap Int
 grid = IntMap.fromAscList [(i, 0 :: Int) | i <- [0 .. (size * size - 1)]]
 
-coords :: Rect -> [Int]
-coords Rect {r, c, h, w} = [i * 1000 + j | i <- [r .. (r + h - 1)], j <- [c .. (c + w - 1)]]
+coordinates :: Rect -> [Int]
+coordinates Rect {r, c, h, w} = [i * 1000 + j | i <- [r .. (r + h - 1)], j <- [c .. (c + w - 1)]]
 
 -- increment each square corresponding to a claim
 claim :: IntMap.IntMap Int -> Rect -> IntMap.IntMap Int
-claim g r = foldl' (flip (IntMap.update (Just . succ))) g (coords r)
+claim g r = foldl' (flip (IntMap.update (Just . succ))) g (coordinates r)
 
 p1 :: [Rect] -> Int
 p1 = length . IntMap.filter (> 1) . foldl' claim grid
 
 noOverlap :: IntMap.IntMap Int -> Rect -> Bool
-noOverlap g r = all ((== 1) . fromMaybe (-1) . (`IntMap.lookup` g)) (coords r)
+noOverlap g r = all ((== 1) . fromMaybe (-1) . (`IntMap.lookup` g)) (coordinates r)
 
 p2 :: [Rect] -> Int
 p2 rects = maybe (-1) i $ find (noOverlap grid') rects
