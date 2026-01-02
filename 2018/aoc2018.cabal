@@ -65,7 +65,7 @@ executable aoc2018
         Day_04,
         Day_05
         Day_06,
-        -- Day_07,
+        Day_07,
         -- Day_08,
         -- Day_09,
         -- Day_10,
@@ -92,8 +92,9 @@ executable aoc2018
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.17.2.1,
+        base ^>= 4.17.2.1,
         containers ^>= 0.7,
+        mtl ^>= 2.3.2,
         parsec ^>= 3.1.17.0,
         split ^>= 0.2.5
 

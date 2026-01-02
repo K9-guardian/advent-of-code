@@ -3,7 +3,6 @@ module Day_06 where
 import Data.Function
 import Data.List
 import Data.Maybe
-import Debug.Trace
 import Text.Parsec
 import Text.Parsec.String
 import Util
@@ -32,7 +31,7 @@ closestPoint coordinates c = case closestPoints of
 
 boundaryPoints :: [Coordinate] -> [Coordinate]
 boundaryPoints coordinates =
-  deleteDuplicates $
+  nub $
     mapMaybe
       (closestPoint coordinates)
       (topEdge ++ bottomEdge ++ leftEdge ++ rightEdge)
