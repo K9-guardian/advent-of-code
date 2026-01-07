@@ -29,6 +29,9 @@ parseEdge = do
   _ <- string " can begin."
   return (step0, step1)
 
+input :: IO (Either ParseError [Edge])
+input = mapM (parse parseEdge "") . lines <$> readFile "input/d7.txt"
+
 type Graph = [(Node, [Node])]
 
 edgesToGraph :: [Edge] -> Graph
@@ -140,9 +143,6 @@ constructionTime numWorkers timeModifier graph =
               return $ (n, s) :<| ns'
         readyToConstruct cs = (`Set.isSubsetOf` cs) . Set.fromList . (`incomingEdges` graph)
         stepToTime n = ord n - ord 'A' + 1 + timeModifier
-
-input :: IO (Either ParseError [Edge])
-input = mapM (parse parseEdge "") . lines <$> readFile "input/d7.txt"
 
 p1 :: [Edge] -> Maybe [Node]
 p1 = topologicalSort . edgesToGraph
