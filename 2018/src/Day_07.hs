@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TupleSections #-}
 
 module Day_07 where
@@ -132,11 +131,9 @@ constructionTime numWorkers timeModifier graph =
         popNodes _ Seq.Empty = return Seq.Empty
         popNodes cnt ((n, s) :<| ns)
           | s == stepToTime n = do
-              !_ <- gets (traceMsg ("finished constructing node " ++ show n))
               modify (\st -> st {constructedNodes = Set.insert n $ constructedNodes st})
               cs <- gets constructedNodes
               let subNodes = sort $ filter (readyToConstruct cs) $ fromMaybe [] $ lookup n graph
-              let !_ = traceMsg "adding subnodes" subNodes
               popNodes (pred cnt) (ns >< Seq.fromList (map (,0) subNodes))
           | otherwise = do
               ns' <- popNodes (pred cnt) ns
