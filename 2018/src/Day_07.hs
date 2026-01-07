@@ -115,17 +115,12 @@ constructionTime numWorkers timeModifier graph =
       case ns of
         Seq.Empty -> return s
         _ -> do
-          modify
-            ( \st ->
-                st
-                  { nodesToConstruct =
-                      foldr (Seq.adjust (second succ)) ns [0 .. min numWorkers (length ns) - 1]
-                  }
-            )
+          modify (\st -> st {nodesToConstruct = workNodes $ nodesToConstruct st})
           ns' <- popNodes numWorkers =<< gets nodesToConstruct
           modify (\st -> st {nodesToConstruct = ns', seconds = succ $ seconds st})
           constructionTime'
       where
+        workNodes ns = foldr (Seq.adjust (second succ)) ns [0 .. min numWorkers (length ns) - 1]
         popNodes :: Int -> Seq.Seq (Node, Int) -> State ConstructionState (Seq.Seq (Node, Int))
         popNodes 0 ns = return ns
         popNodes _ Seq.Empty = return Seq.Empty
@@ -135,9 +130,7 @@ constructionTime numWorkers timeModifier graph =
               cs <- gets constructedNodes
               let subNodes = sort $ filter (readyToConstruct cs) $ fromMaybe [] $ lookup n graph
               popNodes (pred cnt) (ns >< Seq.fromList (map (,0) subNodes))
-          | otherwise = do
-              ns' <- popNodes (pred cnt) ns
-              return $ (n, s) :<| ns'
+          | otherwise = ((n, s) :<|) <$> popNodes (pred cnt) ns
         readyToConstruct cs = (`Set.isSubsetOf` cs) . Set.fromList . (`incomingEdges` graph)
         stepToTime n = ord n - ord 'A' + 1 + timeModifier
 
