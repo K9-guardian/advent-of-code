@@ -1,8 +1,12 @@
 module Util where
 
 import qualified Data.Map as Map
+import Debug.Trace
 import Text.Parsec
 import Text.Parsec.String
+
+traceMsg :: (Show a) => String -> a -> a
+traceMsg s x = trace (s ++ ": " ++ show x) x
 
 natural :: Parser Int
 natural = read <$> many1 digit

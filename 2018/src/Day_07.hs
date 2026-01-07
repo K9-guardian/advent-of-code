@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TupleSections #-}
 
 module Day_07 where
@@ -5,9 +6,12 @@ module Day_07 where
 import Control.Monad
 import Control.Monad.State
 import Data.Bifunctor
+import Data.Char (ord)
 import Data.List
 import Data.Maybe
-import Debug.Trace
+import Data.Sequence (Seq ((:<|)), (><))
+import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
 import Text.Parsec hiding (State)
 import Text.Parsec.String
 import Util
@@ -25,11 +29,6 @@ parseEdge = do
   _ <- string " can begin."
   return (step0, step1)
 
-input :: IO (Either ParseError [Edge])
-input = mapM (parse parseEdge "") . lines <$> readFile "input/d7.txt"
-
--- input = mapM (parse parseEdge "") . lines <$> readFile "input/d7_test.txt"
-
 type Graph = [(Node, [Node])]
 
 edgesToGraph :: [Edge] -> Graph
@@ -44,56 +43,14 @@ graphToNodes = nub . concatMap (uncurry (:))
 transposeGraph :: Graph -> Graph
 transposeGraph = edgesToGraph . map (\(n0, n1) -> (n1, n0)) . graphToEdges
 
+incomingEdges :: Node -> Graph -> [Node]
+incomingEdges node = fromMaybe [] . lookup node . transposeGraph
+
+graphToSources :: Graph -> [Node]
+graphToSources graph = [node | node <- graphToNodes graph, null (incomingEdges node graph)]
+
 data Mark = Unmarked | Temporary | Permanent
   deriving (Eq, Show)
-
--- topologicalSort :: Graph -> Maybe [Node]
--- topologicalSort graph = topologicalSort' (Just [], map (,Unmarked) $ graphToNodes graph)
---   where
---     topologicalSort' :: (Maybe [Node], [(Node, Mark)]) -> Maybe [Node]
---     topologicalSort' (sortedNodes, markedNodes) = case remainingNodes of
---       [] -> sortedNodes
---       _ -> case visit firstUnmarkedNode (sortedNodes, markedNodes) of
---         (Nothing, _) -> Nothing
---         state -> topologicalSort' state
---       where
---         remainingNodes = traceShowId $ filter (\(_, mark) -> mark /= Permanent) markedNodes
---         firstUnmarkedNode = traceShowId $ fst $ fromJust $ find (\(_, mark) -> mark == Unmarked) markedNodes
---     visit :: Node -> (Maybe [Node], [(Node, Mark)]) -> (Maybe [Node], [(Node, Mark)])
---     visit node (sortedNodes, markedNodes) = case fromJust $ lookup node markedNodes of
---       Permanent -> (sortedNodes, markedNodes)
---       Temporary -> (Nothing, markedNodes)
---       Unmarked -> ((node :) <$> sortedNodes', update node Permanent markedNodes')
---         where
---           (sortedNodes', markedNodes') =
---             foldr
---               visit
---               (sortedNodes, update node Temporary markedNodes)
---               (sortBy (flip compare) $ fromMaybe [] $ lookup node graph)
-
--- -- https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
--- topologicalSort :: Graph -> Maybe [Node]
--- topologicalSort graph = topologicalSort' graph [] sources
---   where
---     topologicalSort' :: Graph -> [Node] -> [Node] -> Maybe [Node]
---     topologicalSort' graph' l []
---       | all ((== []) . snd) graph' = Just $ reverse l
---       | otherwise = Nothing
---     topologicalSort' graph' l (n : s) = foldl' go (s, graph') (sort $ fromJust $ lookup n graph')
---       where
---         go :: ([Node], Graph) -> Node -> ([Node], Graph)
---         go (s', graph'') m
---           | null incomingEdges = (n : s', newGraph)
---           | otherwise = (s', newGraph)
---           where
---             incomingEdges = fromJust $ lookup m $ transposeGraph newGraph
---             newGraph = update n (delete m) graph''
---     sources =
---       snd $
---         fromJust $
---           find (\(m, _) -> isNothing m) $
---             groupBy' (`lookup` graph) $
---               graphToNodes graph
 
 data TopologicalSortState = TSS
   { remainingGraph :: Graph,
@@ -109,7 +66,7 @@ topologicalSort graph =
     TSS
       { remainingGraph = graph,
         sortedNodes = [],
-        nodesToSearch = sources
+        nodesToSearch = graphToSources graph
       }
   where
     topologicalSort' :: State TopologicalSortState (Maybe [Node])
@@ -131,18 +88,67 @@ topologicalSort graph =
               when
                 (null $ lookup m $ transposeGraph g')
                 (modify (\st -> st {nodesToSearch = m : nodesToSearch st}))
-    sources =
-      snd $
-        fromJust $
-          find (\(m, _) -> isNothing m) $
-            groupBy' (`lookup` transposeGraph graph) $
-              graphToNodes graph
+
+data ConstructionState = CS
+  { seconds :: Int,
+    nodesToConstruct :: Seq.Seq (Node, Int),
+    constructedNodes :: Set.Set Node
+  }
+  deriving (Show)
+
+constructionTime :: Int -> Int -> Graph -> Int
+constructionTime numWorkers timeModifier graph =
+  evalState
+    constructionTime'
+    CS
+      { seconds = 0,
+        nodesToConstruct = Seq.fromList $ map (,0) $ sort $ graphToSources graph,
+        constructedNodes = Set.empty
+      }
+  where
+    constructionTime' :: State ConstructionState Int
+    constructionTime' = do
+      s <- gets seconds
+      ns <- gets nodesToConstruct
+      case ns of
+        Seq.Empty -> return s
+        _ -> do
+          modify
+            ( \st ->
+                st
+                  { nodesToConstruct =
+                      foldr (Seq.adjust (second succ)) ns [0 .. min numWorkers (length ns) - 1]
+                  }
+            )
+          ns' <- popNodes numWorkers =<< gets nodesToConstruct
+          modify (\st -> st {nodesToConstruct = ns', seconds = succ $ seconds st})
+          constructionTime'
+      where
+        popNodes :: Int -> Seq.Seq (Node, Int) -> State ConstructionState (Seq.Seq (Node, Int))
+        popNodes 0 ns = return ns
+        popNodes _ Seq.Empty = return Seq.Empty
+        popNodes cnt ((n, s) :<| ns)
+          | s == stepToTime n = do
+              !_ <- gets (traceMsg ("finished constructing node " ++ show n))
+              modify (\st -> st {constructedNodes = Set.insert n $ constructedNodes st})
+              cs <- gets constructedNodes
+              let subNodes = sort $ filter (readyToConstruct cs) $ fromMaybe [] $ lookup n graph
+              let !_ = traceMsg "adding subnodes" subNodes
+              popNodes (pred cnt) (ns >< Seq.fromList (map (,0) subNodes))
+          | otherwise = do
+              ns' <- popNodes (pred cnt) ns
+              return $ (n, s) :<| ns'
+        readyToConstruct cs = (`Set.isSubsetOf` cs) . Set.fromList . (`incomingEdges` graph)
+        stepToTime n = ord n - ord 'A' + 1 + timeModifier
+
+input :: IO (Either ParseError [Edge])
+input = mapM (parse parseEdge "") . lines <$> readFile "input/d7.txt"
 
 p1 :: [Edge] -> Maybe [Node]
 p1 = topologicalSort . edgesToGraph
 
-p2 :: [Edge] -> [Node]
-p2 = undefined
+p2 :: [Edge] -> Int
+p2 = constructionTime 5 60 . edgesToGraph
 
 main :: IO ()
 main = do
