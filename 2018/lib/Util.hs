@@ -31,3 +31,17 @@ update _ _ [] = []
 update k f ((k', v) : kvs)
   | k == k' = (k, f v) : kvs
   | otherwise = (k', v) : update k f kvs
+
+{-# INLINEABLE (!?) #-}
+(!?) :: [a] -> Int -> Maybe a
+xs !? n
+  | n < 0 = Nothing
+  | otherwise =
+      foldr
+        ( \x r k -> case k of
+            0 -> Just x
+            _ -> r (k - 1)
+        )
+        (const Nothing)
+        xs
+        n
