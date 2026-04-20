@@ -1,4 +1,12 @@
 # 2018
 Solutions in Haskell
 
-Run `cabal repl` and use `:load` to load a file.
+Use
+```
+cabal repl
+```
+and
+```
+:load Day_XX
+```
+to run a specific day.

@@ -25,7 +25,8 @@ user:prolog_file_type(pro, prolog).
 :- use_module(library(reif)).
 :- use_module(library(yall)).
 ```
-Use `-s` to load a file.
+Use
 ```prolog
 swipl -s src/day_XX.pro
 ```
+to run a specific day.
