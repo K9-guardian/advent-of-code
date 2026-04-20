@@ -85,7 +85,7 @@ fn p2(input: &Data) -> String {
     solve(input, &mut HashMap::new(), Rc::clone(&p1(input))).unwrap_err()
 }
 
-fn main() {
+pub fn main() {
     let input = std::fs::read_to_string("input/d7.txt")
         .unwrap()
         .parse()

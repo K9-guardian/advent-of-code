@@ -60,7 +60,7 @@ fn p2(Graph(graph): &Graph) -> usize {
     ret
 }
 
-fn main() {
+pub fn main() {
     let input = std::fs::read_to_string("input/d12.txt")
         .unwrap()
         .parse()

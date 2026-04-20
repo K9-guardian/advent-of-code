@@ -98,7 +98,7 @@ fn p2(input: &[Particle]) -> usize {
     particles.iter().filter_map(|&e| e).count()
 }
 
-fn main() {
+pub fn main() {
     let input: Vec<Particle> = std::fs::read_to_string("input/d20.txt")
         .unwrap()
         .lines()

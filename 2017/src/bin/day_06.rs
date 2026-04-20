@@ -57,7 +57,7 @@ fn p2(input: &[usize]) -> usize {
     history.into_iter().rev().take_while(|v| *v != rc).count() + 1
 }
 
-fn main() {
+pub fn main() {
     let input: Vec<_> = std::fs::read_to_string("input/d6.txt")
         .unwrap()
         .split_whitespace()

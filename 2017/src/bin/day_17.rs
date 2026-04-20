@@ -24,7 +24,7 @@ fn p2(step: usize) -> usize {
     ret
 }
 
-fn main() {
+pub fn main() {
     let input: usize = std::fs::read_to_string("input/d17.txt")
         .unwrap()
         .parse()

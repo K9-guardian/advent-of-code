@@ -98,7 +98,7 @@ fn p2(input: &str) -> i32 {
     ret
 }
 
-fn main() {
+pub fn main() {
     let input = std::fs::read_to_string("input/d8.txt").unwrap();
     dbg!(p1(&input));
     dbg!(p2(&input));

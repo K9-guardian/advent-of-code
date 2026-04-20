@@ -92,7 +92,7 @@ fn p2(grid: &[Vec<char>]) -> usize {
     steps
 }
 
-fn main() {
+pub fn main() {
     let grid: Vec<_> = std::fs::read_to_string("input/d19.txt")
         .unwrap()
         .lines()

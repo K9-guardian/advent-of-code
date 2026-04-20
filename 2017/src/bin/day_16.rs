@@ -80,7 +80,7 @@ fn p2(moves: &[Move]) -> String {
     String::from_utf8(progs).unwrap()
 }
 
-fn main() {
+pub fn main() {
     let input: Vec<_> = std::fs::read_to_string("input/d16.txt")
         .unwrap()
         .split(',')

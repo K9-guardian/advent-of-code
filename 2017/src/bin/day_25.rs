@@ -35,7 +35,7 @@ fn p1(
     tape.values().sum()
 }
 
-fn main() {
+pub fn main() {
     // parsing hard
     let input: TuringMachine = TuringMachine {
         starting_state: 0,

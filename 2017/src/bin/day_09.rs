@@ -35,7 +35,7 @@ fn p2(input: &str) -> usize {
     garbage.captures_iter(&clean0).map(|s| s[1].len()).sum()
 }
 
-fn main() {
+pub fn main() {
     let input = std::fs::read_to_string("input/d9.txt").unwrap();
     dbg!(p1(&input));
     dbg!(p2(&input));

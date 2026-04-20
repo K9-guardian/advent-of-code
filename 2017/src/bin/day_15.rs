@@ -38,7 +38,7 @@ fn p2(input: &[usize]) -> usize {
     ret
 }
 
-fn main() {
+pub fn main() {
     let input: Vec<_> = std::fs::read_to_string("input/d15.txt")
         .unwrap()
         .lines()

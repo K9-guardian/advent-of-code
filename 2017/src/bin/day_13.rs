@@ -98,7 +98,7 @@ fn p2(st: &mut State) -> i32 {
     }
 }
 
-fn main() {
+pub fn main() {
     let mut input = State {
         packet: -1,
         firewall: std::fs::read_to_string("input/d13.txt")

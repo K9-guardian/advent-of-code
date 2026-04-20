@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::str::FromStr;
 
-fn main() {
+pub fn main() {
     let input = get_input();
     println!("{}", puzzle(input, 5));
     println!("{}", puzzle(input, 18));

@@ -103,7 +103,7 @@ fn p2(_instrs: &[Instr]) -> usize {
     cnt
 }
 
-fn main() {
+pub fn main() {
     let instrs: Vec<_> = std::fs::read_to_string("input/d23.txt")
         .unwrap()
         .lines()

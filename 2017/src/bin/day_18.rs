@@ -138,7 +138,7 @@ fn p2(instructions: &[&str]) -> usize {
     snd_cnt
 }
 
-fn main() {
+pub fn main() {
     let input = std::fs::read_to_string("input/d18.txt").unwrap();
     let instructions: Vec<_> = input.lines().collect();
     dbg!(p1(&instructions));

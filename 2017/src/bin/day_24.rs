@@ -105,7 +105,7 @@ fn components_to_graph(cmps: &[(usize, usize)]) -> Graph {
     grp
 }
 
-fn main() {
+pub fn main() {
     let cmps: Vec<_> = std::fs::read_to_string("input/d24.txt")
         .unwrap()
         .lines()

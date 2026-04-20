@@ -28,7 +28,7 @@ fn p2(input: &mut [i32]) -> usize {
     steps
 }
 
-fn main() {
+pub fn main() {
     let mut input: Vec<_> = std::fs::read_to_string("input/d5.txt")
         .unwrap()
         .lines()

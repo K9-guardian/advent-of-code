@@ -59,7 +59,7 @@ fn sum_neighbors(grid: &[Vec<usize>], x: usize, y: usize) -> usize {
     cnt
 }
 
-fn main() {
+pub fn main() {
     let input: usize = std::fs::read_to_string("input/d3.txt")
         .unwrap()
         .parse()

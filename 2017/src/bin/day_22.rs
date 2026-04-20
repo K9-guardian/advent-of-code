@@ -68,7 +68,7 @@ fn p2(st: &mut State) -> usize {
     bursts
 }
 
-fn main() {
+pub fn main() {
     let mut input: State = HashMap::new();
     for (i, l) in std::fs::read_to_string("input/d22.txt")
         .unwrap()

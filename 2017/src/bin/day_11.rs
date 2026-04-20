@@ -54,7 +54,7 @@ fn p2(input: &str) -> usize {
     ret
 }
 
-fn main() {
+pub fn main() {
     let input = std::fs::read_to_string("input/d11.txt").unwrap();
     dbg!(p1(&input));
     dbg!(p2(&input));
