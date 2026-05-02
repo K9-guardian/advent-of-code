@@ -11,7 +11,7 @@ Install the following packages.
 :- pack_install(reif).
 ```
 Use
-```prolog
+```
 swipl -f init.pro -s src/day_XX.pro
 ```
 to run a specific day.
